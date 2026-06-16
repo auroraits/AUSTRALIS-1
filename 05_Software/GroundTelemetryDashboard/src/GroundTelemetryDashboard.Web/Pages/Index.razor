@@ -1,0 +1,153 @@
+@page "/"
+@using System.Net.Http.Json
+@using Microsoft.JSInterop
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="dashboard-shell">
+    <header class="topbar">
+        <div>
+            <h1>Ground Telemetry Dashboard</h1>
+            <p>433 MHz bench · GY-521 (MPU6050) · Quaternion attitude</p>
+        </div>
+        <button class="btn ghost" @onclick="ToggleTheme">@(isDark ? "Light" : "Dark")</button>
+    </header>
+
+    <section class="panel controls-panel">
+        <div class="row">
+            <button class="btn" @onclick="RefreshPorts">Refresh</button>
+            <select @bind="selectedPort">
+                @foreach (var port in ports)
+                {
+                    <option value="@port">@port</option>
+                }
+            </select>
+            <input type="number" @bind="baud" />
+            <button class="btn" @onclick="Connect">Connect</button>
+            <button class="btn ghost" @onclick="Disconnect">Disconnect</button>
+            <button class="btn ghost" @onclick="SetReference">Set Reference (Zero)</button>
+            <button class="btn ghost" @onclick="ToggleFollow">Follow: @(followCamera ? "ON" : "OFF")</button>
+            <span class="status-dot @(status.IsConnected ? "ok" : "down")"></span>
+            <span>@(status.IsConnected ? "Connected" : "Disconnected")</span>
+        </div>
+    </section>
+
+    <section class="grid-main">
+        <article class="panel panel-cube">
+            <div id="cube"></div>
+            <div id="attitudeHud" class="hud">roll=0 pitch=0 yaw=0</div>
+            <div class="stats-grid">
+                <div class="stat-card"><span>Sensor</span><strong>@sensorInfo</strong></div>
+                <div class="stat-card"><span>Port</span><strong>@(status.PortName ?? "-")</strong></div>
+                <div class="stat-card"><span>Success</span><strong>@stats.SuccessRateWindow.ToString("P1")</strong></div>
+                <div class="stat-card"><span>PER</span><strong>@stats.PerWindow.ToString("P1")</strong></div>
+            </div>
+        </article>
+
+        <article class="panel panel-charts">
+            <div class="chart-actions">
+                <button class="btn ghost" @onclick='() => SetMode("accel")'>Accel</button>
+                <button class="btn ghost" @onclick='() => SetMode("gyro")'>Gyro</button>
+                <button class="btn ghost" @onclick='() => SetMode("quat")'>Quat</button>
+                <button class="btn ghost" @onclick='() => SetMode("all")'>All</button>
+                <button class="btn ghost" @onclick='() => ToggleDebug()'>Axis Debug</button>
+            </div>
+            <canvas id="telemetryChart"></canvas>
+        </article>
+
+        <article class="panel panel-terminal">
+            <h3>RAW terminal</h3>
+            <pre id="terminal"></pre>
+        </article>
+
+        <article class="panel panel-signal-quality">
+            <h3>Signal Quality</h3>
+            <div class="signal-quality-wrap">
+                <div class="signal-quality-chart-wrap">
+                    <canvas id="signalQualityChart"></canvas>
+                    <div id="signalQualityValue" class="signal-quality-value">100%</div>
+                </div>
+                <div class="signal-quality-legend">
+                    <span class="ok">OK (verde)</span>
+                    <span class="bad">Perdidos (rojo)</span>
+                </div>
+                <div class="signal-quality-trend-wrap">
+                    <canvas id="signalQualityTrendChart"></canvas>
+                </div>
+            </div>
+        </article>
+    </section>
+</div>
+
+@code {
+    private string[] ports = [];
+    private string? selectedPort;
+    private int baud = 115200;
+    private bool isDark = true;
+    private bool followCamera = true;
+    private string sensorInfo = "GY-521 (MPU6050) via I2C";
+    private ConnectionStatus status = new(false, null, 115200);
+    private TelemetryStats stats = new(0, 0, 0, 0, 1, 0, null, DateTime.UtcNow);
+    private DotNetObjectReference<Index>? dotNetRef;
+
+    protected override async Task OnInitializedAsync() => await RefreshPorts();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        dotNetRef ??= DotNetObjectReference.Create(this);
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("dashboard.init", dotNetRef);
+            await JS.InvokeVoidAsync("dashboard.setTheme", "dark");
+            return;
+        }
+        await JS.InvokeVoidAsync("dashboard.setDotNetRef", dotNetRef);
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDark = !isDark;
+        await JS.InvokeVoidAsync("dashboard.setTheme", isDark ? "dark" : "light");
+    }
+
+    private async Task SetReference() => await JS.InvokeVoidAsync("dashboard.setReference");
+
+    private async Task ToggleFollow()
+    {
+        followCamera = !followCamera;
+        await JS.InvokeVoidAsync("dashboard.setFollow", followCamera);
+    }
+
+    private async Task ToggleDebug() => await JS.InvokeVoidAsync("dashboard.toggleAxisDebug");
+
+    private async Task RefreshPorts()
+    {
+        ports = await Http.GetFromJsonAsync<string[]>("/api/ports") ?? [];
+        selectedPort ??= ports.FirstOrDefault();
+        status = await Http.GetFromJsonAsync<ConnectionStatus>("/api/status") ?? status;
+    }
+
+    private async Task Connect()
+    {
+        if (string.IsNullOrWhiteSpace(selectedPort)) return;
+        var response = await Http.PostAsJsonAsync("/api/connect", new { PortName = selectedPort, Baud = baud });
+        status = await response.Content.ReadFromJsonAsync<ConnectionStatus>() ?? status;
+    }
+
+    private async Task Disconnect()
+    {
+        var response = await Http.PostAsync("/api/disconnect", null);
+        status = await response.Content.ReadFromJsonAsync<ConnectionStatus>() ?? status;
+    }
+
+    private Task SetMode(string mode) => JS.InvokeVoidAsync("dashboard.setMode", mode).AsTask();
+
+    [JSInvokable]
+    public Task OnStats(TelemetryStats incoming)
+    {
+        stats = incoming;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => dotNetRef?.Dispose();
+}

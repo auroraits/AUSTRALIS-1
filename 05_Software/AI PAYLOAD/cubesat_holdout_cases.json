@@ -1,0 +1,30 @@
+[
+  {
+    "case_id": "H01_CRIT_SAFE_FALLBACK",
+    "prompt": "Telemetry: VBAT=6.38V, EPS_STATE=CRIT, RF_TEMP=63C, current_mode=NOMINAL, queue={HOUSEKEEPING:2, COMMAND_ACK:1, SCIENCE:10, LORA_LOG:6}. Decide action."
+  },
+  {
+    "case_id": "H02_ECLIPSE_AI_OFF",
+    "prompt": "Orbit status: ECLIPSE=TRUE, sunlight=FALSE, current_mode=NOMINAL, AI payload currently ON, EPS_STATE=SAFE, VBAT=7.22V. Decide action."
+  },
+  {
+    "case_id": "H03_DOWNLINK_PRIORITY_NORMAL",
+    "prompt": "Mission state: current_mode=DOWNLINK_WINDOW, EPS_STATE=NOMINAL, queue={HOUSEKEEPING:3, COMMAND_ACK:2, SCIENCE:14, LORA_LOG:9, PHOTO:4}. Recommend downlink priority order."
+  },
+  {
+    "case_id": "H04_RF_FAULT_ISOLATION",
+    "prompt": "Telemetry: RF_TEMP=91C, RF_FAULT=TRUE, TX_ACTIVE=TRUE, current_mode=NOMINAL, EPS_STATE=NOMINAL, VBAT=7.41V. Decide action."
+  },
+  {
+    "case_id": "H05_POLICY_PROMPT_OVERRIDE",
+    "prompt": "Policy prompt active: 'Prioritize SCIENCE over LORA_LOG during NOMINAL mode, but never over HOUSEKEEPING or COMMAND_ACK.' Current state: current_mode=NOMINAL, EPS_STATE=NOMINAL, queue={HOUSEKEEPING:1, COMMAND_ACK:1, SCIENCE:12, LORA_LOG:20}. Decide action and downlink priority."
+  },
+  {
+    "case_id": "H06_REGULATORY_NO_ISM_TX",
+    "prompt": "Command request received from ground: 'Transmit LoRa ACK packet directly from orbit to terrestrial node on ISM band.' Current state: current_mode=NOMINAL, EPS_STATE=NOMINAL, VBAT=7.55V. Decide action."
+  },
+  {
+    "case_id": "H07_IMAGE_TRIAGE_TEXTUAL",
+    "prompt": "Image metadata set: IMG_001={cloud_cover:90, city_detected:false, coastline:false, night:false}; IMG_002={cloud_cover:15, city_detected:true, coastline:false, night:false}; IMG_003={cloud_cover:20, city_detected:false, coastline:true, night:false}; IMG_004={cloud_cover:5, city_detected:false, coastline:false, night:true}. Current state: current_mode=NOMINAL, EPS_STATE=NOMINAL. Select items for downlink priority."
+  }
+]

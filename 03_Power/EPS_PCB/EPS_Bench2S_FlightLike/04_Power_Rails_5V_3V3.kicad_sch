@@ -1,0 +1,552 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "50000000-0000-0000-0000-000000000001")
+	(paper "A4")
+	(title_block
+		(title "04_Power_Rails_5V_3V3")
+	)
+	(lib_symbols
+		(symbol "2026-02-17_07-54-14:MP1584EN-LF-Z"
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at 20.32 10.16 0)
+				(effects
+					(font
+						(size 1.524 1.524)
+					)
+				)
+			)
+			(property "Value" "MP1584EN-LF-Z"
+				(at 20.32 7.62 0)
+				(effects
+					(font
+						(size 1.524 1.524)
+					)
+				)
+			)
+			(property "Footprint" "SOIC8E_MPS"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(italic yes)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "MP1584EN-LF-Z"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(italic yes)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "MP1584EN-LF-Z"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "SOIC8E_MPS SOIC8E_MPS-M SOIC8E_MPS-L"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "MP1584EN-LF-Z_0_1"
+				(polyline
+					(pts
+						(xy 7.62 5.08) (xy 7.62 -15.24)
+					)
+					(stroke
+						(width 0.127)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 7.62 -15.24) (xy 33.02 -15.24)
+					)
+					(stroke
+						(width 0.127)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 33.02 5.08) (xy 7.62 5.08)
+					)
+					(stroke
+						(width 0.127)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 33.02 -15.24) (xy 33.02 5.08)
+					)
+					(stroke
+						(width 0.127)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin output line
+					(at 0 0 0)
+					(length 7.62)
+					(name "SW"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 0 -2.54 0)
+					(length 7.62)
+					(name "EN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 0 -5.08 0)
+					(length 7.62)
+					(name "COMP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 0 -7.62 0)
+					(length 7.62)
+					(name "FB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 40.64 0 180)
+					(length 7.62)
+					(name "EPAD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "EPAD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at 40.64 -2.54 180)
+					(length 7.62)
+					(name "BST"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 40.64 -5.08 180)
+					(length 7.62)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 40.64 -7.62 180)
+					(length 7.62)
+					(name "FREQ"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 40.64 -10.16 180)
+					(length 7.62)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "Objetivos: +5V/2A y +3V3/1.5A."
+		(exclude_from_sim no)
+		(at 20 20 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "0933176d-f8e9-449f-8945-adbcbd414dd5")
+	)
+	(text "Módulos buck genéricos: VIN, GND, VOUT, EN."
+		(exclude_from_sim no)
+		(at 20 15 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "61e87e1c-b964-4f68-92c9-caa51be22803")
+	)
+	(wire
+		(pts
+			(xy 20 64) (xy 180 64)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "080c4471-fe08-4c96-9309-abb4e3db5f46")
+	)
+	(wire
+		(pts
+			(xy 20 54) (xy 180 54)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "0eedeea2-d010-4b32-b4b7-b9d7d640a9b0")
+	)
+	(wire
+		(pts
+			(xy 60 64) (xy 180 74)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "d88b7872-7a3a-4d9b-b78c-9a867c08bfef")
+	)
+	(hierarchical_label "GND"
+		(shape output)
+		(at 180 74 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "023420e3-1a38-4d8b-8236-713b99b180bf")
+	)
+	(hierarchical_label "+5V"
+		(shape output)
+		(at 180 54 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "214e387a-aae3-4561-8ebb-03c987eb35b4")
+	)
+	(hierarchical_label "VBAT_P"
+		(shape input)
+		(at 20 54 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "36a90515-90a1-481d-ae91-95f515013ea9")
+	)
+	(hierarchical_label "VBAT_N"
+		(shape input)
+		(at 20 64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "c70b264a-128e-4762-9d8c-ea7b49a4a51a")
+	)
+	(hierarchical_label "+3V3"
+		(shape output)
+		(at 180 64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ed30f17a-ca33-4304-a6e3-04f9870042f3")
+	)
+	(symbol
+		(lib_id "2026-02-17_07-54-14:MP1584EN-LF-Z")
+		(at 49.53 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c7c4d752-54c7-4fd3-b9b3-a3e3b27c08ef")
+		(property "Reference" "MP1584EN-LF-Z"
+			(at 49.53 76.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "BUCK5V_VIN_GND_VOUT_EN"
+			(at 40.894 98.298 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "SOIC8E_MPS"
+			(at 49.53 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "MP1584EN-LF-Z"
+			(at 49.53 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 49.53 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "EPAD"
+			(uuid "0a8f813f-4ab6-4b9a-9790-6d6225baeba5")
+		)
+		(pin "4"
+			(uuid "89e88356-7d90-425a-87a6-29cb486be658")
+		)
+		(pin "3"
+			(uuid "cf358ef4-482c-4ac5-9289-57353f0aa20c")
+		)
+		(pin "6"
+			(uuid "dca98034-fd50-494d-8507-cdacd64385af")
+		)
+		(pin "1"
+			(uuid "53db1f0d-1d15-451c-8364-142c8eb49669")
+		)
+		(pin "2"
+			(uuid "b7d3d872-52ec-464d-8881-c07f0f1cb225")
+		)
+		(pin "7"
+			(uuid "435b9a59-2f3f-4d28-a9ab-32e997e1e92d")
+		)
+		(pin "8"
+			(uuid "99e93216-aa41-4c16-b963-b77e96243c36")
+		)
+		(pin "5"
+			(uuid "2191919d-c9d3-473a-8e0b-8f1cb32a515e")
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000104"
+					(reference "MP1584EN-LF-Z")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x04")
+		(at 130 60 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d88edd44-5780-44ee-8ac3-840e9d173186")
+		(property "Reference" "J_BUCK3V?"
+			(at 130 53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "BUCK3V3_VIN_GND_VOUT_EN"
+			(at 130 67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 130 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 130 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000104"
+					(reference "J_BUCK3V?")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

@@ -1,0 +1,237 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "60000000-0000-0000-0000-000000000001")
+	(paper "A4")
+	(title_block
+		(title "05_Power_Gating")
+	)
+	(lib_symbols)
+	(text "Bloques de switch de carga: entrada, salida y enable."
+		(exclude_from_sim no)
+		(at 20 15 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "790a4cc3-3fd7-4fc4-abb0-0be584daa170")
+	)
+	(wire
+		(pts
+			(xy 20 62) (xy 180 62)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "a94ee559-ec46-4d3a-a947-e162818a0236")
+	)
+	(wire
+		(pts
+			(xy 60 70) (xy 180 70)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "ae3a014a-363b-4d54-a839-34511a51b966")
+	)
+	(wire
+		(pts
+			(xy 130 78) (xy 180 78)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "c774ea2b-6c65-4968-9205-702963b5ec63")
+	)
+	(wire
+		(pts
+			(xy 20 52) (xy 180 52)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "e80c9bff-af07-49b4-b04a-56100a6ccff0")
+	)
+	(hierarchical_label "SW_5V_RF_EN"
+		(shape output)
+		(at 180 70 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "23ab038f-8cc4-4ea9-84ab-241814d6c31b")
+	)
+	(hierarchical_label "+3V3_OBC"
+		(shape output)
+		(at 180 62 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "72d280b8-1e36-4d40-a683-835885f956e6")
+	)
+	(hierarchical_label "+5V_RF"
+		(shape output)
+		(at 180 52 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "806e7e91-f5e6-4cad-b53e-024275458cdc")
+	)
+	(hierarchical_label "SW_3V3_OBC_EN"
+		(shape output)
+		(at 180 78 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "c2da2c1d-9407-4bf8-a1f3-0d37a3e851d2")
+	)
+	(hierarchical_label "+5V"
+		(shape input)
+		(at 20 52 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ea813335-c922-4d11-ab1b-6d91a381140a")
+	)
+	(hierarchical_label "+3V3"
+		(shape input)
+		(at 20 62 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "f8099d0e-25e9-4c2c-82c6-c7383dcd557a")
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x03")
+		(at 60 58 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "18f7ea0f-f503-429b-aa49-3d9363333008")
+		(property "Reference" "J_SW_5V_RF?"
+			(at 60 51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SW5V_IN_OUT_EN"
+			(at 60 65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 60 58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60 58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 60 58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000105"
+					(reference "J_SW_5V_RF?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x03")
+		(at 130 58 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9dad7ef7-07d5-4938-b198-2f7c83aca0df")
+		(property "Reference" "J_SW_3V3_OBC?"
+			(at 130 51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SW3V3_IN_OUT_EN"
+			(at 130 65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 130 58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130 58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 130 58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000105"
+					(reference "J_SW_3V3_OBC?")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

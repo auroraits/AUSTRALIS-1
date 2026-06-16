@@ -1,0 +1,1118 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "20000000-0000-0000-0000-000000000001")
+	(paper "A4")
+	(title_block
+		(title "01_PV_Input")
+	)
+	(lib_symbols
+		(symbol "Device:D_Schottky"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "D_Schottky"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Schottky diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "diode Schottky"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "D_Schottky_0_1"
+				(polyline
+					(pts
+						(xy -1.905 0.635) (xy -1.905 1.27) (xy -1.27 1.27) (xy -1.27 -1.27) (xy -0.635 -1.27) (xy -0.635 -0.635)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "D_Schottky_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:Fuse"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "F"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Fuse"
+				(at -1.905 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Fuse"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "fuse"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "*Fuse*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Fuse_0_1"
+				(rectangle
+					(start -0.762 -2.54)
+					(end 0.762 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 2.54) (xy 0 -2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Fuse_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "String A activo: P1 y P2 en serie. String B reservado (futuro)."
+		(exclude_from_sim no)
+		(at 93.83 50.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "5888c41f-e8bc-4cf0-8624-de2ea29191f3")
+	)
+	(text "Diodo Schottky por string a PV_BUS_P y fusible F1 (1A) entre PV_BUS_P y PV_IN_P."
+		(exclude_from_sim no)
+		(at 93.83 55.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "8153ca2e-5eb4-421d-a62a-ec3457c84549")
+	)
+	(junction
+		(at 188.83 88.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "162524e6-6adc-4330-b041-9562f0ece8b5")
+	)
+	(junction
+		(at 188.83 106.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2c5f5217-08c3-4abf-b9e2-f35acbfe4323")
+	)
+	(junction
+		(at 188.83 118.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "5ecfc238-9a37-4510-8bba-18586c1f29ca")
+	)
+	(junction
+		(at 188.83 93.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6240d813-13e9-49d2-9fda-1bfe029faf3c")
+	)
+	(wire
+		(pts
+			(xy 188.83 106.82) (xy 188.83 118.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "0c2770bb-b9a1-4e9f-b8dd-f4d29be740d9")
+	)
+	(wire
+		(pts
+			(xy 188.83 83.82) (xy 188.83 88.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "0f42fdb8-08f5-4bc6-bb1d-dd063ee896d5")
+	)
+	(wire
+		(pts
+			(xy 93.83 113.82) (xy 93.83 118.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "25d6e406-9ae1-4670-bdd1-0442ba360ee8")
+	)
+	(wire
+		(pts
+			(xy 188.83 93.82) (xy 203.83 93.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "3ae14ce8-0c84-4865-af2b-f3532813f40f")
+	)
+	(wire
+		(pts
+			(xy 93.83 78.82) (xy 93.83 83.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "3cfe2c46-6fcb-4780-bea3-6161302acd38")
+	)
+	(wire
+		(pts
+			(xy 173.83 118.82) (xy 188.83 118.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "47bead34-fb77-4b71-b991-6387bdd97135")
+	)
+	(wire
+		(pts
+			(xy 188.83 118.82) (xy 188.83 123.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "49a081f1-3398-4951-a1cb-05b108ce18ef")
+	)
+	(wire
+		(pts
+			(xy 85.83 113.82) (xy 93.83 113.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "62e0d676-fe0d-4432-a631-9292cbe3374d")
+	)
+	(wire
+		(pts
+			(xy 213.83 93.82) (xy 243.83 93.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "72c9e1ca-b13c-47aa-b541-6c078e683594")
+	)
+	(wire
+		(pts
+			(xy 85.83 78.82) (xy 93.83 78.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "7734c81a-9105-4e5c-997e-31212a893845")
+	)
+	(wire
+		(pts
+			(xy 85.83 123.82) (xy 188.83 123.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "79f3b8f9-9822-48c1-9c10-400291d67d40")
+	)
+	(wire
+		(pts
+			(xy 93.83 83.82) (xy 163.83 83.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "7f76d4ad-edda-4442-8829-1152be0352db")
+	)
+	(wire
+		(pts
+			(xy 85.83 88.82) (xy 188.83 88.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "8c2702c8-2c54-461e-98d3-b6d6a80a81bf")
+	)
+	(wire
+		(pts
+			(xy 93.83 118.82) (xy 163.83 118.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "99e8d757-1518-4bea-aefc-bf2c1c0d0da4")
+	)
+	(wire
+		(pts
+			(xy 173.83 83.82) (xy 188.83 83.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "b457f32f-9f59-4a93-9a17-38d65876b8d2")
+	)
+	(wire
+		(pts
+			(xy 188.83 93.82) (xy 188.83 106.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "c1664f79-e3e7-4417-89c1-c19f01d78a29")
+	)
+	(wire
+		(pts
+			(xy 188.83 88.82) (xy 188.83 93.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "cb0d92db-dab1-4c5a-ac1d-5da035829258")
+	)
+	(wire
+		(pts
+			(xy 188.83 106.82) (xy 243.83 106.82)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "eb86d0b7-7824-4f3b-959d-6febbbdc72b3")
+	)
+	(global_label "PV_BUS_N"
+		(shape bidirectional)
+		(at 188.83 106.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "1df84a41-6cf0-4c3c-b90a-efc0bddcfd4c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 188.83 106.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "B_SERIES_MID"
+		(shape bidirectional)
+		(at 113.83 118.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "2e68429d-a59d-4182-a632-279882e06cc4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 113.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "PV_STRING_B_N"
+		(shape bidirectional)
+		(at 85.83 123.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "39606782-9ddd-4214-9d1a-cc00b7f024fc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 85.83 123.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "PV_STRING_B_P"
+		(shape bidirectional)
+		(at 85.83 113.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "3b9c0061-5ca4-4aa2-bdd1-c6f16f41daa2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 85.83 113.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "A_SERIES_MID"
+		(shape bidirectional)
+		(at 113.83 83.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "460f6997-3a0f-4cd5-a7e3-471f5a46aa0b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 113.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "PV_STRING_A_N"
+		(shape bidirectional)
+		(at 85.83 88.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "47dbe510-b8d2-4e4c-9afb-f1bf6f3db85c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 85.83 88.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "PV_BUS_P"
+		(shape bidirectional)
+		(at 188.83 93.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "49ca6c97-1ada-447e-b72e-2fe843df71f5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 188.83 93.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "PV_STRING_A_P"
+		(shape bidirectional)
+		(at 85.83 78.82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "cbf7af9e-d1ad-4516-9875-b4e3517bb9ce")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 85.83 78.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(hierarchical_label "PV_IN_P"
+		(shape output)
+		(at 243.83 93.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "6d408b36-ff61-4f9f-ae21-84fbfdab7ba1")
+	)
+	(hierarchical_label "PV_IN_N"
+		(shape output)
+		(at 243.83 106.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "da87f872-816d-4438-9b01-9358e82be18d")
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 98.83 118.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "2486b369-cf18-4167-aed8-b4fc2eb48443")
+		(property "Reference" "J_P?"
+			(at 98.83 112.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Panel_P3_FUTURE"
+			(at 98.83 124.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 98.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 98.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 98.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "J_P?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 128.83 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "55a6c3ba-6a09-421f-93ff-3328118fafaa")
+		(property "Reference" "J_P?"
+			(at 128.83 77.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Panel_P2"
+			(at 128.83 89.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 128.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 128.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 128.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "J_P?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 163.83 118.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "80019ae8-bd25-469a-ab58-ffb3414a9045")
+		(property "Reference" "D_STR_B?"
+			(at 163.83 112.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SS34_FUTURE"
+			(at 163.83 124.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 163.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 163.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Schottky diode"
+			(at 163.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "09c0b3fb-9e23-4651-b74b-de4b4278dfe4")
+		)
+		(pin "2"
+			(uuid "38394354-2d67-4bcd-ade2-6b5201d59547")
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "D_STR_B?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 163.83 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "85664913-0a16-4610-bce9-a4dfdf2d784f")
+		(property "Reference" "D_STR_A?"
+			(at 163.83 77.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SS34"
+			(at 163.83 89.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 163.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 163.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Schottky diode"
+			(at 163.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "37bde171-fd6a-4a4e-a862-16878035aaf5")
+		)
+		(pin "1"
+			(uuid "692a2329-8799-412c-aacf-d526b42c9408")
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "D_STR_A?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 128.83 118.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "909cd574-973b-460f-bd82-a54645e18ae9")
+		(property "Reference" "J_P?"
+			(at 128.83 112.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Panel_P4_FUTURE"
+			(at 128.83 124.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 128.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 128.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 128.83 118.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "J_P?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 98.83 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "93799f08-dc20-440a-8268-93437d877bf6")
+		(property "Reference" "J_P?"
+			(at 98.83 77.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Panel_P1"
+			(at 98.83 89.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 98.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 98.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 98.83 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "J_P?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:Fuse")
+		(at 203.83 93.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "bf80813e-5aca-4a1d-b223-d0059aad720f")
+		(property "Reference" "F?"
+			(at 203.83 87.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1A"
+			(at 203.83 99.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 203.83 93.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 203.83 93.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Fuse"
+			(at 203.83 93.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "96d892a2-29fb-4307-a137-8b23cd4dc385")
+		)
+		(pin "2"
+			(uuid "caa04fc6-aa53-4ddc-87d0-0c29f8413cfc")
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000101"
+					(reference "F?")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

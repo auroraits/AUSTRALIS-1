@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BOREALIS Orbit/Thermal Trade Viewer v9.3</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --panel2:#1f2937;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --line:#334155;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --accent:#38bdf8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      overflow:hidden;
+    }
+    #app{
+      display:grid;
+      grid-template-columns: 1.62fr 0.98fr;
+      width:100vw;
+      height:100vh;
+    }
+    #viewerWrap{
+      position:relative;
+      min-width:0;
+      background:linear-gradient(180deg,#020617,#0b1220);
+      border-right:1px solid var(--line);
+    }
+    #viewer{width:100%;height:100%}
+    #overlay{
+      position:absolute;
+      top:12px; left:12px;
+      max-width:520px;
+      background:rgba(15,23,42,.85);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      backdrop-filter: blur(8px);
+      font-size:13px;
+      line-height:1.35;
+      z-index:20;
+    }
+    #overlay b{color:#fff}
+    #fatalError{
+      position:absolute;
+      left:12px; right:12px; bottom:12px;
+      display:none;
+      padding:10px 12px;
+      background:rgba(127,29,29,.94);
+      border:1px solid #ef4444;
+      border-radius:12px;
+      color:white;
+      z-index:30;
+      font-size:13px;
+      line-height:1.35;
+      white-space:pre-wrap;
+    }
+    #panel{
+      display:grid;
+      grid-template-rows:auto auto auto auto auto 1fr;
+      gap:10px;
+      padding:12px;
+      background:var(--panel);
+      min-width:430px;
+      overflow:auto;
+    }
+    .card{
+      background:var(--panel2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:14px;
+      color:#fff;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .grid1{display:grid;grid-template-columns:1fr;gap:10px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 12px}
+    .field label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:5px;
+    }
+    .field input, .field select, .field textarea{
+      width:100%;
+      background:#0b1220;
+      color:var(--text);
+      border:1px solid #475569;
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:13px;
+      font-family:inherit;
+    }
+    .field textarea{
+      min-height:62px;
+      font-family:Consolas, monospace;
+      resize:vertical;
+    }
+    .btnRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    button{
+      background:#0b1220;
+      color:#fff;
+      border:1px solid #475569;
+      border-radius:10px;
+      padding:9px 12px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    button.primary{ background:#14532d; border-color:#16a34a }
+    button:hover{ filter:brightness(1.08) }
+    .muted{ color:var(--muted) }
+    .kpiGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:8px;
+    }
+    .kpi{
+      background:#0b1220;
+      border:1px solid #334155;
+      border-radius:12px;
+      padding:10px;
+    }
+    .kpi .v{
+      font-size:18px;
+      font-weight:700;
+      color:#fff;
+    }
+    .kpi .l{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#0b1220;
+      border:1px solid #334155;
+      font-size:12px;
+      margin-right:6px;
+      margin-top:6px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    th,td{
+      padding:6px 7px;
+      border-bottom:1px solid #334155;
+      text-align:right;
+      vertical-align:top;
+    }
+    th:first-child, td:first-child{ text-align:left }
+    code{font-family:Consolas, monospace}
+    .ok{color:var(--good)}
+    .warn{color:var(--warn)}
+    .bad{color:var(--bad)}
+    #progressWrap{
+      height:10px;background:#0b1220;border:1px solid #334155;border-radius:999px;overflow:hidden
+    }
+    #progressBar{
+      width:0%;height:100%;background:linear-gradient(90deg,#38bdf8,#22c55e)
+    }
+    .small{font-size:12px}
+    .mono{font-family:Consolas, monospace}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="viewerWrap">
+    <div id="viewer"></div>
+    <div id="overlay">
+      <div><b>BOREALIS v9.3 — TLE real + SGP4 + barrido conceptual (6-rad export)</b></div>
+      <div class="muted" style="margin-top:5px">
+        <b>Modo Real TLE</b>: órbita propagada con <b>SGP4</b> a partir de un TLE real. La Tierra rota con tiempo sideral y el Sol se calcula desde la hora UTC global.
+      </div>
+      <div class="muted" style="margin-top:6px">
+        <b>Modo Diseño/Trade</b>: barrido de <b>inclinación</b>, <b>altitud</b>, <b>LTAN</b> y <b>actitud nadir</b> para optimizar pasadas sobre Buenos Aires, energía, eclipses y térmica.
+      </div>
+      <div class="muted" style="margin-top:6px">
+        <b>v9.2:</b> Eclipse cónico con penumbra. Albedo modulado por posición subsolar.
+        View factors analíticos por altitud. CM5 con estado OFF (0 W) fuera de duty-cycle.
+        C_batt = 100 J/K (2× 18650). η solar, albedo, IR y CM5 parametrizables.
+        <b>v9.3:</b> CSV exporta las 6 caras evaluadas como radiador por candidato (Wh, Tcm5, Tbat, paneles, thermalKey).
+        Permite comparación directa entre radiadores para la misma órbita. Horizonte hasta 8760h (1 año).
+      </div>
+      <div class="muted" style="margin-top:6px">
+        En el 3D el marco es <b>ECI</b>: la órbita está en el espacio inercial, la Tierra rota debajo y el Sol evoluciona con el tiempo absoluto.
+      </div>
+      <div style="margin-top:8px">
+        <span class="pill">Cara 1 = +X</span>
+        <span class="pill">Cara 2 = -X</span>
+        <span class="pill">Cara 3 = +Y</span>
+        <span class="pill">Cara 4 = -Y</span>
+        <span class="pill">Cara 5 = +Z</span>
+        <span class="pill">Cara 6 = -Z</span>
+      </div>
+    </div>
+    <div id="fatalError"></div>
+  </div>
+
+  <div id="panel">
+    <div class="card">
+      <h3>1) Tiempo global / visualización</h3>
+      <div class="grid2">
+        <div class="field">
+          <label>Fecha / hora inicial (local)</label>
+          <input id="startDateLocal" type="datetime-local" />
+        </div>
+        <div class="field">
+          <label>Velocidad de simulación</label>
+          <select id="playbackRate">
+            <option value="1">1x real</option>
+            <option value="10">10x</option>
+            <option value="60" selected>60x</option>
+            <option value="600">600x</option>
+            <option value="3600">3600x</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Modo de visualización</label>
+          <select id="viewMode">
+            <option value="realTle" selected>Real TLE / SGP4</option>
+            <option value="bestDesign">Mejor candidato de diseño</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Actitud visual</label>
+          <select id="viewerAttitude">
+            <option value="squareNadir" selected>Nadir en cara 10×10</option>
+            <option value="rectNadir">Nadir en cara 10×15</option>
+          </select>
+        </div>
+      </div>
+      <div class="btnRow" style="margin-top:10px">
+        <button id="playBtn" class="primary">Play</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset tiempo</button>
+      </div>
+      <div class="muted small" style="margin-top:8px">
+        Tiempo simulado UTC: <span id="simTimeUtc" class="mono">--</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>2) TLE real + SGP4</h3>
+      <div class="grid2">
+        <div class="field">
+          <label>Preset</label>
+          <select id="tlePreset">
+            <option value="landsat8" selected>LANDSAT 8</option>
+            <option value="sentinel2a">SENTINEL-2A</option>
+            <option value="noaa20">NOAA-20 (JPSS-1)</option>
+            <option value="manual">Manual</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>CATNR CelesTrak</label>
+          <input id="tleCatnr" type="text" value="39084" />
+        </div>
+      </div>
+      <div class="grid1" style="margin-top:10px">
+        <div class="field">
+          <label>TLE línea 1</label>
+          <textarea id="tleLine1"></textarea>
+        </div>
+        <div class="field">
+          <label>TLE línea 2</label>
+          <textarea id="tleLine2"></textarea>
+        </div>
+      </div>
+      <div class="btnRow" style="margin-top:10px">
+        <button id="fillPresetBtn">Cargar preset</button>
+        <button id="fetchLiveTleBtn">Traer último TLE de CelesTrak</button>
+        <button id="loadTleBtn" class="primary">Usar este TLE</button>
+      </div>
+      <div class="muted small" style="margin-top:8px">
+        Estado TLE: <span id="tleStatus">sin cargar</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>3) Barrido de diseño / optimización</h3>
+      <div class="grid3">
+        <div class="field">
+          <label>i mín [deg]</label>
+          <input id="incMin" type="number" step="0.1" value="97.6" />
+        </div>
+        <div class="field">
+          <label>i máx [deg]</label>
+          <input id="incMax" type="number" step="0.1" value="98.8" />
+        </div>
+        <div class="field">
+          <label>Δi [deg]</label>
+          <input id="incStep" type="number" step="0.05" value="0.3" />
+        </div>
+        <div class="field">
+          <label>Alt mín [km]</label>
+          <input id="altMin" type="number" step="10" value="500" />
+        </div>
+        <div class="field">
+          <label>Alt máx [km]</label>
+          <input id="altMax" type="number" step="10" value="650" />
+        </div>
+        <div class="field">
+          <label>Δalt [km]</label>
+          <input id="altStep" type="number" step="10" value="50" />
+        </div>
+        <div class="field">
+          <label>LTAN mín [h]</label>
+          <input id="ltanMin" type="number" step="0.25" value="9.5" />
+        </div>
+        <div class="field">
+          <label>LTAN máx [h]</label>
+          <input id="ltanMax" type="number" step="0.25" value="14.0" />
+        </div>
+        <div class="field">
+          <label>ΔLTAN [h]</label>
+          <input id="ltanStep" type="number" step="0.25" value="0.5" />
+        </div>
+        <div class="field">
+          <label>Horizonte evaluación [h]</label>
+          <input id="sweepHours" type="number" step="6" value="24" />
+        </div>
+        <div class="field">
+          <label>dt barrido [s]</label>
+          <input id="sweepDt" type="number" step="10" value="120" />
+        </div>
+        <div class="field">
+          <label>Actitud a comparar</label>
+          <select id="sweepAttitudes">
+            <option value="both" selected>Comparar ambas</option>
+            <option value="squareNadir">Solo nadir en 10×10</option>
+            <option value="rectNadir">Solo nadir en 10×15</option>
+          </select>
+        </div>
+      </div>
+      <div class="muted small" style="margin-top:8px">
+        Score por defecto = 30% pasadas Buenos Aires + 25% energía 4 caras + 15% menos eclipse + 30% margen térmico (límites operativos CM5 80°C, batt −10°C).
+        <br>Horizontes sugeridos: 24h (rápido), 4320h (6 meses), <b>8760h (1 año)</b>. Para ≥4320h usar dt ≥ 180s.
+        <br>CSV exporta <b>las 6 caras como radiador</b> por candidato para comparación directa.
+      </div>
+      <div class="btnRow" style="margin-top:10px">
+        <button id="runSweepBtn" class="primary">Optimizar</button>
+      </div>
+      <div style="margin-top:10px" id="progressWrap"><div id="progressBar"></div></div>
+      <div class="muted small" id="progressText" style="margin-top:6px">esperando barrido…</div>
+    </div>
+
+    <div class="card">
+      <h3>4) Parámetros ambientales y payload</h3>
+      <div class="grid3">
+        <div class="field">
+          <label>Albedo medio</label>
+          <select id="paramAlbedo">
+            <option value="0.25">0.25 (caso frío)</option>
+            <option value="0.30" selected>0.30 (nominal)</option>
+            <option value="0.35">0.35 (caso caliente)</option>
+            <option value="0.40">0.40 (extremo)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>IR terrestre [W/m²]</label>
+          <select id="paramEarthIR">
+            <option value="218">218 (caso frío)</option>
+            <option value="237" selected>237 (nominal)</option>
+            <option value="257">257 (caso caliente)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>η celda solar [%]</label>
+          <select id="paramPanelEff">
+            <option value="0.20">20% (mono-Si genérico)</option>
+            <option value="0.24" selected>24% (IBC / Maxeon)</option>
+            <option value="0.28">28% (GaAs TJ)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>P CM5 activo [W]</label>
+          <input id="paramCm5Active" type="number" step="0.1" value="4.5" />
+        </div>
+        <div class="field">
+          <label>P CM5 idle [W]</label>
+          <input id="paramCm5Idle" type="number" step="0.1" value="2.2" />
+        </div>
+        <div class="field">
+          <label>CM5 modo off-cycle</label>
+          <select id="paramCm5OffMode">
+            <option value="off" selected>Apagado (0 W)</option>
+            <option value="idle">Idle (consume P idle)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>CM5 duty-cycle [%]</label>
+          <input id="paramCm5Duty" type="number" step="1" value="20" min="0" max="100" />
+        </div>
+        <div class="field">
+          <label>CM5 ciclo [s]</label>
+          <input id="paramCm5Cycle" type="number" step="60" value="600" />
+        </div>
+        <div class="field">
+          <label>Modelo eclipse</label>
+          <select id="paramEclipseModel">
+            <option value="cylindrical">Cilíndrico</option>
+            <option value="conical" selected>Cónico (penumbra)</option>
+          </select>
+        </div>
+      </div>
+      <div class="muted small" style="margin-top:8px">
+        Albedo modulado por posición orbital relativa al punto subsolar. View factors calculados analíticamente desde altitud.
+        CM5 en modo "Apagado" = 0 W fuera del duty-cycle activo (recomendado para duty-cycle realista).
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>5) Estado actual</h3>
+      <div class="kpiGrid">
+        <div class="kpi"><div class="v" id="kpiSubpoint">--</div><div class="l">Subpunto</div></div>
+        <div class="kpi"><div class="v" id="kpiAltitude">--</div><div class="l">Altitud</div></div>
+        <div class="kpi"><div class="v" id="kpiBeta">--</div><div class="l">β actual</div></div>
+        <div class="kpi"><div class="v" id="kpiBAElev">--</div><div class="l">Elev. sobre BA</div></div>
+        <div class="kpi"><div class="v" id="kpiEclipse">--</div><div class="l">Eclipse</div></div>
+        <div class="kpi"><div class="v" id="kpiMode">--</div><div class="l">Modo</div></div>
+      </div>
+      <div class="muted small" style="margin-top:8px">
+        Buenos Aires: lat −34.6037°, lon −58.3816°, elevación mínima de pase usada en el barrido: 10°.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>6) Resultado del barrido</h3>
+      <div id="bestSummary" class="muted">Todavía no se ejecutó el optimizador.</div>
+      <div style="margin-top:10px; max-height:320px; overflow:auto" id="resultsTableWrap" class="muted">—</div>
+      <div class="btnRow" style="margin-top:10px">
+        <button id="exportCsvBtn">Exportar CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as satellite from 'https://esm.sh/satellite.js@6.0.2';
+
+const fatal = document.getElementById('fatalError');
+function showFatal(msg){
+  fatal.style.display = 'block';
+  fatal.textContent = msg;
+}
+try {
+  const MU = 398600.4418; // km^3/s^2
+  const RE = 6378.137;    // km
+  const J2 = 1.08262668e-3;
+  const K0 = 273.15;
+  const pi = Math.PI;
+
+  const BA = { latDeg: -34.6037, lonDeg: -58.3816, heightKm: 0.03 };
+  const BA_GD = {
+    latitude: satellite.degreesToRadians(BA.latDeg),
+    longitude: satellite.degreesToRadians(BA.lonDeg),
+    height: BA.heightKm
+  };
+
+  const TLE_PRESETS = {
+    landsat8: {
+      name: 'LANDSAT 8',
+      catnr: '39084',
+      line1: '1 39084U 13008A   26079.51011485  .00000324  00000-0  81936-4 0  9995',
+      line2: '2 39084  98.1899 151.0572 0001221  91.3686 268.7652 14.57120159684986'
+    },
+    sentinel2a: {
+      name: 'SENTINEL-2A',
+      catnr: '40697',
+      line1: '1 40697U 15028A   26079.47349491  .00000308  00000-0  13413-3 0  9993',
+      line2: '2 40697  98.5641 155.6084 0001279  97.0512 263.0817 14.30817626561044'
+    },
+    noaa20: {
+      name: 'NOAA-20 (JPSS-1)',
+      catnr: '43013',
+      line1: '1 43013U 17073A   26079.54213210  .00000055  00000-0  47033-4 0  9992',
+      line2: '2 43013  98.7705  19.8221 0001639 123.5449 236.5884 14.19538739431890'
+    }
+  };
+
+  function setNowLocalInput(){
+    const now = new Date();
+    now.setSeconds(0,0);
+    const tzOff = now.getTimezoneOffset();
+    const local = new Date(now.getTime() - tzOff*60000).toISOString().slice(0,16);
+    document.getElementById('startDateLocal').value = local;
+  }
+  setNowLocalInput();
+
+  function parseLocalDateInput(){
+    const s = document.getElementById('startDateLocal').value;
+    return s ? new Date(s) : new Date();
+  }
+
+  function deg2rad(d){ return d*pi/180; }
+  function rad2deg(r){ return r*180/pi; }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+  function posPart(x){ return x > 0 ? x : 0; }
+  function normAngle(a){ a = a % (2*pi); if(a < 0) a += 2*pi; return a; }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  function julianDateFromDate(date){
+    return date.getTime() / 86400000 + 2440587.5;
+  }
+  function gmstFromDate(date){
+    const jd = julianDateFromDate(date);
+    const T = (jd - 2451545.0) / 36525.0;
+    let gmstDeg = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933*T*T - T*T*T/38710000.0;
+    gmstDeg = ((gmstDeg % 360) + 360) % 360;
+    return deg2rad(gmstDeg);
+  }
+  function sunVectorECI(date){
+    const jd = julianDateFromDate(date);
+    const n = jd - 2451545.0;
+    let L = 280.460 + 0.9856474 * n;
+    let g = 357.528 + 0.9856003 * n;
+    L = ((L % 360) + 360) % 360;
+    g = ((g % 360) + 360) % 360;
+    const lambda = L + 1.915*Math.sin(deg2rad(g)) + 0.020*Math.sin(2*deg2rad(g));
+    const eps = 23.439 - 0.0000004 * n;
+    const lam = deg2rad(lambda);
+    const ob = deg2rad(eps);
+    return new THREE.Vector3(
+      Math.cos(lam),
+      Math.cos(ob)*Math.sin(lam),
+      Math.sin(ob)*Math.sin(lam)
+    ).normalize();
+  }
+  function sunRightAscension(date){
+    const s = sunVectorECI(date);
+    return normAngle(Math.atan2(s.y, s.x));
+  }
+
+  function tempToColor(tempC){
+    const t = clamp((tempC - (-20)) / 100, 0, 1);
+    const hue = lerp(220, 0, t) / 360;
+    const c = new THREE.Color();
+    c.setHSL(hue, 0.82, 0.52);
+    return c;
+  }
+  function faceName(i){
+    return ['+X','-X','+Y','-Y','+Z','-Z'][i-1];
+  }
+  function finiteOr(x, fallback=0){
+    return Number.isFinite(x) ? x : fallback;
+  }
+  function fmtNum(x, digits=1, suffix=''){
+    return Number.isFinite(x) ? `${x.toFixed(digits)}${suffix}` : '—';
+  }
+  function areaByFace(){
+    return [0.015,0.015,0.015,0.015,0.010,0.010]; // m²
+  }
+  function createTextSprite(text, options = {}){
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const fontSize = options.fontSize || 30;
+    const paddingX = options.paddingX || 14;
+    const paddingY = options.paddingY || 8;
+    ctx.font = `700 ${fontSize}px Segoe UI, Arial, sans-serif`;
+    const tw = Math.ceil(ctx.measureText(text).width);
+    canvas.width = tw + paddingX*2;
+    canvas.height = fontSize + paddingY*2 + 6;
+    ctx.font = `700 ${fontSize}px Segoe UI, Arial, sans-serif`;
+
+    ctx.fillStyle = options.bg || 'rgba(15,23,42,0.88)';
+    ctx.strokeStyle = options.border || 'rgba(148,163,184,0.95)';
+    ctx.lineWidth = 3;
+    const r = 16, w = canvas.width, h = canvas.height;
+    ctx.beginPath();
+    ctx.moveTo(r,0); ctx.lineTo(w-r,0); ctx.quadraticCurveTo(w,0,w,r);
+    ctx.lineTo(w,h-r); ctx.quadraticCurveTo(w,h,w-r,h); ctx.lineTo(r,h);
+    ctx.quadraticCurveTo(0,h,0,h-r); ctx.lineTo(0,r); ctx.quadraticCurveTo(0,0,r,0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = options.color || '#e5e7eb';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, paddingX, h/2);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+    const sprite = new THREE.Sprite(mat);
+    const scale = options.scale || 0.0036;
+    sprite.scale.set(canvas.width*scale, canvas.height*scale, 1);
+    return sprite;
+  }
+
+  function createFallbackEarthTexture(){
+    const w = 2048, h = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const g = ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'#0b3d91'); g.addColorStop(0.5,'#1463b1'); g.addColorStop(1,'#0b3d91');
+    ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    for(let i=0;i<3000;i++){
+      ctx.beginPath();
+      ctx.arc(Math.random()*w, Math.random()*h, Math.random()*4+1, 0, Math.PI*2);
+      ctx.fill();
+    }
+    function ll(lon, lat){
+      const x = (lon + 180)/360*w;
+      const y = (90 - lat)/180*h;
+      return [x,y];
+    }
+    function drawPoly(points, fill, stroke='#2f6b2f'){
+      ctx.beginPath();
+      points.forEach((p,idx)=>{
+        const [x,y] = ll(p[0], p[1]);
+        if(idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke();
+    }
+    drawPoly([[-168,72],[-150,58],[-140,48],[-128,40],[-124,30],[-114,24],[-98,18],[-86,22],[-80,28],[-75,37],[-60,46],[-56,56],[-75,72],[-110,78],[-145,76]], '#4a8d3f');
+    drawPoly([[-82,12],[-74,8],[-67,-4],[-60,-18],[-58,-32],[-62,-45],[-70,-54],[-76,-50],[-80,-30],[-79,-12]], '#4a8d3f');
+    drawPoly([[-17,36],[-5,44],[12,48],[28,52],[42,58],[60,58],[84,54],[104,48],[126,50],[142,46],[158,58],[170,50],[160,36],[138,28],[120,20],[106,8],[88,14],[74,18],[58,28],[44,30],[28,24],[16,12],[8,0],[-2,-6],[-10,8],[-18,20]], '#5e9d48');
+    drawPoly([[112,-10],[124,-16],[138,-22],[150,-31],[154,-40],[144,-44],[130,-38],[118,-28],[112,-18]], '#b98b4d', '#7a5a34');
+    ctx.fillStyle = 'rgba(240,248,255,0.85)';
+    ctx.beginPath(); ctx.ellipse(w/2, 38, w*0.44, 58, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w/2, h-38, w*0.50, 72, 0, 0, Math.PI*2); ctx.fill();
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }
+
+  // ------ Scene ------
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x06101e);
+  const viewer = document.getElementById('viewer');
+
+  const camera = new THREE.PerspectiveCamera(48, 1, 0.01, 100);
+  camera.position.set(4.4, -4.8, 3.2);
+  camera.up.set(0,0,1);
+
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  viewer.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.target.set(0,0,0);
+  controls.maxDistance = 12;
+  controls.minDistance = 1.6;
+
+  const hemi = new THREE.HemisphereLight(0xbcd7ff, 0x0d1117, 1.05);
+  scene.add(hemi);
+  const dlight = new THREE.DirectionalLight(0xffffff, 1.15);
+  dlight.position.set(5,-3,4);
+  scene.add(dlight);
+
+  const grid = new THREE.GridHelper(10, 40, 0x20314d, 0x142033);
+  grid.rotation.x = Math.PI/2;
+  scene.add(grid);
+
+  const axisLine = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-1.6), new THREE.Vector3(0,0,1.6)]),
+    new THREE.LineBasicMaterial({color:0xdbeafe, transparent:true, opacity:0.65})
+  );
+  scene.add(axisLine);
+  const northLabel = createTextSprite('N', {scale:0.0054,bg:'rgba(14,165,233,0.85)',border:'rgba(125,211,252,0.95)'});
+  northLabel.position.set(0,0,1.78);
+  scene.add(northLabel);
+  const southLabel = createTextSprite('S', {scale:0.0054,bg:'rgba(14,165,233,0.85)',border:'rgba(125,211,252,0.95)'});
+  southLabel.position.set(0,0,-1.78);
+  scene.add(southLabel);
+
+  const earthRadiusScene = 0.85;
+
+  // Visual scale helpers: la Tierra conserva escala propia, pero la órbita se comprime
+  // deliberadamente para que el satélite no quede "dentro" de la esfera y sea legible.
+  function visualOrbitRadiusScene(altKm){
+    const alt = Math.max(0, Number.isFinite(altKm) ? altKm : 500);
+    return earthRadiusScene + 1.10 + 0.0010 * alt;
+  }
+  function eciToScenePosition(rEci){
+    const rmag = rEci.length();
+    if(!Number.isFinite(rmag) || rmag < 1e-6) return new THREE.Vector3(0,0,0);
+    const altKm = Math.max(0, rmag - RE);
+    return rEci.clone().normalize().multiplyScalar(visualOrbitRadiusScene(altKm));
+  }
+
+  const earthGroup = new THREE.Group();
+  scene.add(earthGroup);
+  const earthMaterial = new THREE.MeshPhongMaterial({ map: createFallbackEarthTexture(), shininess: 8, specular: new THREE.Color(0x224466) });
+  const earth = new THREE.Mesh(new THREE.SphereGeometry(earthRadiusScene, 64, 64), earthMaterial);
+  earth.rotation.x = Math.PI / 2; // poles to +Z/-Z
+  earth.rotation.z = THREE.MathUtils.degToRad(18);
+  earthGroup.add(earth);
+  const earthGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(earthRadiusScene*1.08, 48, 48),
+    new THREE.MeshBasicMaterial({color:0x38bdf8, transparent:true, opacity:0.07})
+  );
+  earthGroup.add(earthGlow);
+
+  // Try loading a real Earth texture
+  const loader = new THREE.TextureLoader();
+  loader.crossOrigin = 'anonymous';
+  loader.load(
+    'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+    (tex) => { tex.colorSpace = THREE.SRGBColorSpace; earthMaterial.map = tex; earthMaterial.needsUpdate = true; },
+    undefined,
+    () => {}
+  );
+
+  function geodeticToEarthSurface(latDeg, lonDeg, radiusScale=1.0){
+    const lat = deg2rad(latDeg), lon = deg2rad(lonDeg);
+    const r = earthRadiusScene * radiusScale;
+    return new THREE.Vector3(
+      r * Math.cos(lat) * Math.cos(lon),
+      r * Math.cos(lat) * Math.sin(lon),
+      r * Math.sin(lat)
+    );
+  }
+
+  const baMarker = new THREE.Mesh(
+    new THREE.SphereGeometry(0.025, 14, 14),
+    new THREE.MeshBasicMaterial({color:0xff4d4f})
+  );
+  baMarker.position.copy(geodeticToEarthSurface(BA.latDeg, BA.lonDeg, 1.01));
+  earthGroup.add(baMarker);
+  const baLabel = createTextSprite('Buenos Aires', {scale:0.0029,bg:'rgba(127,29,29,0.88)', border:'rgba(248,113,113,0.95)'});
+  baLabel.position.copy(geodeticToEarthSurface(BA.latDeg, BA.lonDeg, 1.12));
+  earthGroup.add(baLabel);
+
+  const sunArrow = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), 4.2, 0xffd54a, 0.26, 0.12);
+  scene.add(sunArrow);
+  const sunSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18, 24, 24),
+    new THREE.MeshBasicMaterial({color:0xffe066})
+  );
+  scene.add(sunSphere);
+
+  const orbitLine = new THREE.Line(
+    new THREE.BufferGeometry(),
+    new THREE.LineBasicMaterial({color:0x60a5fa, transparent:true, opacity:0.86})
+  );
+  scene.add(orbitLine);
+
+  const satCarrier = new THREE.Group();
+  scene.add(satCarrier);
+  const satGroup = new THREE.Group();
+  satCarrier.add(satGroup);
+  satGroup.scale.setScalar(0.5);
+
+  const boxX = 1.0, boxY = 1.0, boxZ = 1.5;
+  const frameBox = new THREE.Mesh(
+    new THREE.BoxGeometry(boxX, boxY, boxZ),
+    new THREE.MeshPhysicalMaterial({color:0x44546b, metalness:0.45, roughness:0.55, transparent:true, opacity:0.10})
+  );
+  satGroup.add(frameBox);
+  const edge = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(boxX, boxY, boxZ)),
+    new THREE.LineBasicMaterial({color:0x94a3b8})
+  );
+  satGroup.add(edge);
+
+  const faceMeshes = [];
+  const faceHighlight = [];
+  function plane(w,h,color){
+    return new THREE.Mesh(
+      new THREE.PlaneGeometry(w,h),
+      new THREE.MeshBasicMaterial({color, side:THREE.DoubleSide, transparent:true, opacity:0.92})
+    );
+  }
+  faceMeshes[0] = plane(boxZ, boxY, 0x334155); faceMeshes[0].position.x = boxX/2 + 0.004; faceMeshes[0].rotation.y = -pi/2;
+  faceMeshes[1] = plane(boxZ, boxY, 0x334155); faceMeshes[1].position.x = -boxX/2 - 0.004; faceMeshes[1].rotation.y = pi/2;
+  faceMeshes[2] = plane(boxX, boxZ, 0x334155); faceMeshes[2].position.y = boxY/2 + 0.004; faceMeshes[2].rotation.x = -pi/2;
+  faceMeshes[3] = plane(boxX, boxZ, 0x334155); faceMeshes[3].position.y = -boxY/2 - 0.004; faceMeshes[3].rotation.x = pi/2;
+  faceMeshes[4] = plane(boxX, boxY, 0x334155); faceMeshes[4].position.z = boxZ/2 + 0.004;
+  faceMeshes[5] = plane(boxX, boxY, 0x334155); faceMeshes[5].position.z = -boxZ/2 - 0.004; faceMeshes[5].rotation.y = pi;
+  faceMeshes.forEach((m,i)=>{
+    satGroup.add(m);
+    const hi = new THREE.LineSegments(
+      new THREE.EdgesGeometry(m.geometry),
+      new THREE.LineBasicMaterial({color:0xfacc15})
+    );
+    hi.position.copy(m.position); hi.rotation.copy(m.rotation); hi.visible = false;
+    faceHighlight[i] = hi;
+    satGroup.add(hi);
+  });
+
+  const faceLabels = [];
+  const labelScale = 0.0031;
+  faceLabels[0] = createTextSprite('1 +X', {scale:labelScale}); faceLabels[0].position.set(boxX/2 + 0.32, 0, 0.52);
+  faceLabels[1] = createTextSprite('2 -X', {scale:labelScale}); faceLabels[1].position.set(-boxX/2 - 0.36, 0, 0.52);
+  faceLabels[2] = createTextSprite('3 +Y', {scale:labelScale}); faceLabels[2].position.set(0, boxY/2 + 0.30, 0.55);
+  faceLabels[3] = createTextSprite('4 -Y', {scale:labelScale}); faceLabels[3].position.set(0, -boxY/2 - 0.30, 0.55);
+  faceLabels[4] = createTextSprite('5 +Z', {scale:labelScale}); faceLabels[4].position.set(0, 0, boxZ/2 + 0.28);
+  faceLabels[5] = createTextSprite('6 -Z', {scale:labelScale}); faceLabels[5].position.set(0, 0, -boxZ/2 - 0.28);
+  faceLabels.forEach(s => satGroup.add(s));
+
+  const cm5Mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.28, 0.10, 0.22),
+    new THREE.MeshStandardMaterial({color:0xff6b6b, metalness:0.15, roughness:0.65})
+  );
+  satGroup.add(cm5Mesh);
+  const battMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.24, 0.24, 0.45),
+    new THREE.MeshStandardMaterial({color:0x60a5fa, metalness:0.10, roughness:0.75})
+  );
+  battMesh.position.set(-0.10, -0.14, 0.05);
+  satGroup.add(battMesh);
+
+  const nadirArrow = new THREE.ArrowHelper(new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), 1.0, 0x38bdf8, 0.14, 0.08);
+  scene.add(nadirArrow);
+
+  function resize(){
+    const w = viewer.clientWidth, h = viewer.clientHeight;
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h,false);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ------ Dynamic state ------
+  let loadedSatrec = null;
+  let loadedTleInfo = null;
+  let bestDesign = null;
+  let lastSweepResults = [];
+  let playing = false;
+  let simElapsedSec = 0;
+  let lastFrameMs = performance.now();
+
+  function getCurrentSimDate(){
+    const start = parseLocalDateInput();
+    return new Date(start.getTime() + simElapsedSec*1000);
+  }
+
+  function fillPreset(key){
+    const p = TLE_PRESETS[key];
+    if(!p) return;
+    document.getElementById('tleCatnr').value = p.catnr;
+    document.getElementById('tleLine1').value = p.line1;
+    document.getElementById('tleLine2').value = p.line2;
+    document.getElementById('tleStatus').textContent = `preset ${p.name} cargado`;
+  }
+  fillPreset('landsat8');
+
+  async function fetchLatestTle(){
+    const catnr = document.getElementById('tleCatnr').value.trim();
+    if(!catnr) throw new Error('CATNR vacío');
+    const url = `https://celestrak.org/NORAD/elements/gp.php?CATNR=${encodeURIComponent(catnr)}&FORMAT=TLE`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`No se pudo traer TLE en vivo desde CelesTrak (${res.status})`);
+    const txt = await res.text();
+    const lines = txt.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const l1 = lines.find(s => s.startsWith('1 '));
+    const l2 = lines.find(s => s.startsWith('2 '));
+    if(!l1 || !l2) throw new Error('Respuesta sin líneas TLE válidas');
+    document.getElementById('tleLine1').value = l1;
+    document.getElementById('tleLine2').value = l2;
+    document.getElementById('tleStatus').textContent = `último TLE descargado en vivo (${catnr})`;
+  }
+
+  function loadCurrentTle(){
+    const l1 = document.getElementById('tleLine1').value.trim();
+    const l2 = document.getElementById('tleLine2').value.trim();
+    if(!l1.startsWith('1 ') || !l2.startsWith('2 ')) throw new Error('TLE inválido');
+    loadedSatrec = satellite.twoline2satrec(l1, l2);
+    loadedTleInfo = { line1:l1, line2:l2, catnr: document.getElementById('tleCatnr').value.trim() };
+    document.getElementById('tleStatus').textContent = `TLE activo cargado (CATNR ${loadedTleInfo.catnr || 'manual'})`;
+  }
+  loadCurrentTle();
+
+  function setEarthRotation(date){
+    earthGroup.rotation.z = gmstFromDate(date);
+  }
+
+  function setSun(date){
+    const s = sunVectorECI(date).normalize();
+    sunArrow.setDirection(s);
+    sunSphere.position.copy(s.clone().multiplyScalar(4.4));
+    return s;
+  }
+
+  function bodyBasisFromRV(rVec, vVec, attitudeMode){
+    const rhat = rVec.clone().normalize();
+    const vhat = vVec.clone().normalize();
+    const nadir = rhat.clone().multiplyScalar(-1).normalize();
+    if(attitudeMode === 'rectNadir'){
+      const xBody = nadir;           // face +X nadir (10x15)
+      const zBody = vhat;            // face +Z ram-ish
+      const yBody = new THREE.Vector3().crossVectors(zBody, xBody).normalize();
+      const zFix = new THREE.Vector3().crossVectors(xBody, yBody).normalize();
+      return { xBody, yBody, zBody: zFix };
+    }
+    const zBody = nadir;             // face +Z nadir (10x10)
+    const xBody = vhat;
+    const yBody = new THREE.Vector3().crossVectors(zBody, xBody).normalize();
+    const xFix = new THREE.Vector3().crossVectors(yBody, zBody).normalize();
+    return { xBody:xFix, yBody, zBody };
+  }
+
+  function placeCm5ByRadiator(face){
+    const off = 0.18;
+    if(face === 1){ cm5Mesh.position.set( boxX/2 - off, 0.18, 0.12); cm5Mesh.rotation.set(0,0,0); }
+    if(face === 2){ cm5Mesh.position.set(-boxX/2 + off, 0.18, 0.12); cm5Mesh.rotation.set(0,0,0); }
+    if(face === 3){ cm5Mesh.position.set( 0.16, boxY/2 - off, 0.12); cm5Mesh.rotation.set(pi/2,0,0); }
+    if(face === 4){ cm5Mesh.position.set( 0.16,-boxY/2 + off, 0.12); cm5Mesh.rotation.set(pi/2,0,0); }
+    if(face === 5){ cm5Mesh.position.set( 0, 0.12, boxZ/2 - 0.16); cm5Mesh.rotation.set(0,0,0); }
+    if(face === 6){ cm5Mesh.position.set( 0, 0.12,-boxZ/2 + 0.16); cm5Mesh.rotation.set(0,0,0); }
+  }
+
+  // Eclipse model: returns shadow fraction 0 (full sun) to 1 (full umbra)
+  const R_SUN_KM = 696000;      // radio solar [km]
+  const D_SUN_KM = 149597870.7; // distancia media Tierra-Sol [km] (1 AU)
+
+  function eclipseFraction(rEci, sunEci){
+    const proj = rEci.dot(sunEci);
+    if(proj >= 0) return 0; // lado iluminado
+
+    const closest = Math.sqrt(Math.max(0, rEci.lengthSq() - proj*proj));
+    const eclipseModel = document.getElementById('paramEclipseModel').value;
+
+    if(eclipseModel === 'cylindrical'){
+      return closest < RE ? 1 : 0;
+    }
+    // Modelo cónico con penumbra
+    const dAnti = Math.abs(proj);
+    const halfAngle = R_SUN_KM / D_SUN_KM; // ~0.00465 rad
+    const rUmbra    = RE - dAnti * halfAngle;
+    const rPenumbra = RE + dAnti * halfAngle;
+    if(closest >= rPenumbra) return 0;
+    if(rUmbra > 0 && closest <= rUmbra) return 1;
+    if(rUmbra <= 0) return closest < rPenumbra ? 0.5 : 0; // antumbra guard
+    return clamp((rPenumbra - closest) / (rPenumbra - rUmbra), 0, 1);
+  }
+  // Legacy boolean wrapper
+  function isEclipsed(rEci, sunEci){
+    return eclipseFraction(rEci, sunEci) >= 0.98;
+  }
+
+  function sampleRealTleState(date, attitudeMode){
+    if(!loadedSatrec) return null;
+    const pv = satellite.propagate(loadedSatrec, date);
+    if(!pv || !pv.position || !pv.velocity) return null;
+
+    const r = new THREE.Vector3(pv.position.x, pv.position.y, pv.position.z);
+    const v = new THREE.Vector3(pv.velocity.x, pv.velocity.y, pv.velocity.z);
+    const basis = bodyBasisFromRV(r, v, attitudeMode);
+    const gmst = satellite.gstime(date);
+    const geod = satellite.eciToGeodetic(pv.position, gmst);
+    const ecf = satellite.eciToEcf(pv.position, gmst);
+    const look = satellite.ecfToLookAngles(BA_GD, ecf);
+    const hhat = new THREE.Vector3().crossVectors(r, v).normalize();
+    const sun = sunVectorECI(date);
+    const beta = rad2deg(Math.asin(clamp(hhat.dot(sun), -1, 1)));
+    const periodMin = loadedSatrec.no ? (2*pi / loadedSatrec.no) : 100;
+
+    return {
+      kind:'realTle',
+      date,
+      rEci:r, vEci:v,
+      basis,
+      latDeg: rad2deg(geod.latitude),
+      lonDeg: rad2deg(geod.longitude),
+      altKm: geod.height,
+      baElevDeg: rad2deg(look.elevation),
+      eclipse: isEclipsed(r, sun),
+      betaDeg: beta,
+      periodMin
+    };
+  }
+
+  function raANFromLTAN(date, ltanHours){
+    const sunRA = sunRightAscension(date);
+    return normAngle(sunRA + deg2rad(15*(ltanHours - 12)));
+  }
+
+  function j2RaanDot(aKm, inclRad){
+    const n = Math.sqrt(MU / Math.pow(aKm, 3));
+    return -1.5 * J2 * Math.pow(RE / aKm, 2) * n * Math.cos(inclRad); // rad/s (circular)
+  }
+
+  function syntheticOrbitState(date, design){
+    const epoch = design.epochDate;
+    const dtSec = (date.getTime() - epoch.getTime()) / 1000;
+    const incl = deg2rad(design.incDeg);
+    const raan0 = raANFromLTAN(epoch, design.ltanHours);
+    const raan = normAngle(raan0 + design.raanDot * dtSec);
+    const aKm = RE + design.altKm;
+    const n = Math.sqrt(MU / Math.pow(aKm,3));
+    const u = normAngle(design.u0 + n*dtSec);
+    const cO = Math.cos(raan), sO = Math.sin(raan), ci = Math.cos(incl), si = Math.sin(incl);
+    const cu = Math.cos(u), su = Math.sin(u);
+
+    const r = new THREE.Vector3(
+      aKm * (cO*cu - sO*su*ci),
+      aKm * (sO*cu + cO*su*ci),
+      aKm * (su*si)
+    );
+    const vDir = new THREE.Vector3(
+      -cO*su - sO*cu*ci,
+      -sO*su + cO*cu*ci,
+      cu*si
+    ).normalize();
+    const vMag = Math.sqrt(MU / aKm);
+    const v = vDir.clone().multiplyScalar(vMag);
+    const basis = bodyBasisFromRV(r, v, design.attitudeMode);
+
+    const gmst = satellite.gstime(date);
+    const ecf = satellite.eciToEcf({x:r.x,y:r.y,z:r.z}, gmst);
+    const geod = satellite.eciToGeodetic({x:r.x,y:r.y,z:r.z}, gmst);
+    const look = satellite.ecfToLookAngles(BA_GD, ecf);
+    const sun = sunVectorECI(date);
+    const beta = rad2deg(Math.asin(clamp(new THREE.Vector3().crossVectors(r, v).normalize().dot(sun), -1, 1)));
+
+    return {
+      kind:'design',
+      date,
+      rEci:r, vEci:v,
+      basis,
+      latDeg: rad2deg(geod.latitude),
+      lonDeg: rad2deg(geod.longitude),
+      altKm: geod.height,
+      baElevDeg: rad2deg(look.elevation),
+      eclipse: isEclipsed(r, sun),
+      betaDeg: beta,
+      periodMin: 2*pi/n/60
+    };
+  }
+
+  function updateOrbitLineForReal(date){
+    if(!loadedSatrec) return;
+    const current = sampleRealTleState(date, document.getElementById('viewerAttitude').value);
+    if(!current) return;
+    const pts = [];
+    const periodMin = current.periodMin || 100;
+    for(let i=0;i<=160;i++){
+      const dtMin = lerp(-periodMin*0.25, periodMin*0.75, i/160);
+      const d = new Date(date.getTime() + dtMin*60000);
+      const pv = satellite.propagate(loadedSatrec, d);
+      if(pv && pv.position){
+        const rv = new THREE.Vector3(pv.position.x, pv.position.y, pv.position.z);
+        pts.push(eciToScenePosition(rv));
+      }
+    }
+    orbitLine.geometry.dispose();
+    orbitLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+  }
+
+  function updateOrbitLineForDesign(date, design){
+    const pts = [];
+    const aKm = RE + design.altKm;
+    const n = Math.sqrt(MU / Math.pow(aKm,3));
+    const periodSec = 2*pi / n;
+    for(let i=0;i<=160;i++){
+      const d = new Date(date.getTime() + lerp(-0.25*periodSec, 0.75*periodSec, i/160)*1000);
+      const st = syntheticOrbitState(d, design);
+      pts.push(eciToScenePosition(st.rEci));
+    }
+    orbitLine.geometry.dispose();
+    orbitLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+  }
+
+  function faceNadZenViews(attitudeMode, altKm){
+    // View factors calculados analíticamente desde altitud
+    const alt = (Number.isFinite(altKm) && altKm > 0) ? altKm : 550;
+    const rho = Math.asin(RE / (RE + alt)); // semiángulo terrestre
+    const fNadir  = Math.pow(Math.sin(rho), 2);    // cara mirando a nadir
+    const fZenith = 0.03;                           // cara mirando al espacio (residual)
+    const fLat    = (1 - Math.cos(rho)) / 2;        // caras laterales
+    if(attitudeMode === 'rectNadir'){
+      // +X nadir, -X zenith
+      return {
+        earthView: [fNadir, fZenith, fLat, fLat, fLat, fLat],
+        spaceView: [1-fNadir, 1-fZenith, 1-fLat, 1-fLat, 1-fLat, 1-fLat],
+        nadirIndex: 1,
+        zenithIndex: 2
+      };
+    }
+    // +Z nadir, -Z zenith
+    return {
+      earthView: [fLat, fLat, fLat, fLat, fNadir, fZenith],
+      spaceView: [1-fLat, 1-fLat, 1-fLat, 1-fLat, 1-fNadir, 1-fZenith],
+      nadirIndex: 5,
+      zenithIndex: 6
+    };
+  }
+
+  function faceBodyNormals(){
+    return [
+      new THREE.Vector3( 1,0,0), new THREE.Vector3(-1,0,0),
+      new THREE.Vector3( 0,1,0), new THREE.Vector3( 0,-1,0),
+      new THREE.Vector3( 0,0,1), new THREE.Vector3( 0,0,-1)
+    ];
+  }
+
+  function getUIParams(){
+    return {
+      albedo: parseFloat(document.getElementById('paramAlbedo').value),
+      earthIR: parseFloat(document.getElementById('paramEarthIR').value),
+      panelEff: parseFloat(document.getElementById('paramPanelEff').value),
+      cm5Active: parseFloat(document.getElementById('paramCm5Active').value),
+      cm5Idle: parseFloat(document.getElementById('paramCm5Idle').value),
+      cm5OffMode: document.getElementById('paramCm5OffMode').value,
+      cm5Duty: parseFloat(document.getElementById('paramCm5Duty').value) / 100,
+      cm5Cycle: parseFloat(document.getElementById('paramCm5Cycle').value),
+    };
+  }
+
+  function evaluateDesignCandidate(candidate, dtSec, hours){
+    const durationSec = hours * 3600;
+    const steps = Math.floor(durationSec / dtSec);
+    const energyPotential = new Array(6).fill(0);
+    let eclipseSteps = 0;
+    let passCount = 0;
+    let totalVisibleSec = 0;
+    let inPass = false;
+    const series = []; // keep compact for thermal run
+
+    const normals = faceBodyNormals();
+    const views = faceNadZenViews(candidate.attitudeMode, candidate.altKm);
+    const areas = areaByFace();
+    const uiP = getUIParams();
+
+    for(let k=0;k<=steps;k++){
+      const date = new Date(candidate.epochDate.getTime() + k*dtSec*1000);
+      const st = syntheticOrbitState(date, candidate);
+      const sunEci = sunVectorECI(date);
+      const { xBody, yBody, zBody } = st.basis;
+
+      // Shadow fraction: 0 = full sun, 1 = full umbra
+      const shadow = eclipseFraction(st.rEci, sunEci);
+      const sunFactor = 1 - shadow; // 0 in umbra, fractional in penumbra, 1 in full sun
+
+      const sunBody = normals.map(n => {
+        const nEci = xBody.clone().multiplyScalar(n.x).add(yBody.clone().multiplyScalar(n.y)).add(zBody.clone().multiplyScalar(n.z));
+        return sunFactor * posPart(nEci.dot(sunEci));
+      });
+
+      // Albedo modulation: factor depends on orbital position relative to subsolar point
+      // nadir vector dotted with sun = how much the ground below is lit
+      const nadirVec = st.rEci.clone().normalize().multiplyScalar(-1);
+      const albedoMod = clamp(posPart(nadirVec.dot(sunEci)) * 2, 0, 1); // 0 over night side, ~1 near subsolar
+
+      for(let i=0;i<6;i++){
+        energyPotential[i] += 1361 * areas[i] * sunBody[i] * uiP.panelEff * dtSec / 3600.0;
+      }
+
+      const isEcl = shadow >= 0.98;
+      if(isEcl) eclipseSteps++;
+      const elev = st.baElevDeg;
+      const visible = elev > 10;
+      if(visible){
+        totalVisibleSec += dtSec;
+        if(!inPass){ passCount++; inPass = true; }
+      } else inPass = false;
+
+      series.push({
+        date,
+        sunBody,
+        eclipse: isEcl,
+        shadow,
+        sunFactor,
+        albedoMod,
+        basis: st.basis,
+        sunEci,
+        baElevDeg: elev
+      });
+    }
+
+    // Select panel faces based on energy potential
+    const order = [1,2,3,4,5,6].map(i => ({face:i, e:energyPotential[i-1]})).sort((a,b)=>b.e-a.e);
+    const top4CandidateFaces = order.slice(0,4).map(o=>o.face);
+    const faceActivityCount = energyPotential.filter(e => e > 0.15 * Math.max(...energyPotential, 1e-9)).length;
+
+    // Determine best radiator face by thermal scan — store ALL 6 results
+    let bestThermal = null;
+    const allRadiatorResults = [];
+    for(let radFace=1; radFace<=6; radFace++){
+      const panelFaces = [];
+      for(const o of order){
+        if(o.face !== radFace && panelFaces.length < 4) panelFaces.push(o.face);
+      }
+      const therm = runThermalSweep(series, candidate, radFace, panelFaces);
+      const entry = { ...therm, radiatorFace: radFace, panelFaces };
+      allRadiatorResults.push(entry);
+      if(!bestThermal || therm.thermalKey > bestThermal.thermalKey){
+        bestThermal = entry;
+      }
+    }
+
+    return {
+      ...candidate,
+      energyPotentialWh: energyPotential,
+      faceActivityCount,
+      top4PotentialFaces: top4CandidateFaces,
+      passCount,
+      totalVisibleMin: totalVisibleSec/60,
+      eclipseFraction: eclipseSteps / Math.max(1, steps+1),
+      hotMaxC: finiteOr(bestThermal.hotMaxC, 999),
+      battMinEclipseC: finiteOr(bestThermal.battMinEclipseC, -999),
+      netPanelWh: finiteOr(bestThermal.netPanelWh, 0),
+      radiatorFace: bestThermal.radiatorFace,
+      panelFaces: bestThermal.panelFaces,
+      panelFaceEnergyWh: bestThermal.panelFaceEnergyWh,
+      allRadiators: allRadiatorResults
+    };
+  }
+
+  function runThermalSweep(series, candidate, radiatorFace, panelFaces){
+    const areas = areaByFace();
+    const views = faceNadZenViews(candidate.attitudeMode, candidate.altKm);
+    const earthView = views.earthView.slice();
+    const spaceView = views.spaceView.slice();
+    const uiP = getUIParams();
+
+    const alphaSolar = new Array(6).fill(0.35);
+    const epsIR = new Array(6).fill(0.85);
+    const earthIRAbs = new Array(6).fill(0.60);
+    const panelArea = new Array(6).fill(0);
+    panelFaces.forEach(f => {
+      panelArea[f-1] = areas[f-1] * 0.88;
+      alphaSolar[f-1] = 0.90;
+      epsIR[f-1] = 0.85;
+      earthIRAbs[f-1] = 0.85;
+    });
+    alphaSolar[radiatorFace-1] = 0.20;
+    epsIR[radiatorFace-1] = 0.88;
+    earthIRAbs[radiatorFace-1] = 0.20;
+    panelArea[radiatorFace-1] = 0;
+
+    const G_frame_face = new Array(6).fill(0.45);
+    const G_cm5_face = new Array(6).fill(0);
+    const G_batt_face = new Array(6).fill(0);
+    G_frame_face[radiatorFace-1] = 1.00;
+    G_cm5_face[radiatorFace-1] = 0.60;
+    G_batt_face[views.nadirIndex-1] = 0.03;
+
+    let T_face = new Array(6).fill(293.15);
+    let T_frame = 293.15, T_batt = 293.15, T_cm5 = 293.15;
+    const C_face = [180,180,180,180,130,130];
+    // C_batt: 2× 18650 ~90g @ ~1100 J/(kg·K) ≈ 100 J/K (corregido de 220)
+    const C_frame = 450, C_batt = 100, C_cm5 = 60;
+    const G_batt_frame = 0.08, G_cm5_frame = 0.70;
+    const panelTempCoeff = -0.0035;
+    // CM5 power from UI
+    const P_cm5_active = uiP.cm5Active;
+    const P_cm5_idle = uiP.cm5Idle;
+    const cm5Duty = uiP.cm5Duty;
+    const cm5Cycle = uiP.cm5Cycle;
+    const cm5OffIsIdle = (uiP.cm5OffMode === 'idle');
+    // Env params from UI
+    const userAlbedo = uiP.albedo;
+    const userEarthIR = uiP.earthIR;
+    const userPanelEff = uiP.panelEff;
+
+    let hotMaxC = -1e9;
+    let battMinEclipseC = 1e9;
+    const panelFaceEnergyWh = new Array(6).fill(0);
+    let netPanelWh = 0;
+
+    for(let k=0;k<series.length;k++){
+      const s = series[k];
+      const dtRaw = k > 0 ? (series[k].date - series[k-1].date)/1000 : ((series.length>1) ? (series[1].date - series[0].date)/1000 : 120);
+      const dtSec = (Number.isFinite(dtRaw) && dtRaw > 0) ? dtRaw : 120;
+      const time = (s.date - candidate.epochDate)/1000;
+
+      // CM5 power model: active during duty window, OFF (or idle) outside
+      const inDutyWindow = ((time % cm5Cycle) < cm5Duty * cm5Cycle);
+      let P_cm5;
+      if(s.eclipse){
+        P_cm5 = 0; // CM5 off during eclipse
+      } else if(inDutyWindow){
+        P_cm5 = P_cm5_active;
+      } else {
+        P_cm5 = cm5OffIsIdle ? P_cm5_idle : 0; // OFF = 0W, idle = P_idle
+      }
+
+      const substeps = Math.max(1, Math.ceil(dtSec / 20));
+      const h = dtSec / substeps;
+
+      // Albedo modulation factor from series (varies with orbital position)
+      const albMod = Number.isFinite(s.albedoMod) ? s.albedoMod : (s.eclipse ? 0 : 1);
+
+      for(let sub=0; sub<substeps; sub++){
+        const qFrameToFace = new Array(6).fill(0);
+        const dT_face = new Array(6).fill(0);
+        let P_panelGross = 0;
+
+        for(let i=0;i<6;i++){
+          const inc = Number.isFinite(s.sunBody[i]) ? clamp(s.sunBody[i], 0, 1) : 0;
+          const Ti = clamp(finiteOr(T_face[i], 293.15), 150, 450);
+          const Tf = clamp(finiteOr(T_frame, 293.15), 150, 450);
+          const Tb = clamp(finiteOr(T_batt, 293.15), 150, 450);
+          const Tc = clamp(finiteOr(T_cm5, 293.15), 150, 450);
+
+          const qsun = 1361 * alphaSolar[i] * areas[i] * inc;
+          // Albedo: modulated by subsolar position, zero in eclipse
+          const qalb = s.eclipse ? 0 : userAlbedo * albMod * 1361 * alphaSolar[i] * areas[i] * earthView[i];
+          // Earth IR: parametric, always present
+          const qir = userEarthIR * earthIRAbs[i] * areas[i] * earthView[i];
+          const qrad = 5.670374419e-8 * epsIR[i] * areas[i] * spaceView[i] * (Math.pow(Ti,4) - Math.pow(2.725,4));
+          const qff = G_frame_face[i] * (Tf - Ti);
+          const qcf = G_cm5_face[i] * (Tc - Ti);
+          const qbf = G_batt_face[i] * (Tb - Ti);
+          qFrameToFace[i] = qff;
+
+          const qnet = qsun + qalb + qir + qff + qcf + qbf - qrad;
+          dT_face[i] = qnet / C_face[i];
+
+          const peff = Math.max(0, userPanelEff * (1 + panelTempCoeff*(Ti - 298.15)));
+          const pface = 1361 * panelArea[i] * inc * peff;
+          panelFaceEnergyWh[i] += pface * h / 3600;
+          P_panelGross += pface;
+        }
+
+        const Tf = clamp(finiteOr(T_frame, 293.15), 150, 450);
+        const Tb = clamp(finiteOr(T_batt, 293.15), 150, 450);
+        const Tc = clamp(finiteOr(T_cm5, 293.15), 150, 450);
+        const dT_frame = (
+          -qFrameToFace.reduce((acc,q)=>acc + q, 0)
+          + G_cm5_frame * (Tc - Tf)
+          + G_batt_frame * (Tb - Tf)
+        ) / C_frame;
+
+        const sumQcm5 = G_cm5_face.reduce((acc,g,i)=>acc + g * (Tc - clamp(finiteOr(T_face[i],293.15),150,450)), 0);
+        const dT_cm5 = (P_cm5 - G_cm5_frame * (Tc - Tf) - sumQcm5) / C_cm5;
+        const sumQbatt = G_batt_face.reduce((acc,g,i)=>acc + g * (Tb - clamp(finiteOr(T_face[i],293.15),150,450)), 0);
+        const dT_batt = (- G_batt_frame * (Tb - Tf) - sumQbatt) / C_batt;
+
+        for(let i=0;i<6;i++){
+          T_face[i] = clamp(finiteOr(T_face[i],293.15) + h * dT_face[i], 150, 450);
+        }
+        T_frame = clamp(finiteOr(T_frame,293.15) + h * dT_frame, 150, 450);
+        T_cm5 = clamp(finiteOr(T_cm5,293.15) + h * dT_cm5, 150, 450);
+        T_batt = clamp(finiteOr(T_batt,293.15) + h * dT_batt, 150, 450);
+
+        if(!s.eclipse) hotMaxC = Math.max(hotMaxC, T_cm5 - K0);
+        if(s.eclipse) battMinEclipseC = Math.min(battMinEclipseC, T_batt - K0);
+        netPanelWh += P_panelGross * 0.80 * h / 3600;
+      }
+    }
+
+    if(!Number.isFinite(hotMaxC) || hotMaxC < -200) hotMaxC = T_cm5 - K0;
+    if(!Number.isFinite(battMinEclipseC) || battMinEclipseC > 200) battMinEclipseC = T_batt - K0;
+    if(!Number.isFinite(netPanelWh)) netPanelWh = 0;
+    for(let i=0;i<panelFaceEnergyWh.length;i++){
+      if(!Number.isFinite(panelFaceEnergyWh[i])) panelFaceEnergyWh[i] = 0;
+    }
+
+    // Margin-based thermalKey: operational limits as reference
+    // When both temps are far from limits, energy becomes the tiebreaker (physically correct)
+    const T_CM5_LIMIT = 80;    // °C operational limit CM5 (abs max ~85°C)
+    const T_BATT_COLD = -10;   // °C Li-ion discharge lower limit (survival -20°C)
+    const cm5Margin = clamp((T_CM5_LIMIT - hotMaxC) / T_CM5_LIMIT, 0, 1);
+    const battMargin = clamp((battMinEclipseC - T_BATT_COLD) / 50, 0, 1);
+    // Energy has real mission impact: paneles en una cara solar desperdiciada cuestan Wh reales
+    const energyScore = netPanelWh / 100;
+    const thermalKey = cm5Margin + 0.5 * battMargin + 0.8 * energyScore;
+    return { hotMaxC, battMinEclipseC, netPanelWh, panelFaceEnergyWh, thermalKey: finiteOr(thermalKey, -1e6) };
+  }
+
+  function normalizeScore(items, key, higherBetter=true){
+    const vals = items.map(i => Number.isFinite(i[key]) ? i[key] : NaN);
+    const finiteVals = vals.filter(v => Number.isFinite(v));
+    if(!finiteVals.length) return items.map(() => 0);
+    const min = Math.min(...finiteVals), max = Math.max(...finiteVals);
+    return items.map((i, idx) => {
+      const v = vals[idx];
+      if(!Number.isFinite(v)) return 0;
+      let s = (max - min) < 1e-9 ? 1 : ((v - min) / (max - min));
+      if(!higherBetter) s = 1 - s;
+      return clamp(s, 0, 1);
+    });
+  }
+
+  async function runOptimizer(){
+    const incMin = parseFloat(document.getElementById('incMin').value);
+    const incMax = parseFloat(document.getElementById('incMax').value);
+    const incStep = parseFloat(document.getElementById('incStep').value);
+    const altMin = parseFloat(document.getElementById('altMin').value);
+    const altMax = parseFloat(document.getElementById('altMax').value);
+    const altStep = parseFloat(document.getElementById('altStep').value);
+    const ltanMin = parseFloat(document.getElementById('ltanMin').value);
+    const ltanMax = parseFloat(document.getElementById('ltanMax').value);
+    const ltanStep = parseFloat(document.getElementById('ltanStep').value);
+    const hours = parseFloat(document.getElementById('sweepHours').value);
+    const dtSec = parseFloat(document.getElementById('sweepDt').value);
+    const attSel = document.getElementById('sweepAttitudes').value;
+    const epochDate = parseLocalDateInput();
+
+    const attitudes = attSel === 'both' ? ['squareNadir','rectNadir'] : [attSel];
+    const candidates = [];
+    for(let inc=incMin; inc<=incMax+1e-9; inc+=incStep){
+      for(let alt=altMin; alt<=altMax+1e-9; alt+=altStep){
+        for(let ltan=ltanMin; ltan<=ltanMax+1e-9; ltan+=ltanStep){
+          for(const attitudeMode of attitudes){
+            candidates.push({
+              incDeg:+inc.toFixed(4),
+              altKm:+alt.toFixed(3),
+              ltanHours:+ltan.toFixed(4),
+              attitudeMode,
+              epochDate,
+              u0:0,
+              raanDot:j2RaanDot(RE + alt, deg2rad(inc))
+            });
+          }
+        }
+      }
+    }
+
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    progressBar.style.width = '0%';
+    progressText.textContent = `evaluando ${candidates.length} candidatos…`;
+
+    const raw = [];
+    for(let idx=0; idx<candidates.length; idx++){
+      raw.push(evaluateDesignCandidate(candidates[idx], dtSec, hours));
+      if(idx % 5 === 0){
+        progressBar.style.width = `${(idx+1)/candidates.length*100}%`;
+        progressText.textContent = `evaluando ${idx+1}/${candidates.length} candidatos…`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    const passScore = raw.map((r,i)=>0); // fill below
+    const visibleNorm = normalizeScore(raw, 'totalVisibleMin', true);
+    const passCountNorm = normalizeScore(raw, 'passCount', true);
+    const energyNorm = normalizeScore(raw, 'netPanelWh', true);
+    const eclipseNorm = normalizeScore(raw, 'eclipseFraction', false);
+    const hotNorm = normalizeScore(raw, 'hotMaxC', false);
+    const battNorm = normalizeScore(raw, 'battMinEclipseC', true);
+    const activeFaceNorm = raw.map(r => Math.min(r.faceActivityCount,4)/4);
+
+    raw.forEach((r,i) => {
+      const pass = 0.55*passCountNorm[i] + 0.45*visibleNorm[i];
+      const energy = 0.55*energyNorm[i] + 0.45*activeFaceNorm[i];
+      const thermal = 0.55*hotNorm[i] + 0.45*battNorm[i];
+      r.scoreBreakdown = { pass, energy, eclipse: eclipseNorm[i], thermal };
+      r.totalScore = 0.30*pass + 0.25*energy + 0.15*eclipseNorm[i] + 0.30*thermal;
+    });
+
+    raw.sort((a,b)=>b.totalScore-a.totalScore);
+    bestDesign = raw[0] || null;
+    lastSweepResults = raw;
+    document.getElementById('viewMode').value = 'bestDesign';
+
+    renderResults(raw);
+    progressBar.style.width = '100%';
+    progressText.textContent = `listo: ${candidates.length} candidatos evaluados`;
+  }
+
+  function renderResults(rows){
+    if(!rows.length){
+      document.getElementById('bestSummary').textContent = 'sin resultados';
+      document.getElementById('resultsTableWrap').textContent = '—';
+      return;
+    }
+    const best = rows[0];
+    const bestSquare = rows.find(r => r.attitudeMode === 'squareNadir');
+    const bestRect = rows.find(r => r.attitudeMode === 'rectNadir');
+
+    function facesToStr(arr){ return arr.map(f => faceName(f)).join(', '); }
+
+    let summary = `<div><b>Mejor candidato global</b></div>
+      <div class="muted" style="margin-top:6px">
+        i = <b>${best.incDeg.toFixed(2)}°</b>, alt = <b>${best.altKm.toFixed(0)} km</b>, LTAN = <b>${best.ltanHours.toFixed(2)} h</b>,
+        actitud = <b>${best.attitudeMode === 'squareNadir' ? 'nadir en 10×10' : 'nadir en 10×15'}</b>.
+      </div>
+      <div class="muted" style="margin-top:6px">
+        Pasadas BA = <b>${best.passCount}</b>, visibilidad total = <b>${best.totalVisibleMin.toFixed(1)} min</b>, eclipse = <b>${(best.eclipseFraction*100).toFixed(1)}%</b>.
+      </div>
+      <div class="muted" style="margin-top:6px">
+        Térmica: max CM5 = <b>${fmtNum(best.hotMaxC,1,'°C')}</b>, min batería en eclipse = <b>${fmtNum(best.battMinEclipseC,1,'°C')}</b>.
+      </div>
+      <div class="muted" style="margin-top:6px">
+        Recomendación de caras: <b>radiador = ${faceName(best.radiatorFace)}</b>; <b>paneles = ${facesToStr(best.panelFaces)}</b>.
+      </div>`;
+    if(bestSquare) summary += `<div class="muted" style="margin-top:8px">Mejor 10×10 nadir: i ${bestSquare.incDeg.toFixed(2)}°, alt ${bestSquare.altKm.toFixed(0)} km, LTAN ${bestSquare.ltanHours.toFixed(2)} h, score ${fmtNum(bestSquare.totalScore*100,1)}</div>`;
+    if(bestRect) summary += `<div class="muted" style="margin-top:4px">Mejor 10×15 nadir: i ${bestRect.incDeg.toFixed(2)}°, alt ${bestRect.altKm.toFixed(0)} km, LTAN ${bestRect.ltanHours.toFixed(2)} h, score ${fmtNum(bestRect.totalScore*100,1)}</div>`;
+    document.getElementById('bestSummary').innerHTML = summary;
+
+    let html = '<table><thead><tr><th>#</th><th>Actitud</th><th>i</th><th>alt</th><th>LTAN</th><th>Pases BA</th><th>Wh netos</th><th>Eclipse</th><th>Tmax CM5</th><th>Tmin batt</th><th>Radiador</th><th>Paneles</th><th>Score</th></tr></thead><tbody>';
+    rows.slice(0,20).forEach((r,idx)=>{
+      html += `<tr>
+        <td>${idx+1}</td>
+        <td>${r.attitudeMode === 'squareNadir' ? '10×10 nadir' : '10×15 nadir'}</td>
+        <td>${r.incDeg.toFixed(2)}°</td>
+        <td>${r.altKm.toFixed(0)}</td>
+        <td>${r.ltanHours.toFixed(2)}</td>
+        <td>${r.passCount} / ${r.totalVisibleMin.toFixed(1)}m</td>
+        <td>${fmtNum(r.netPanelWh,2)}</td>
+        <td>${fmtNum(r.eclipseFraction*100,1,'%')}</td>
+        <td>${fmtNum(r.hotMaxC,1,'°C')}</td>
+        <td>${fmtNum(r.battMinEclipseC,1,'°C')}</td>
+        <td>${faceName(r.radiatorFace)}</td>
+        <td>${r.panelFaces.map(f=>faceName(f)).join(', ')}</td>
+        <td>${fmtNum(r.totalScore*100,1)}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('resultsTableWrap').innerHTML = html;
+  }
+
+  function setSatelliteScene(state, radiatorFace=6){
+    if(!state) return;
+    setEarthRotation(state.date);
+    const sun = setSun(state.date);
+
+    satCarrier.position.copy(eciToScenePosition(state.rEci));
+    const { xBody, yBody, zBody } = state.basis;
+    const basis = new THREE.Matrix4().makeBasis(xBody, yBody, zBody);
+    satGroup.quaternion.setFromRotationMatrix(basis);
+
+    // Move satellite local thermal parts
+    placeCm5ByRadiator(radiatorFace);
+    const satPos = satCarrier.position.clone();
+    nadirArrow.position.copy(satPos);
+    nadirArrow.setDirection(satPos.clone().multiplyScalar(-1).normalize());
+    nadirArrow.setLength(0.95, 0.14, 0.08);
+
+    // Use eclipseFraction for gradual penumbra
+    const shadow = eclipseFraction(state.rEci, sun);
+    const sunFactor = 1 - shadow;
+
+    const sunlightBody = faceBodyNormals().map(n => {
+      const nEci = xBody.clone().multiplyScalar(n.x).add(yBody.clone().multiplyScalar(n.y)).add(zBody.clone().multiplyScalar(n.z));
+      return sunFactor * posPart(nEci.dot(sun));
+    });
+    faceMeshes.forEach((m,i)=>{
+      const pseudoTemp = 5 + 55*sunlightBody[i] + (i+1===radiatorFace ? -10 : 0);
+      m.material.color.copy(tempToColor(pseudoTemp));
+      faceHighlight[i].visible = (i+1 === radiatorFace);
+      m.material.opacity = (i+1 === radiatorFace) ? 1.0 : 0.92;
+    });
+    cm5Mesh.material.color.copy(tempToColor(30 + (shadow > 0.5 ? -5 : 12) * sunFactor));
+    battMesh.material.color.copy(tempToColor((shadow > 0.5 ? 0 : 12) * sunFactor));
+  }
+
+  function updateCurrentKpis(state, label){
+    if(!state) return;
+    document.getElementById('simTimeUtc').textContent = state.date.toISOString();
+    document.getElementById('kpiSubpoint').textContent = `${state.latDeg.toFixed(1)}°, ${state.lonDeg.toFixed(1)}°`;
+    document.getElementById('kpiAltitude').textContent = `${state.altKm.toFixed(0)} km`;
+    document.getElementById('kpiBeta').textContent = `${state.betaDeg.toFixed(1)}°`;
+    document.getElementById('kpiBAElev').textContent = `${state.baElevDeg.toFixed(1)}°`;
+    const shadow = eclipseFraction(state.rEci, sunVectorECI(state.date));
+    document.getElementById('kpiEclipse').textContent = shadow >= 0.98 ? 'umbra' : shadow > 0.02 ? `penumbra ${(shadow*100).toFixed(0)}%` : 'no';
+    document.getElementById('kpiMode').textContent = label;
+  }
+
+  function lonWrap(deg){
+    let d = ((deg + 180) % 360 + 360) % 360 - 180;
+    return d;
+  }
+
+  function renderAtCurrentTime(){
+    const date = getCurrentSimDate();
+    const mode = document.getElementById('viewMode').value;
+    const attitudeMode = document.getElementById('viewerAttitude').value;
+    if(mode === 'bestDesign' && bestDesign){
+      const st = syntheticOrbitState(date, bestDesign);
+      updateOrbitLineForDesign(date, bestDesign);
+      setSatelliteScene(st, bestDesign.radiatorFace || 6);
+      updateCurrentKpis(st, bestDesign.attitudeMode === 'squareNadir' ? 'mejor diseño 10×10' : 'mejor diseño 10×15');
+    } else {
+      const st = sampleRealTleState(date, attitudeMode);
+      if(st){
+        updateOrbitLineForReal(date);
+        setSatelliteScene(st, 6);
+        st.lonDeg = lonWrap(st.lonDeg);
+        updateCurrentKpis(st, 'TLE real / SGP4');
+      }
+    }
+  }
+
+  // ------ UI handlers ------
+  document.getElementById('tlePreset').addEventListener('change', (e)=>{
+    const key = e.target.value;
+    if(key !== 'manual') fillPreset(key);
+  });
+  document.getElementById('fillPresetBtn').addEventListener('click', ()=>{
+    const key = document.getElementById('tlePreset').value;
+    if(key !== 'manual') fillPreset(key);
+  });
+  document.getElementById('fetchLiveTleBtn').addEventListener('click', async ()=>{
+    try{
+      document.getElementById('tleStatus').textContent = 'descargando TLE en vivo…';
+      await fetchLatestTle();
+      loadCurrentTle();
+    } catch(err){
+      document.getElementById('tleStatus').textContent = `falló fetch en vivo: ${err.message}`;
+    }
+  });
+  document.getElementById('loadTleBtn').addEventListener('click', ()=>{
+    try{
+      loadCurrentTle();
+      renderAtCurrentTime();
+    } catch(err){
+      showFatal(err.message);
+    }
+  });
+  document.getElementById('playBtn').addEventListener('click', ()=>{ playing = true; });
+  document.getElementById('pauseBtn').addEventListener('click', ()=>{ playing = false; });
+  document.getElementById('resetBtn').addEventListener('click', ()=>{ simElapsedSec = 0; renderAtCurrentTime(); });
+  document.getElementById('runSweepBtn').addEventListener('click', async ()=>{
+    try{
+      await runOptimizer();
+      renderAtCurrentTime();
+    } catch(err){
+      showFatal('Error en optimización: ' + err.message);
+      console.error(err);
+    }
+  });
+  ['startDateLocal','viewMode','viewerAttitude'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=>{ simElapsedSec = 0; renderAtCurrentTime(); });
+  });
+
+  // CSV export
+  document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+    if(!lastSweepResults.length){ alert('Ejecutá el optimizador primero.'); return; }
+    // Build header: common cols + per-radiator-face cols
+    const faces = ['+X','-X','+Y','-Y','+Z','-Z'];
+    let header = 'Rank,Attitude,Inc_deg,Alt_km,LTAN_h,Passes_BA,Visible_min,Eclipse_%,BestRad,Score';
+    faces.forEach(f => { header += `,Rad${f}_Wh,Rad${f}_Tcm5,Rad${f}_Tbat,Rad${f}_Panels,Rad${f}_ThermalKey`; });
+    header += '\n';
+
+    const rows = lastSweepResults.map((r,i) => {
+      let line = `${i+1},${r.attitudeMode === 'squareNadir' ? '10x10_nadir' : '10x15_nadir'},${r.incDeg.toFixed(2)},${r.altKm.toFixed(0)},${r.ltanHours.toFixed(2)},${r.passCount},${r.totalVisibleMin.toFixed(1)},${(r.eclipseFraction*100).toFixed(1)},${faceName(r.radiatorFace)},${(r.totalScore*100).toFixed(1)}`;
+      // Append all 6 radiator results
+      if(r.allRadiators && r.allRadiators.length === 6){
+        for(let fi=0; fi<6; fi++){
+          const ar = r.allRadiators[fi];
+          line += `,${finiteOr(ar.netPanelWh,0).toFixed(2)},${finiteOr(ar.hotMaxC,999).toFixed(1)},${finiteOr(ar.battMinEclipseC,-999).toFixed(1)},${ar.panelFaces.map(f=>faceName(f)).join('+')},${finiteOr(ar.thermalKey,-999).toFixed(3)}`;
+        }
+      } else {
+        for(let fi=0; fi<6; fi++) line += ',,,,,';
+      }
+      return line;
+    }).join('\n');
+
+    const blob = new Blob([header + rows], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `borealis_sweep_6rad_${new Date().toISOString().slice(0,19).replace(/:/g,'')}.csv`;
+    a.click();
+  });
+
+  // New parameter controls trigger re-render
+  ['paramAlbedo','paramEarthIR','paramPanelEff','paramCm5OffMode','paramEclipseModel'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=>{ renderAtCurrentTime(); });
+  });
+
+  function animate(now){
+    requestAnimationFrame(animate);
+    const dt = (now - lastFrameMs) / 1000;
+    lastFrameMs = now;
+    if(playing){
+      const rate = parseFloat(document.getElementById('playbackRate').value);
+      simElapsedSec += dt * rate;
+    }
+    renderAtCurrentTime();
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  renderAtCurrentTime();
+  animate(performance.now());
+
+} catch(err){
+  console.error(err);
+  showFatal(err && err.message ? err.message : String(err));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+ID,Severidad,Tema,Hallazgo,Impacto,Accion_recomendada
+C1,Critico,Baseline/FSW,Conviven dos modelos operativos distintos (SCIENCE vs NOMINAL),Contamina requisitos software y V&V,Unificar en MISSION_MODE SAFE/NOMINAL/DOWNLINK_WINDOW + EPS_STATE
+C2,Critico,COMMS,Uplink LoRa desde nodos tipicos sigue siendo justo y no esta experimentalmente cerrado,Riesgo directo sobre el criterio de exito del MVP,Cerrar banco/campo P1 y redefinir nodo tipico y elevacion minima
+C3,Critico,Compliance,Falta matriz formal de cumplimiento de vuelo/CDS/licencias,Riesgo de bloqueo tardio de integracion/lanzamiento,Crear compliance matrix con owner metodo y evidencia
+H1,Alto,Documentacion,Demasiados documentos historicos siguen apareciendo como si estuvieran vivos,Errores de decision y contaminacion de contexto,Archivar/supersede con encabezados formales y export canonico
+H2,Alto,RF,La madurez del hardware RF esta muy por detras de EPS,Desbalance de cronograma y riesgo tecnico,Cerrar shortlist RF y pasar a esquema/KiCad real
+H3,Alto,Link budget,UHF 1k2 tiene margen bajo en peor caso,Operacion poco robusta a baja elevacion,Adoptar elevacion minima operativa y mejorar cadena ground
+H4,Alto,Costos,Costeo ROM aun sin datos trazables,No permite decisiones de procurement,Emitir BOM por subsistema con proveedor fecha y moneda
+M1,Medio,Requisitos,Trazabilidad de requisitos mezcla baseline con documentos draft,Debilita control de configuracion,Limpiar references a ADR/MVP canonicos
+M2,Medio,Ground SW,Dashboard de banco mantiene estado solo en memoria,Poca capacidad de post-mortem y replay,Agregar persistencia SQLite/CSV rotado
+M3,Medio,EPS Bench,Banco 1S puede leerse erradamente como arquitectura de vuelo,Riesgo de sesgo de diseño,Blindar etiquetas bench-only y roadmap 2S flight-like

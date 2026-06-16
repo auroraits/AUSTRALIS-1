@@ -1,0 +1,227 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "30000000-0000-0000-0000-000000000001")
+	(paper "A4")
+	(title_block
+		(title "02_MPPT_Charger")
+	)
+	(lib_symbols)
+	(text "MPPT (Maximum Power Point Tracking) con módulo COTS (Commercial Off-The-Shelf) de banco."
+		(exclude_from_sim no)
+		(at 20 15 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "1e9fa548-4172-4663-8ea3-36a8950d33ec")
+	)
+	(text "Interfaz funcional: entrada PV y salida a BMS (Battery Management System)."
+		(exclude_from_sim no)
+		(at 20 20 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "7ae9698a-15ee-4f5f-b6ff-05016867b25a")
+	)
+	(wire
+		(pts
+			(xy 120 56) (xy 170 56)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "07622ab2-e584-4daf-926e-5e96a058f0bd")
+	)
+	(wire
+		(pts
+			(xy 20 64) (xy 60 64)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "11cd0818-a5c6-4e53-ac5e-cea33f7d6b4d")
+	)
+	(wire
+		(pts
+			(xy 120 64) (xy 170 64)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "bea95a67-9ce3-4920-aca7-e4a629bd19e5")
+	)
+	(wire
+		(pts
+			(xy 20 56) (xy 60 56)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "f247973e-8c66-4eb5-9f25-37d4ea601dfd")
+	)
+	(hierarchical_label "BMS_N"
+		(shape output)
+		(at 170 64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "192630f8-969e-4a49-a332-1fd762a9084f")
+	)
+	(hierarchical_label "PV_IN_P"
+		(shape input)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "8831b9b6-4bb0-4080-bc2c-cbd25898901b")
+	)
+	(hierarchical_label "BMS_P"
+		(shape output)
+		(at 170 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "be2a0a1c-da54-4c13-b0e6-80ff74b33fae")
+	)
+	(hierarchical_label "PV_IN_N"
+		(shape input)
+		(at 20 64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ef26f7ac-9869-4cd5-a6cc-b492eac68005")
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 120 60 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "2c7aede9-49d7-4f2b-8f90-12fb42db5c5d")
+		(property "Reference" "J_MPPT_OUT?"
+			(at 120 54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "MPPT_OUT"
+			(at 120 66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 120 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 120 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 120 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000102"
+					(reference "J_MPPT_OUT?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 60 60 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a902e546-590a-4e69-8237-d0526f0c109d")
+		(property "Reference" "J_MPPT_IN?"
+			(at 60 54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "MPPT_IN"
+			(at 60 66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 60 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 60 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000102"
+					(reference "J_MPPT_IN?")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

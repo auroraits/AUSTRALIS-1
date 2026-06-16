@@ -1,0 +1,342 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "40000000-0000-0000-0000-000000000001")
+	(paper "A4")
+	(title_block
+		(title "03_Battery_BMS_2S")
+	)
+	(lib_symbols)
+	(text "Salida protegida del pack por BMS_P/BMS_N hacia bus VBAT."
+		(exclude_from_sim no)
+		(at 20 20 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "2ca755de-4016-43af-9727-1c965bd5c09f")
+	)
+	(text "BMS (Battery Management System) 2S de banco con pines funcionales B+, BM, B-."
+		(exclude_from_sim no)
+		(at 20 15 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "3c87ba6a-773b-4076-ad60-9b4285e65fd6")
+	)
+	(wire
+		(pts
+			(xy 20 64) (xy 180 64)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "0fd59da8-636f-48da-8a7b-8e6f4fe222a2")
+	)
+	(wire
+		(pts
+			(xy 20 56) (xy 180 56)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "396ea9fd-c3b3-46e1-b92a-8af55c2062eb")
+	)
+	(wire
+		(pts
+			(xy 65 72) (xy 180 72)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(uuid "c3a2649d-f1e3-4b35-8d6c-17732fb37bfd")
+	)
+	(global_label "B+"
+		(shape bidirectional)
+		(at 180 82 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "106ad869-2227-44fa-88a8-a59f0c71ef6a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "B-"
+		(shape bidirectional)
+		(at 180 94 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "97107e6c-5b71-4b2a-b8f0-917da8aea9e8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "BM"
+		(shape bidirectional)
+		(at 180 88 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "d5f492ae-e1a9-45bc-9b73-da67fa5b2790")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(hierarchical_label "BMS_P"
+		(shape input)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "219655a1-d5fe-4d00-8a59-939fa4f26c5e")
+	)
+	(hierarchical_label "BMS_N"
+		(shape input)
+		(at 20 64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "314f2d24-5747-4711-a451-b845bcb86f21")
+	)
+	(hierarchical_label "VBAT_P"
+		(shape output)
+		(at 180 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "606d020e-f9d1-4481-85a1-6b7bdb216bf2")
+	)
+	(hierarchical_label "CELL_MID"
+		(shape output)
+		(at 180 72 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ce6979de-0a3c-4ee6-b3b6-5df45291b21a")
+	)
+	(hierarchical_label "VBAT_N"
+		(shape output)
+		(at 180 64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "e9c7e2a3-83dc-4880-8d50-a7767142f8f0")
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 130 45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "939b1ded-e645-49e5-9848-57a27c9ad882")
+		(property "Reference" "J_CELL?"
+			(at 130 39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "CELL1"
+			(at 130 51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 130 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 130 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000103"
+					(reference "J_CELL?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02")
+		(at 130 80 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a2c634d1-00c3-4ebf-bfb7-ecdbdecc01e2")
+		(property "Reference" "J_CELL?"
+			(at 130 74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "CELL2"
+			(at 130 86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 130 80 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130 80 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 130 80 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000103"
+					(reference "J_CELL?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x05")
+		(at 65 60 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b75ea60b-dae5-40c4-9468-c7d14a3b36e5")
+		(property "Reference" "J_BMS?"
+			(at 65 53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "BMS_BLOCK"
+			(at 65 67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 65 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 65 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 65 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000103"
+					(reference "J_BMS?")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

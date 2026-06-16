@@ -1,0 +1,61 @@
+Subsystem,Stage,ItemClass,PreferredCandidate,AltCandidate,Manufacturer,MPN,Qty,Supplier,SupplierRegion,UnitCost,Currency,QuoteDate,LeadTime,Risk,Status,Notes
+Structure/Thermal,Flight-Like,Frame 1.5U,TBD — estructura CubeSat 1.5U aluminio,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Estructura principal 100x100x150mm. Requiere cotización.
+Structure/Thermal,Flight-Like,Rails + screws + fasteners,TBD,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,TBD
+Structure/Thermal,Bench,Perfboard / breadboard,55x34 mm perfboard,TBD,Genérico,TBD,2,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Partial,En uso en banco EPS. Ver BOM_EPS_Bench1_1S.md
+EPS,Bench,Solar charger COTS 1S,CN3065 module,TBD,TBD,CN3065,1,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Cargador lineal (no MPPT). Solo banco 1S. Ver EPS_Bench1_1S.md
+EPS,Bench,BMS 1S COTS,BMS 1S 5A module,TBD,TBD,TBD,1,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Módulo COTS. Solo banco.
+EPS,Bench,Boost converter COTS,MT3608 module,TBD,TBD,MT3608,1,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Solo banco 1S.
+EPS,Bench,Buck converter COTS,Mini-360 MP2307,TBD,TBD,MP2307,1,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Solo banco 1S.
+EPS,Bench,Current/voltage sensor,INA219 CJMCU module,TBD,TBD,INA219,2,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Partial,2 unidades (solar + load). Ver EPS_Bench1_1S.md
+EPS,Bench,MCU EPS,Arduino Nano (ATmega328P),TBD,Arduino / Compatible,ATmega328P,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Solo banco. Ver EPS_Bench1_1S.md
+EPS,Bench,Battery cell 1S,18650 Li-ion 3.7V,TBD,TBD,TBD,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Open,Celda comercial para banco. Marca/MPN TBD.
+EPS,Bench,Solar panel,Panel solar monocristalino 1.2W 5.5V 98x98mm,TBD,TBD,TBD,2,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Partial,2 unidades (strings A+B). Ver EPS_Bench1_1S.md
+EPS,Bench,System header control/sense,JP1 2x12 header,TBD,Generico,TBD,1,Local AR,Argentina,TBD,USD,TBD,TBD,Low,Open,Header bench-only de control/sense/telemetria. La potencia principal IA no pasa por JP1.
+EPS,Bench,AI power input connector,J_AI_PWR 2-pin connector,TBD,Generico,TBD,1,Local AR,Argentina,TBD,USD,TBD,TBD,Low,Open,Entrada principal de `5V_AI_EXT` para Gate IA-2. Bench-only.
+EPS,Bench,AI external 5V harness,Harness 5V + GND hacia carrier board COTS,TBD,Generico,TBD,1,Local AR,Argentina,TBD,USD,TBD,TBD,Low,Open,Harness bench-only para `5V_AI_SW` y retorno. No extrapolar a vuelo.
+EPS,Bench,AI rail protection,PTC / fuse `F_AI`,TBD,TBD,TBD,1,Local AR,Argentina,TBD,USD,TBD,TBD,Low,Open,Proteccion bench-only de la rama IA.
+EPS,Bench,AI high-current switch / eFuse,Load switch / eFuse `SW_AI`,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,MPN final TBD. No congelar `TPS22918` mientras la corriente del CM5 siga abierta.
+EPS,Bench,AI current sense option,INA219 extra / metrologia externa de banco,Metrologia externa preferida si el shunt afecta el boot,TBD,TBD,1,Local AR / Lab,TBD,TBD,USD,TBD,TBD,Medium,Open,Opcion bench-only para `T20`; el sensado principal del CM5 puede requerir metrologia externa.
+AI Payload experimental,Bench,CM5 module bench candidate,Raspberry Pi CM5 8 GB,TBD,Raspberry Pi,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Bench candidate para Gate IA-2. SKU exacto TBD.
+AI Payload experimental,Bench,CM5 carrier board COTS,Carrier board COTS externa para CM5,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Integracion Gate IA-2 en banco. Bench-only.
+AI Payload experimental,Bench,UART level adaptation / interface,Level shifter / UART bench interface,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,Adaptacion segun niveles reales de la carrier board. Bench-only.
+AI Payload experimental,Bench,CM5 thermal telemetry,Basic thermal sensor / probe for CM5,TBD,TBD,TBD,1,Local AR / Lab,TBD,TBD,USD,TBD,TBD,Low,Open,Telemetria termica basica para `T21`. Bench-only.
+AI Payload experimental,Flight-Like,CM5 module flight-like candidate,Raspberry Pi CM5 4 GB + eMMC,TBD,Raspberry Pi,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Candidato inicial flight-like. No calificado.
+EPS,Flight-Like,MPPT charge controller IC,BQ24650 (MPPT buck),TBD,Texas Instruments,BQ24650,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,Equivalente de vuelo al CN3065. Para PCB 2S flight-like.
+EPS,Flight-Like,BMS 2S IC,S-8252AAH-M6T1U,BQ29209,Seiko Instruments,S-8252AAH-M6T1U,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,Protección celda 2S. Para PCB flight-like.
+EPS,Flight-Like,DC/DC converter IC,TPS630701 (buck-boost),TBD,Texas Instruments,TPS630701,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,Equivalente de vuelo al MT3608. Para PCB flight-like.
+EPS,Flight-Like,Buck converter IC,TPS62160,TBD,Texas Instruments,TPS62160,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,Ultra-low Iq. Para PCB flight-like.
+EPS,Flight-Like,MCU EPS,MSP430FR2033,STM32L011,Texas Instruments,MSP430FR2033,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,Ultra-bajo consumo para flight-like.
+EPS,Flight-Like,Triple current sensor IC,INA3221,TBD,Texas Instruments,INA3221,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Low,Open,Equivalente de vuelo a 2x INA219.
+EPS,Flight-Like,Load switches,TPS22918,TBD,Texas Instruments,TPS22918,4,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Low,Open,Reemplazo de AO3401/2N7002 para flight-like.
+EPS,Flight-Like,Battery cells 2S,18650 Li-ion x2 series 3.0Ah ref. (2S1P ~22Wh),TBD,TBD,TBD,2,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Referencia baseline 2026-03-14: 2S1P con 18650 3.0Ah (~22Wh nominal). 2S2P (~44Wh) queda como ruta de mitigación TBD tras Gate IA-1.
+OBC + Storage,Flight-Like,MCU OBC,STM32L4xx,TBD,STMicroelectronics,STM32L4xx,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,STM32L4 clase. MPN exacto TBD según pinout/package.
+OBC + Storage,Flight-Like,Watchdog HW externo,TBD,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,TBD
+OBC + Storage,Flight-Like,NOR Flash (critical logs),TBD,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,Para logs críticos. Capacidad TBD.
+OBC + Storage,Flight-Like,microSD,Standard microSD + holder,TBD,TBD,TBD,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Open,Para bulk storage. Holder + tarjeta.
+OBC + Storage,Bench,Arduino / STM32 dev board (bench OBC),Arduino Nano / Nucleo,TBD,Arduino / ST,TBD,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Solo banco de pruebas de software.
+COMMS UHF TTC,Flight-Like,Radio SoC TTC,TI CC1110Fxx (base OpenLST),Si4463 / AX5043 / CC1101,Texas Instruments,CC1110F32,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,High,Open,CC1110 es base OpenLST. Hardware final TBD. Requiere ADR de adopción.
+COMMS UHF TTC,Flight-Like,PA UHF,TBD — PA discreto 435MHz (NXP AFIC901N / SKY / SGM33685C),TBD,TBD,TBD,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,High,Open,RFFM6403 (OpenLST original) es EOL. PA discreto necesario. Selección TBD.
+COMMS UHF TTC,Flight-Like,SAW filter 435MHz,TBD — SAW ~435-438 MHz (compatible STA1120A package),TBD,Sawtron/TBD,TBD,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,High,Open,SAW centrado en 435-438 MHz. TBD.
+COMMS UHF TTC,Flight-Like,TCXO 27MHz,TCXO ~27 MHz,TBD,TBD,TBD,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Medium,Open,Para estabilidad vs Doppler. TBD.
+COMMS UHF TTC,Flight-Like,Antena UHF deployable,Antena deployable 1/4 onda 435 MHz,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Mecanismo de despliegue TBD. Compatible con 1.5U.
+LoRa RX orbital,Flight-Like,LoRa concentrator / RX,SX1302-based module / LoRa concentrator,SX1276 RX simple,Semtech/TBD,SX1302,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,High,Open,Exploración en curso. Multi-canal/multi-SF preferido. Selección y mounting TBD.
+LoRa RX orbital,Flight-Like,Antena LoRa orbital,Dipolo/patch impreso 915 MHz,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,TBD
+GNSS,Flight-Like,Módulo GNSS,TBD — módulo GNSS UART,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Módulo GNSS + antena patch para sincronización/telemetría. TBD.
+Science Pack,Flight-Like,UV sensor,TBD — sensor UV I2C,TBD,TBD,TBD,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Low,Open,Sensor UV I2C para Science Board.
+Science Pack,Flight-Like,ALS/visible sensor,TBD — sensor ALS I2C,TBD,TBD,TBD,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Low,Open,Sensor ALS visible I2C.
+Science Pack,Flight-Like,Magnetómetro 3 ejes,TBD — magnetómetro I2C,TBD,TBD,TBD,1,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Low,Open,Magnetómetro 3 ejes I2C.
+Science Pack,Flight-Like,Temperatura multipunto,TBD — sensores de temperatura I2C,TBD,TBD,TBD,4,Mouser/DigiKey,Internacional,TBD,USD,TBD,TBD,Low,Open,Sensores de temperatura I2C (múltiples puntos). Qty TBD.
+Science Pack,Bench,IMU (banco 433 MHz),GY-521 MPU6050,TBD,InvenSense,MPU6050,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Solo banco 433 MHz telemetría. Ver docs/TELEMETRY_433_README.md.
+Ground Segment,EGSE,Antena Yagi UHF,Yagi o Cross-Yagi UHF 435 MHz,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,Estación terrena Buenos Aires. TBD.
+Ground Segment,EGSE,LNA UHF,LNA de mástil 435 MHz bajo ruido,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,TBD
+Ground Segment,EGSE,SDR / radio receptor,SDR tipo RTL-SDR o equivalente + software,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,Para demodulación UHF en tierra. TBD.
+Ground Segment,EGSE,PC estación terrena,PC con .NET 8 para dashboard,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Partial,Dashboard .NET 8 + Blazor implementado. PC existente.
+Ground Segment,Bench,Nodo LoRa de prueba (clase típica),Módulo tipo Heltec ESP32+SX1262 / RFM95W,TBD,Heltec / HopeRF / TBD,TBD,2,Local AR / MercadoLibre,Argentina,ROM,ARS,TBD,TBD,Low,Open,Nodo de clase típica para pruebas de uplink P1. MPN exacto TBD.
+Test/Tools,EGSE,Fuente de laboratorio,Fuente DC programable 0-30V / 3A,TBD,TBD,TBD,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Para banco EPS. Existente o a adquirir.
+Test/Tools,EGSE,Multímetro,Multímetro digital con medición de corriente,TBD,TBD,TBD,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Partial,Para pruebas T1-T10 EPS.
+Test/Tools,EGSE,Analizador de espectro,Analizador de espectro UHF / 915 MHz,TBD,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Medium,Open,Para verificación de emisiones espurias TX UHF. TBD adquirir o acceder a uno.
+Test/Tools,EGSE,Osciloscopio,Osciloscopio digital (mínimo 100 MHz),TBD,TBD,TBD,1,Local AR,Argentina,ROM,ARS,TBD,TBD,Low,Open,TBD
+Structure/Thermal,Flight-Like,Radiator coating,AZ-93 white paint (kit),Al anodizado blanco,AZ Technology,AZ-93,1,TBD (importar USA o local),TBD,TBD,USD,TBD,TBD,Medium,Open,Recubrimiento radiador cara −Y. α≤0.20 ε≥0.88. Verificar outgassing TML≤1%/CVCM≤0.1%. ADR-20260320-thermal-design-radiator-cm5-coupling.
+Structure/Thermal,Flight-Like,Thermal pad CM5,Fujipoly XR-Um 1mm o equiv.,3M 5590H,TBD,TBD,1,TBD,TBD,TBD,USD,TBD,TBD,Low,Open,Pad térmico CM5 → pared −Y. k≈17 W/mK. G≈1.5 W/K área 30×22mm. ADR-20260320-thermal-design-radiator-cm5-coupling.
+EPS,Flight-Like,Solar cell IBC,SunPower/Maxeon IBC half-cut ~98×74mm,AnySolar IXOLAR SM261K10TF,TBD,TBD,7,TBD,TBD,TBD,USD,TBD,TBD,High,Open,7 celdas body-mounted (3 caras rect×2 half-cut + 1 cara cuad×1 celda). η~24%. Familia TBD. ADR-20260320-orbit-attitude-solar-layout-baseline.

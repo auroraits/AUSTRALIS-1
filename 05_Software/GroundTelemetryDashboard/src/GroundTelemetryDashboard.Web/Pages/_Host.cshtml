@@ -1,0 +1,23 @@
+@page "/"
+@namespace GroundTelemetryDashboard.Web.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ground Telemetry Dashboard</title>
+    <base href="~/" />
+    <link href="css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <component type="typeof(App)" render-mode="Server" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

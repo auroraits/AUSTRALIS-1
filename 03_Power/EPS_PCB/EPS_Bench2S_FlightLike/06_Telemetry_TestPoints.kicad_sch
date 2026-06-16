@@ -1,0 +1,512 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "70000000-0000-0000-0000-000000000001")
+	(paper "A4")
+	(title_block
+		(title "06_Telemetry_TestPoints")
+	)
+	(lib_symbols)
+	(text "Breakouts INA219 con SDA, SCL, VIN+, VIN-."
+		(exclude_from_sim no)
+		(at 20 15 0)
+		(effects
+			(font
+				(size 1.2 1.2)
+			)
+		)
+		(uuid "1715446b-67f5-466e-826f-c94246f55d2e")
+	)
+	(global_label "TP_CELL2"
+		(shape bidirectional)
+		(at 180 75 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "09ede65e-be43-4d27-a33c-76876b9d27b2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_VBAT_P"
+		(shape bidirectional)
+		(at 180 45 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "27cae108-f948-474f-a954-fa58fb84a454")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_VBAT_N"
+		(shape bidirectional)
+		(at 180 50 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "2a06947a-e313-4e1d-ab18-11282aad883e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 50 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "VIN+"
+		(shape bidirectional)
+		(at 70 46 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "2b31696e-6735-4eb6-9fe9-161809c32213")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "SDA"
+		(shape bidirectional)
+		(at 70 38 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "39b5a0fb-4d43-4a87-ab4a-08c7c4b5f034")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_3V3"
+		(shape bidirectional)
+		(at 180 60 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "3a873c99-a9d3-4b37-be76-0af141ea2267")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "VIN-"
+		(shape bidirectional)
+		(at 70 50 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "9aff8670-67ff-49bc-bdab-d08911db96bd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 50 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_CELL1"
+		(shape bidirectional)
+		(at 180 70 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "b97b5639-57e9-413f-8274-92a5115882b7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 70 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_PV_BUS_P"
+		(shape bidirectional)
+		(at 180 35 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "bd2784ad-da53-4afc-a80e-25dbc22b93b6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_CELL_MID"
+		(shape bidirectional)
+		(at 180 65 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "c0e91148-6d25-428a-bac5-9354dac1e97e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_5V"
+		(shape bidirectional)
+		(at 180 55 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "d048046e-ef4d-4e21-b52d-82d6632de018")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "TP_PV_BUS_N"
+		(shape bidirectional)
+		(at 180 40 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "d15ddcae-a1b4-4d21-8af9-613b63c918b4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180 40 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "SCL"
+		(shape bidirectional)
+		(at 70 42 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+		)
+		(uuid "e846a9d0-5e08-4efc-b6e9-9272d6d44332")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(hierarchical_label "CELL_MID"
+		(shape input)
+		(at 20 74 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "03be6396-2e11-4072-8e33-6fe8ca18fb14")
+	)
+	(hierarchical_label "VBAT_N"
+		(shape input)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "2ae9b054-1fd4-4b74-a807-75c60a5200d1")
+	)
+	(hierarchical_label "PV_IN_N"
+		(shape input)
+		(at 20 44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "71479fc6-60ca-45cf-a508-4e03c9367a72")
+	)
+	(hierarchical_label "PV_IN_P"
+		(shape input)
+		(at 20 38 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "73a8968c-91f6-46a2-82f5-d8417d4a8649")
+	)
+	(hierarchical_label "+5V"
+		(shape input)
+		(at 20 62 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ca37297a-04fa-4d35-aa6e-341f9aa8e0b3")
+	)
+	(hierarchical_label "+3V3"
+		(shape input)
+		(at 20 68 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "f0421ae5-244a-481b-86a5-df27bb06c829")
+	)
+	(hierarchical_label "VBAT_P"
+		(shape input)
+		(at 20 50 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "f6e8db9d-05c5-4000-affb-dad126bc82fb")
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x04")
+		(at 45 45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "30bec2c2-2673-48de-8849-7209f38e6228")
+		(property "Reference" "J_INA219_SOLAR?"
+			(at 45 38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "INA219_SDA_SCL_VINP_VINN"
+			(at 45 52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 45 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 45 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 45 45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000106"
+					(reference "J_INA219_SOLAR?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x04")
+		(at 45 78 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "41748b0d-7738-4170-aeff-159cc387120a")
+		(property "Reference" "J_INA219_5V?"
+			(at 45 71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "INA219_SDA_SCL_VINP_VINN"
+			(at 45 85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 45 78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 45 78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 45 78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000106"
+					(reference "J_INA219_5V?")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x10")
+		(at 130 60 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a7b67263-6a11-4113-9cc8-bfa9e1e385e5")
+		(property "Reference" "J_TP?"
+			(at 130 52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TESTPOINTS"
+			(at 130 68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 130 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 130 60 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "EPS_Bench2S_FlightLike"
+				(path "/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000010/10000000-0000-0000-0000-000000000106"
+					(reference "J_TP?")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

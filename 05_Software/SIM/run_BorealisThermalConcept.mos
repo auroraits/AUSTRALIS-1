@@ -1,0 +1,13 @@
+loadModel(Modelica);
+loadFile("BorealisThermalConcept.mo");
+getErrorString();
+
+simulate(BorealisThermalConcept.LEO500kmNadir_1p5U,
+  startTime=0,
+  stopTime=18000,
+  numberOfIntervals=1800,
+  method="dassl",
+  tolerance=1e-6,
+  outputFormat="mat");
+
+getErrorString();
