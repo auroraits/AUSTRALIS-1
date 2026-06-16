@@ -2,6 +2,12 @@
 
 **Revisión:** 2026-06-15
 
+**Estado público:** mirror limpio publicado (`public-v0.1`)
+
+Sitio oficial: https://australis.aurora.ar/
+
+Release público inicial: https://github.com/auroraits/AUSTRALIS-1/releases/tag/public-v0.1
+
 ## Publicación y licencia
 
 Este repositorio es una publicación técnica **source-available no comercial**.
@@ -25,9 +31,11 @@ Ver:
 - `CONTRIBUTING.md`
 
 Nota importante: este modelo permite colaboración pública no comercial, pero no
-es "open source" OSI porque restringe uso comercial. Para publicar, no cambiar
-la visibilidad del repo privado tal cual. La decisión vigente es publicar por
-**mirror/export limpio**, sin historial privado.
+es "open source" OSI porque restringe uso comercial.
+
+Este repositorio público fue publicado como **mirror/export limpio**, con
+historial público nuevo, sin arrastrar el historial privado de trabajo. El repo
+privado canónico no debe hacerse público directamente.
 
 ## Objetivo (MVP)
 AUSTRALIS-1 busca poner un payload de inteligencia artificial en órbita LEO, operarlo como asistente de vuelo autónomo bajo supervisión determinística y descargar a tierra datos de comportamiento útiles para entrenamiento futuro.
@@ -96,8 +104,10 @@ Radio clase SX1262/SX1276, MCU clase ESP32-S3, +20–21 dBm, antena 0–2 dBi, s
 Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**.
 OpenLST: candidato en análisis, no baseline final. Hardware TTC UHF final: **TBD**.
 
-## Estado actual (2026-03-16)
+## Estado público actual (2026-06-15)
 
+- El proyecto está publicado como mirror limpio `AUSTRALIS-1`, con licencia no comercial PolyForm NC + CC BY-NC-SA.
+- La web oficial `https://australis.aurora.ar/` enlaza este repositorio público.
 - El proyecto incluye un payload IA experimental con **IBM Granite 350M como candidato de vuelo / flight candidate** y línea compacta de banco (sesión 2026-03-16). Licencia Apache 2.0. No declarado flight-ready.
 - Granite 3.1 2B queda como modelo de experimentación de banco, comparativas y ground experimentation; no es candidato primario de vuelo bajo el presupuesto actual.
 - Benchmark corrected: pass_rate BASE 14 % → FINE_TUNED 57 %; avg_score_ratio 0.32 → 0.83. Holdout funcional completado.
@@ -107,6 +117,16 @@ OpenLST: candidato en análisis, no baseline final. Hardware TTC UHF final: **TB
 - Payload IA es el objetivo científico primario; IoT store-and-forward es objetivo secundario.
 - `EPS_STATE` en cuatro niveles: `CRIT | LOW | NOMINAL | HIGH`.
 - `AI_BEHAVIOR_LOG` es la mayor prioridad best-effort del Downlink Manager.
+
+## Sitio web y sincronización
+
+La web pública resume el estado del proyecto y debe mantenerse alineada con este
+repositorio. El flujo operativo vigente es:
+
+- el repositorio público es fuente de verdad técnica para contenido público;
+- `cubesat-pm` valida cambios técnicos/narrativos;
+- `web-developer` actualiza WordPress cuando corresponde;
+- un job diario revisa repo, documentación y web, y reporta al grupo CubeSat.
 
 ## Documentos clave por subsistema
 
