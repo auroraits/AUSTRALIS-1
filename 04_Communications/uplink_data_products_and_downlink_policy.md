@@ -49,7 +49,20 @@ Sin definir el encoding todavía, el set mínimo conceptual:
   - payload + metadata por paquete (timestamp, RSSI/SNR/CFO, CRC status).
 - Se requiere política de retención (rolling buffer) si el storage es limitado.
 
-## 5) Prioridad de colas de downlink (actualizado 2026-03-14)
+## 5) Visibilidad de productos de downlink (actualizado 2026-07-04)
+
+Decision vigente: `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
+
+La politica de datos distingue dos productos UHF:
+
+- `PUBLIC_BEACON`: producto publico, corto, derivado de `HOUSEKEEPING`, compatible con SatNOGS y decodificable por terceros. No contiene payload, comandos, prompts, datos crudos ni informacion operacional sensible.
+- `CONTROLLED_DOWNLINK`: producto privado/controlado para estacion/es propia/s o autorizada/s. Incluye payload y operacion completa: `AI_BEHAVIOR_LOG` detallado, performance IA, `SCIENCE`, `LORA_LOG`, `OPTIONAL_PAYLOAD` / `PHOTO_DEMO`, catalogos, dumps y detalle on-demand.
+
+El uplink UHF de comandos, prompts versionados, seleccion de dumps y comandos de seguridad es `PRIVATE_UPLINK` y no se opera mediante SatNOGS.
+
+Nota: "privado/controlado" significa que no es interfaz publica SatNOGS. No debe interpretarse como confidencialidad criptografica cerrada hasta definir mecanismo y confirmar compatibilidad regulatoria.
+
+## 6) Prioridad de colas de downlink (actualizado 2026-07-04)
 
 Con la redefinición de misión AUSTRALIS-1, la prioridad de colas del Downlink Manager queda:
 
@@ -64,7 +77,9 @@ Con la redefinición de misión AUSTRALIS-1, la prioridad de colas del Downlink 
 
 **Regla permanente:** ninguna cola de prioridad menor puede bloquear o desplazar `HOUSEKEEPING` ni `COMMAND_ACK`.
 
-## 6) Uplink para payload IA (Prompt uplink)
+`PUBLIC_BEACON` no agrega una cola cientifica nueva: es una vista publica/minima derivada de `HOUSEKEEPING` y planificada para recepcion comunitaria. Los productos de payload siguen en las colas privadas/controladas existentes.
+
+## 7) Uplink para payload IA (Prompt uplink)
 
 Con la decisión de incorporar el payload IA como objetivo científico primario, el sistema debe soportar:
 
@@ -89,10 +104,12 @@ Los logs del Behavior Logger del payload IA se descargan por la cola `AI_BEHAVIO
 - Capacidad de la cola y cuota por pasada: TBD (depende del duty-cycle del payload IA).
 - Formato: estructura de evento mínimo con campos: timestamp, model_version, prompt_version, decision_id, recommended_action, confidence, supervisor_result, MISSION_MODE, EPS_STATE, state_snapshot_hash.
 
-## 7) Referencias
+## 8) Referencias
 - `05_Software/software_framework_mvp22.md` (DownlinkManager/FaultManager)
 - `05_Software/ai_payload_architecture.md` (arquitectura payload IA)
 - `04_Communications/uplink_lora_slotted_protocol.md`
+- `04_Communications/satnogs_public_beacon_architecture.md`
 - `01_Mission/mission_definition.md`
+- `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`
 - `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`
 - `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`

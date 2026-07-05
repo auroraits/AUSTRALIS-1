@@ -92,6 +92,8 @@ Objetivos secundarios:
 - Nodo típico: clase de nodo (radio clase SX1262/SX1276, MCU clase ESP32-S3, +20–21 dBm, sin PA/LNA/TCXO externo). No se fija SKU de mercado.
 - Downlink/TTC: **UHF 435 MHz**, baseline **FSK 1200 bps**.
 - Potencia objetivo UHF TX RF: **500 mW** (preliminar; requiere medición hardware final).
+- Modo publico: `PUBLIC_BEACON` UHF compatible con SatNOGS, documentado y decodificable por terceros, limitado a telemetria minima no sensible.
+- Downlink/uplink controlado: payload (`PHOTO_DEMO`, performance IA, `AI_BEHAVIOR_LOG` detallado, `SCIENCE`, `LORA_LOG`) y comandos TTC operan por estacion/es propia/s o autorizada/s, no por SatNOGS.
 - Corrección de papel a 10°: **FSPL ~153 dB**, potencia recibida **~−119 dBm**, margen teórico **+1 dB**.
 - Política de datos: **resumen por pasada por defecto + detalle on-demand**.
 - Hardware TTC UHF final: **TBD**. Hardware RF orbital (PCB) no existe todavía; ver riesgo R16 en `07_Risk/top_risks.md`.
@@ -206,10 +208,12 @@ Fuentes: `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-
 ## 5) Estado TTC UHF y OpenLST
 
 - Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**.
+- Arquitectura UHF vigente: un TRX TTC debe permitir `PUBLIC_BEACON` SatNOGS-friendly, `CONTROLLED_DOWNLINK` para payload/operacion y `PRIVATE_UPLINK` para comandos.
 - OpenLST: candidato técnico / base de desarrollo. Análisis técnico activo en `04_Communications/RF_ANALISYS_OPENLST.md`.
 - **No adoptar OpenLST "tal cual"**: componente RFFM6403 (FEM) es EOL.
 - Hardware final TTC UHF: **TBD** (requiere ADR de adopción).
 - Documentar eventual adopción mediante ADR nueva antes de considerarlo baseline.
+- Decision SatNOGS/publico-privado: `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
 
 ---
 
