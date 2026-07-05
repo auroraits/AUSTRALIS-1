@@ -50,6 +50,7 @@ Objetivos secundarios vigentes:
 - **Downlink principal:** UHF 435 MHz con tasa robusta (baseline 1k2).
 - **Beacon publico:** UHF con producto `PUBLIC_BEACON` compatible con SatNOGS, decodificable por terceros y limitado a telemetria minima no sensible.
 - **Payload/uplink privado-controlado:** `PHOTO_DEMO`, performance IA, ciencia, `AI_BEHAVIOR_LOG` detallado, dumps y comandos operan solo por estacion/es propia/s o autorizada/s.
+- **Estacion terrena:** dual-use, con SatNOGS receive-only y AUSTRALIS privado/controlado en stack separado, sin acceso SatNOGS al transmisor/PTT.
 - **Arquitectura de energía:** EPS con rails medidos, power-gating y lógica de energía por modos.
 - **Topología de batería de vuelo:** 2S (dos celdas Li-ion en serie, 7.4 V nominal) con referencia actual **2S1P, 18650 de 3.0 Ah (~22 Wh nominal)**; `2S2P (~44 Wh)` queda como ruta de mitigación TBD tras Gate IA-2.
 - **Modulación downlink UHF:** FSK 1 200 bps.
@@ -171,8 +172,10 @@ Arquitectura modular por placas, con separación funcional y de ruido:
    - UART + antena patch, uso no crítico para continuidad de misión.
 
 ### 5.3 Segmento terreno
+- Estacion UHF direccional dual-use SatNOGS/AUSTRALIS.
 - Antena UHF direccional (Yagi/Cross-Yagi), LNA, receptor SDR/radio, decoder y backend.
-- Seguimiento manual asistido o rotor az/el.
+- Seguimiento por rotor az/el para fase SatNOGS y operaciones AUSTRALIS.
+- Switch T/R digital fail-safe y transmisor aislado del modo SatNOGS.
 - Pipeline de ingestión y persistencia para auditoría de paquetes.
 
 ---
@@ -218,6 +221,8 @@ Referencias:
 - Perfil privado/controlado `PRIVATE_UPLINK`: comandos TTC, prompts versionados, seleccion de dumps, limites de cuota y comandos de seguridad desde estacion/es propia/s o autorizada/s.
 
 SatNOGS se adopta como red receive-only para el beacon publico; no se usa para uplink/control.
+
+La estacion terrena propia puede compartir antena/rotor con SatNOGS, pero el stack SatNOGS queda estrictamente receive-only y sin acceso al transmisor/PTT. Diseno de referencia: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
 
 ### 7.3 Tipos de tramas minimas
 - **BEACON**
@@ -491,6 +496,7 @@ Sincronizar el baseline `MVP v2.2` con los ultimos avances documentales de subsi
 2. COMMS:
    - `04_Communications/RF_ANALISYS_OPENLST.md` (2026-03-03) incorpora evaluacion de OpenLST como candidato TTC UHF.
    - Esta evaluacion no reemplaza la decision vigente de UHF 435 FSK 1k2 ni cierra aun seleccion de modulo.
+   - `04_Communications/ground_station_dual_use_satnogs_australis.md` (2026-07-05) define la estacion terrena dual-use SatNOGS/AUSTRALIS en estado Draft.
 3. Software/OPS:
    - Se mantiene el marco P1 slotted, scheduler de pasadas y mecanismo de actualizacion TLE como parte del plan de validacion.
 4. Riesgos y costos:
@@ -503,7 +509,8 @@ Documentos en estado `Draft`, `Propuesta` o `Preliminar` aportan direccion tecni
 1. Selección final de transceptor/módulo UHF y medición real de eficiencia PA.
 2. Cierre de factibilidad uplink LoRa con nodos típicos bajo CFO/Doppler.
 3. Completar cuantificación del modelo de costos ROM.
-4. `PHOTO_DEMO` resuelto: **Accepted** como opcional no crítico (ver ADR-20260313).
+4. Relevamiento y calculo estructural de estacion terrena dual-use: torre, anclajes, linea de transmision, T/R switch e interlocks.
+5. `PHOTO_DEMO` resuelto: **Accepted** como opcional no crítico (ver ADR-20260313).
 
 ### 18.6 Sincronización documental (2026-03-13)
 

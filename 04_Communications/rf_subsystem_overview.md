@@ -101,6 +101,17 @@ SatNOGS se adopta como red receive-only complementaria para el beacon publico. N
 
 Nota de seguridad/regulacion: "privado/controlado" no equivale por si solo a confidencialidad RF. Cualquier emision UHF puede ser capturada; cifrado/autenticacion y contenido permitido quedan sujetos al encuadre regulatorio final.
 
+### 5.2 Estacion terrena dual-use SatNOGS / AUSTRALIS
+
+La estacion terrena propia debe poder operar en dos dominios separados:
+
+- SatNOGS receive-only para `PUBLIC_BEACON` y observaciones publicas.
+- AUSTRALIS propio para `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`.
+
+La arquitectura de referencia usa una estacion UHF direccional con rotor AZ/EL, antena 435-438 MHz compartida y switch T/R digital fail-safe. SatNOGS no debe tener acceso al transmisor, PTT, credenciales de comandos ni camino de uplink.
+
+Diseno base: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
+
 ## 6) Selección de módulo UHF (TBD)
 
 Candidatos documentados (no baseline final):
@@ -145,6 +156,7 @@ Candidatos documentados (no baseline final):
 ## 11) Referencias cruzadas
 - `04_Communications/link_budget_uhf_preliminary.md`
 - `04_Communications/satnogs_public_beacon_architecture.md`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
 - `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`
 - `08_Decisions/ADR-20260212-telemetry-bench-433mhz.md`
 - `08_Decisions/ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`

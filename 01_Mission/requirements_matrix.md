@@ -36,6 +36,7 @@ Convención:
 | MIS-REQ-18 | El sistema shall recibir, aplicar y utilizar en inferencia al menos 1 prompt versionado subido por uplink. | Validación de reconfiguración en órbita | D | COMMS/FSW | `ADR-20260314-mission-redef-ai-primary.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
 | MIS-REQ-19 | La arquitectura UHF shall soportar un `PUBLIC_BEACON` compatible con SatNOGS, documentado y decodificable por terceros, limitado a telemetria minima no sensible. | Recepcion distribuida publica sin exponer payload/operacion | T/D | COMMS/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md` |
 | MIS-REQ-20 | El downlink de payload/operacion y el uplink de comandos shall operar como perfiles privados/controlados (`CONTROLLED_DOWNLINK`, `PRIVATE_UPLINK`) mediante estacion/es propia/s o autorizada/s, no mediante SatNOGS. | Seguridad operacional, control de mision y separacion publico/privado | T/D | COMMS/FSW/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
+| MIS-REQ-21 | La estacion terrena propia shall separar fisica/logicamente el modo SatNOGS receive-only del modo AUSTRALIS privado/controlado, impidiendo que SatNOGS tenga acceso al transmisor, PTT, credenciales de comando o camino de uplink. | Evitar TX accidental y preservar seguridad operacional | T/D/I | Ground/COMMS | `04_Communications/ground_station_dual_use_satnogs_australis.md`, `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md` |
 
 ## 2) Requisitos P1 — Uplink con nodos típicos (success-first)
 
@@ -104,6 +105,7 @@ Convención:
 - **BW final del uplink LoRa sigue TBD.** BW250 es el candidato preferente para robustez frente a CFO/Doppler; BW125 requiere evidencia de banco/campo con margen suficiente.
 - **Criterio provisional de downlink UHF:** la validación nominal del downlink UHF se establece provisionalmente para elevaciones ≥20°. Operación a <20° es experimental/oportunista, no criterio nominal de éxito del MVP. Ver `04_Communications/link_budget_uhf_preliminary.md` §6.2 y `ADR-20260313-uhf-downlink-operational-mask.md`.
 - **SatNOGS / visibilidad de datos:** SatNOGS se usa solo para `PUBLIC_BEACON` receive-only. Payload, ciencia, PHOTO_DEMO, logs IA detallados y uplink de comandos quedan en perfiles privados/controlados. Cifrado/autenticacion y restricciones de contenido quedan sujetos al cierre regulatorio final.
+- **Estacion dual-use:** la estacion propia puede compartir antena/rotor con SatNOGS, pero el modo SatNOGS queda estrictamente receive-only y sin acceso al transmisor. Ver `04_Communications/ground_station_dual_use_satnogs_australis.md`.
 - El target solar con payload IA activo queda **TBD** hasta medición real del CM5 y cierre del duty-cycle orbital.
 - `SOLAR_ONLY` se considera contingencia en evaluación; no requisito bloqueado de aceptación MVP hasta nueva ADR `Accepted`.
 - Requisitos marcados con "ICD integrador (TBD)" quedan como `Blocked by Integrator` en la compliance matrix hasta recibir documentación del integrador de lanzamiento.

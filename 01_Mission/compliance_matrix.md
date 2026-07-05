@@ -45,6 +45,7 @@ Estados permitidos:
 | CX-RF-04 | Shall existir evidencia de coordinación IARU para la banda amateur-sat antes de cerrar el bandplan. | ITU/IARU; `04_Communications/RF_ANALISYS_OPENLST.md` | Operaciones | D | Documentación IARU | Open | TBD. |
 | CX-RF-05 | La operación de la estación terrena shall cumplir el camino regulatorio ENACOM aplicable. | ENACOM; `04_Communications/RF_ANALISYS_OPENLST.md` §4.1 | Operaciones | D | Documentación ENACOM | Open | TBD. |
 | CX-RF-06 | El CubeSat shall NO transmitir RF dentro de un tiempo mínimo post-eyección (wait time). | CDS Rev 14.1 §3.3.2; ICD integrador | COMMS/FSW | T | Prueba de secuencia de boot + inhibición RF | Blocked by Integrator | Duración exacta depende del ICD. |
+| CX-RF-07 | La estacion terrena dual-use shall mantener SatNOGS en modo receive-only sin acceso al transmisor/PTT y shall verificar switch T/R digital fail-safe antes de uplink radiado. | `MIS-REQ-21`; `04_Communications/ground_station_dual_use_satnogs_australis.md` | Ground/COMMS | T+D+I | Prueba de interlocks, logs de T/R switch y revision de permisos SatNOGS | Open | Requiere hardware de estacion, secuenciador y procedimiento de uplink. |
 
 ---
 
