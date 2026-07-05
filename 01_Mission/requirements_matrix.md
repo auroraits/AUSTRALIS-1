@@ -34,6 +34,8 @@ Convención:
 | MIS-REQ-16 | El sistema shall completar al menos 5 ciclos de inferencia del payload IA en órbita (con el modelo baseline vigente según ADR más reciente) con logging completo descargado a tierra. | Criterio de éxito primario | D | FSW/Ground | `ADR-20260314-mission-redef-ai-primary.md`, `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md`, `00_MVP/MVP v2.2.md` |
 | MIS-REQ-17 | El sistema shall recolectar y descargar al menos 100 registros `AI_BEHAVIOR_LOG` con datos válidos. | Dataset científico primario | D | FSW/Ground | `ADR-20260314-mission-redef-ai-primary.md`, `05_Software/ai_payload_architecture.md` |
 | MIS-REQ-18 | El sistema shall recibir, aplicar y utilizar en inferencia al menos 1 prompt versionado subido por uplink. | Validación de reconfiguración en órbita | D | COMMS/FSW | `ADR-20260314-mission-redef-ai-primary.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
+| MIS-REQ-19 | La arquitectura UHF shall soportar un `PUBLIC_BEACON` compatible con SatNOGS, documentado y decodificable por terceros, limitado a telemetria minima no sensible. | Recepcion distribuida publica sin exponer payload/operacion | T/D | COMMS/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md` |
+| MIS-REQ-20 | El downlink de payload/operacion y el uplink de comandos shall operar como perfiles privados/controlados (`CONTROLLED_DOWNLINK`, `PRIVATE_UPLINK`) mediante estacion/es propia/s o autorizada/s, no mediante SatNOGS. | Seguridad operacional, control de mision y separacion publico/privado | T/D | COMMS/FSW/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
 
 ## 2) Requisitos P1 — Uplink con nodos típicos (success-first)
 
@@ -101,6 +103,7 @@ Convención:
 - Requisitos numéricos finos (elevación mínima, canales exactos, BW125 vs BW250) quedan como **TBD** hasta completar `docs/COMMS/uplink_lora_bench_testing_plan.md`.
 - **BW final del uplink LoRa sigue TBD.** BW250 es el candidato preferente para robustez frente a CFO/Doppler; BW125 requiere evidencia de banco/campo con margen suficiente.
 - **Criterio provisional de downlink UHF:** la validación nominal del downlink UHF se establece provisionalmente para elevaciones ≥20°. Operación a <20° es experimental/oportunista, no criterio nominal de éxito del MVP. Ver `04_Communications/link_budget_uhf_preliminary.md` §6.2 y `ADR-20260313-uhf-downlink-operational-mask.md`.
+- **SatNOGS / visibilidad de datos:** SatNOGS se usa solo para `PUBLIC_BEACON` receive-only. Payload, ciencia, PHOTO_DEMO, logs IA detallados y uplink de comandos quedan en perfiles privados/controlados. Cifrado/autenticacion y restricciones de contenido quedan sujetos al cierre regulatorio final.
 - El target solar con payload IA activo queda **TBD** hasta medición real del CM5 y cierre del duty-cycle orbital.
 - `SOLAR_ONLY` se considera contingencia en evaluación; no requisito bloqueado de aceptación MVP hasta nueva ADR `Accepted`.
 - Requisitos marcados con "ICD integrador (TBD)" quedan como `Blocked by Integrator` en la compliance matrix hasta recibir documentación del integrador de lanzamiento.

@@ -190,17 +190,20 @@ Pendientes (requieren hardware CM5 real — Gate IA-2):
 - Supply chain del PA y SAW confirmada (sin EOL crítico).
 - ADR de adopción TTC UHF en estado `Accepted`.
 - Baseline operativo UHF (bitrate, modulación, potencia) confirmado o actualizado.
+- `PUBLIC_BEACON` transmitido por hardware candidato, recibido por SDR/estación propia y decodificado con frame schema publico.
+- Separación verificada entre `PUBLIC_BEACON`, `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`; el beacon no incluye payload, comandos, prompts ni datos operativos sensibles.
+- Paquete preliminar SatNOGS DB preparado: frecuencia, modo, baudrate, servicio, estado, referencia publica y decoder/protocolo del beacon.
 - Validación de máscara operativa ≥20° con hardware real: link budget re-calculado con pérdidas medidas. Confirmación o revisión de `ADR-20260313-uhf-downlink-operational-mask.md`.
 
 **Estado actual:** ❌ Pendiente — hardware TTC UHF final TBD.
 
-**Evidencias requeridas:** Medición de espectro, link budget validado con hardware real, ADR de adopción.
+**Evidencias requeridas:** Medición de espectro, link budget validado con hardware real, ADR de adopción, captura/decoder del `PUBLIC_BEACON`, evidencia de separación publico/controlado.
 
 **Dependencias:** Selección de PA UHF, SAW, placa PCB flight-like.
 
 **Owner tentativo:** COMMS/EPS.
 
-**Riesgos relacionados:** Top-risks 6, 11, 12.
+**Riesgos relacionados:** Top-risks 6, 11, 12, 31.
 
 ---
 

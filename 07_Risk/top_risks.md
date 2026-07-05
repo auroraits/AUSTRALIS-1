@@ -6,7 +6,7 @@
 
 Top riesgos consolidados (técnicos y operativos). Este documento referencia matrices específicas por tema.
 
-## Top‑16 (con links)
+## Top risks base (con links)
 
 1) **Uplink LoRa no cierra con nodos típicos** (margen insuficiente, elevación baja)
 - Ver: `07_Risk/comms_lora_uplink_feasibility_risk.md`
@@ -61,6 +61,13 @@ Top riesgos consolidados (técnicos y operativos). Este documento referencia mat
 - El diseño de hardware RF orbital es esencialmente **placeholder**.
 - Toda la documentación COMMS describe el diseño objetivo; la implementación real no existe todavía.
 - Gate de cierre: Gate C.
+
+31) **SatNOGS / separacion publico-privado mal definida**
+- Riesgo: publicar demasiado en el beacon, asumir privacidad por framing cerrado, o introducir cifrado/contenido restringido sin cerrar compatibilidad regulatoria.
+- Impacto: exposicion de datos de payload/operacion, rechazo regulatorio o dependencia indebida de una red receive-only para funciones de control.
+- Mitigacion: `PUBLIC_BEACON` limitado a telemetria minima no sensible; `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK` solo por estacion/es propia/s o autorizada/s; revision regulatoria antes de fijar cifrado/confidencialidad.
+- Ver: `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md`.
+- Gate de cierre: Gate C para beacon/decoder; Gate E/F para operacion segura end-to-end.
 
 ---
 

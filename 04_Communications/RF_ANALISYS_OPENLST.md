@@ -17,6 +17,7 @@
 > - Hardware TTC UHF final: **TBD**.
 > - **No adoptar OpenLST "tal cual"**: componente RFFM6403 (FEM — Front-End Module) está EOL (End of Life).
 > - Para cerrar adopción: requiere ADR nueva en estado `Accepted` + resolución de supply chain del front-end.
+> - Decisión adicional 2026-07-04: la arquitectura UHF candidata debe permitir `PUBLIC_BEACON` compatible con SatNOGS y separar `CONTROLLED_DOWNLINK` / `PRIVATE_UPLINK` para payload y comandos. Ver `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
 >
 > **No se debe:** citar este análisis como si fuera decisión de baseline. No se debe fijar RFFM6403 como componente de diseño final.
 

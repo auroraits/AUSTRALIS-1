@@ -48,6 +48,8 @@ Objetivos secundarios vigentes:
 - **CONOPS:** store & forward por ventanas orbitales.
 - **Comunicaciones:** LoRa en órbita como **RX-only** (sin TX ISM desde satélite en MVP).
 - **Downlink principal:** UHF 435 MHz con tasa robusta (baseline 1k2).
+- **Beacon publico:** UHF con producto `PUBLIC_BEACON` compatible con SatNOGS, decodificable por terceros y limitado a telemetria minima no sensible.
+- **Payload/uplink privado-controlado:** `PHOTO_DEMO`, performance IA, ciencia, `AI_BEHAVIOR_LOG` detallado, dumps y comandos operan solo por estacion/es propia/s o autorizada/s.
 - **Arquitectura de energía:** EPS con rails medidos, power-gating y lógica de energía por modos.
 - **Topología de batería de vuelo:** 2S (dos celdas Li-ion en serie, 7.4 V nominal) con referencia actual **2S1P, 18650 de 3.0 Ah (~22 Wh nominal)**; `2S2P (~44 Wh)` queda como ruta de mitigación TBD tras Gate IA-2.
 - **Modulación downlink UHF:** FSK 1 200 bps.
@@ -211,9 +213,15 @@ Referencias:
 ### 7.2 Downlink satélite→tierra
 - Enlace UHF robusto (baseline 435 MHz, ~1200 bps), con tramas cortas, CRC y numeración.
 - Reanudación de transferencia para tolerar cortes por geometría/pérdida de enlace.
+- Perfil publico `PUBLIC_BEACON`: beacon corto compatible con SatNOGS, documentado y decodificable por terceros.
+- Perfil privado/controlado `CONTROLLED_DOWNLINK`: payload completo (`PHOTO_DEMO`, performance IA, `AI_BEHAVIOR_LOG`, `SCIENCE`, `LORA_LOG`) hacia estacion/es propia/s o autorizada/s.
+- Perfil privado/controlado `PRIVATE_UPLINK`: comandos TTC, prompts versionados, seleccion de dumps, limites de cuota y comandos de seguridad desde estacion/es propia/s o autorizada/s.
+
+SatNOGS se adopta como red receive-only para el beacon publico; no se usa para uplink/control.
 
 ### 7.3 Tipos de tramas minimas
 - **BEACON**
+- **PUBLIC_BEACON**
 - **HOUSEKEEPING**
 - **COMMAND_ACK**
 - **AI_BEHAVIOR_LOG**
@@ -374,6 +382,7 @@ Componentes comprados actualmente para prototipo/banco:
 
 ### 16.1 Downlink Manager (OBC)
 Arquitectura permanente de colas por tipo de tráfico:
+- `PUBLIC_BEACON` (vista publica/minima derivada de `HOUSEKEEPING`)
 - `HOUSEKEEPING`
 - `COMMAND_ACK`
 - `AI_BEHAVIOR_LOG`
@@ -387,10 +396,12 @@ Política por modo:
 - **DOWNLINK_WINDOW:** mantiene prioridad estricta de `HOUSEKEEPING`/`COMMAND_ACK` y amplía cuota para colas best-effort.
 
 Reglas permanentes:
+- `PUBLIC_BEACON` es publico, SatNOGS-friendly y no contiene payload ni informacion operacional sensible.
 - Prioridad absoluta: `HOUSEKEEPING` y `COMMAND_ACK`.
 - `AI_BEHAVIOR_LOG` es la cola best-effort de mayor prioridad científica.
 - Tráfico no-crítico (`AI_BEHAVIOR_LOG`, `LORA_LOG`, `SCIENCE`, y colas opcionales) bajo cuota por pasada.
 - `SCIENCE` y payloads opcionales nunca bloquean housekeeping o comandos.
+- `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK` quedan restringidos a estacion/es propia/s o autorizada/s. La confidencialidad criptografica y su compatibilidad regulatoria quedan TBD hasta cierre de licencias/coordinacion.
 
 ### 16.2 Fault/Power Manager (OBC + EPS)
 - Power-gating selectivo por subsistema (`EN_x`).

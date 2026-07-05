@@ -7,7 +7,7 @@
 ## 1) Arquitectura RF del satélite
 El subsistema RF del MVP utiliza dos canales:
 - **LoRa RX 915 MHz** para uplink de nodos IoT en tierra (RX-only en satélite).
-- **UHF TRX 435 MHz** para downlink/TTC con estación terrena.
+- **UHF TRX 435 MHz** para beacon publico, downlink/TTC y uplink privado/controlado con estacion/es terrena/s propia/s o autorizada/s.
 
 Decisión P1 (ver ADR): para maximizar probabilidad de uplink con nodos típicos, el RX orbital se explora como **LoRa concentrator** y el acceso múltiple se hace por **slotting (modo B2)**.
 
@@ -87,6 +87,20 @@ Referencia: `08_Decisions/ADR-20260313-nodo-tipico-lora-clase.md`
 
 **Máscara de elevación operativa (provisional):** la validación nominal del downlink UHF se establece provisionalmente para elevaciones **≥20°**. Operación a <20° es experimental/oportunista. A 10° el margen teórico de papel es solo **+1 dB**.
 
+### 5.1 Modo publico SatNOGS y enlaces privados/controlados
+
+Decision vigente: `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
+
+La arquitectura UHF debe soportar tres perfiles sobre el mismo TRX UHF de TTC:
+
+- `PUBLIC_BEACON`: beacon publico compatible con SatNOGS, documentado y decodificable por terceros. Debe contener solo telemetria minima no sensible.
+- `CONTROLLED_DOWNLINK`: downlink privado/controlado hacia estacion/es propia/s o autorizada/s para `PHOTO_DEMO`, `AI_BEHAVIOR_LOG` detallado, performance IA, `SCIENCE`, `LORA_LOG` y dumps bajo demanda.
+- `PRIVATE_UPLINK`: comandos TTC, prompts versionados, seleccion de downlink, limites de cuota y comandos de seguridad desde estacion/es propia/s o autorizada/s.
+
+SatNOGS se adopta como red receive-only complementaria para el beacon publico. No se usa como infraestructura de uplink/control y no reemplaza licencias, coordinacion ni estaciones propias.
+
+Nota de seguridad/regulacion: "privado/controlado" no equivale por si solo a confidencialidad RF. Cualquier emision UHF puede ser capturada; cifrado/autenticacion y contenido permitido quedan sujetos al encuadre regulatorio final.
+
 ## 6) Selección de módulo UHF (TBD)
 
 Candidatos documentados (no baseline final):
@@ -97,6 +111,7 @@ Candidatos documentados (no baseline final):
 
 **Hardware TTC UHF final:** TBD. Requiere ADR de adopción cuando se tome la decisión.
 **OpenLST:** candidato técnico en análisis. No copiar "tal cual" (componente RFFM6403 es EOL).
+**Requisito arquitectonico nuevo:** cualquier seleccion UHF debe permitir un `PUBLIC_BEACON` decodificable publicamente y perfiles separados para `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`.
 
 ## 7) Antena del satélite
 - Alternativa base: antena 1/4 onda deployable.
@@ -129,6 +144,8 @@ Candidatos documentados (no baseline final):
 
 ## 11) Referencias cruzadas
 - `04_Communications/link_budget_uhf_preliminary.md`
+- `04_Communications/satnogs_public_beacon_architecture.md`
+- `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`
 - `08_Decisions/ADR-20260212-telemetry-bench-433mhz.md`
 - `08_Decisions/ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`
 - `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`

@@ -81,6 +81,8 @@ Un cambio queda "hecho" si:
 
 | ADR | Estado | Decisión corta |
 |---|---|---|
+| `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md` | Accepted | SatNOGS se adopta como red receive-only para `PUBLIC_BEACON`; payload downlink y uplink de comandos quedan privados/controlados por estacion/es propia/s o autorizada/s. |
+| `ADR-20260615-ai-model-roles-granite350m-flight-candidate-2b-experimentation.md` | Accepted | Granite 350M queda como candidato de vuelo / flight candidate; Granite 3.1 2B queda reservado para experimentacion de banco y ground experimentation. |
 | `ADR-20260320-orbit-attitude-solar-layout-baseline.md` | Accepted | Órbita SSO 600 km LTAN 10h, actitud 10×10 nadir, layout solar +Y/±X/−Z, radiador −Y, sin desplegables. |
 | `ADR-20260320-thermal-design-radiator-cm5-coupling.md` | Accepted | Radiador −Y con AZ-93/anodizado blanco, CM5 acoplado por pad térmico, sin heater de batería. |
 | `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md` | Accepted | IBM Granite 350M fine-tuned como baseline funcional de banco del payload IA. Actualiza §C de ADR-20260314 (modelo). Resto de ADR-20260314 vigente. |
@@ -141,11 +143,11 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 | `01_Mission/` | Definición de misión, requisitos verificables, compliance y validación. | Activo. Incluye `compliance_matrix.md` y `validation_plan_and_stage_gates.md`. |
 | `02_Structure/` | Estructura, block diagram e ICD de alto nivel. | `Block Diagram.md` alineado con framework MVP. |
 | `03_Power/` | EPS por capas (bench/flight-like/flight), budget, sizing y reglas. | Activo. `EPS_Bench1_1S` extendido para Gate IA-2 con FPM bench + rail IA bench-only + `J_AI_PWR`; batería de referencia **~22 Wh**; solar con IA **TBD**. |
-| `04_Communications/` | Arquitectura RF, link budgets, protocolo uplink y política de datos. | Activo. UHF/LoRa preliminar, slotted uplink, resumen-first y análisis OpenLST. |
+| `04_Communications/` | Arquitectura RF, link budgets, protocolo uplink y política de datos. | Activo. UHF/LoRa preliminar, slotted uplink, resumen-first, análisis OpenLST y arquitectura SatNOGS `PUBLIC_BEACON`. |
 | `05_Software/` | Framework de vuelo, ops de nodos, firmware bench y dashboard de tierra. | Activo. `ai_payload_architecture.md` documenta la integración bench de Gate IA-2 sobre `EPS_Bench1_1S` extendido. |
 | `06_Costs/` | BOM maestra y modelos ROM de costos por subsistema. | Activo. Batería 2S1P de referencia reflejada en BOM; delta bench-only de Gate IA-2 separado del baseline de vuelo. |
 | `07_Risk/` | Riesgos top y matrices específicas de mitigación. | Activo con riesgos IA 17–30 ligados al éxito primario y a la integración bench del CM5. |
-| `08_Decisions/` | Registro ADR. | **23 ADRs `Accepted`** vigentes. |
+| `08_Decisions/` | Registro ADR. | **25 ADRs `Accepted`** vigentes. |
 | `99_References/` | Fuentes externas. | Librería activa de soporte. |
 | `docs/` | Planes de prueba y notas operativas de banco. | Incluye plan COMMS uplink bench, soporte EPS/telemetría. |
 | `SYSTEM_BASELINE.md` | Punto rápido de entrada al baseline. | Sincronizado rev 2026-03-14. |
@@ -161,7 +163,7 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 | Mission | **AUSTRALIS-1**: payload IA como objetivo primario; IoT store-and-forward como objetivo secundario; compliance matrix activa. **Órbita: SSO 600 km LTAN 10h (ADR-20260320).** | Ajustes finos de criterios operativos por resultados de banco/campo. Sensibilidad estacional β pendiente. |
 | Payload IA | OBC como autoridad de vuelo. Payload IA primario (CM5 family, IBM Granite 350M fine-tuned QLoRA) con RuntimeSafetySupervisor, power-gated, off-by-default en SAFE/eclipse/DOWNLINK_WINDOW. Gate IA-2 usa `EPS_Bench1_1S` extendido con carrier board COTS externa y `5V_AI_EXT` bench-only. | Hardware de vuelo calificado TBD; consumo CM5 real TBD; térmica TBD; Gate IA-2 pendiente sin evidencia T11–T21. |
 | EPS | Vuelo 2S+MPPT, banco 1S validación, referencia batería ~22 Wh nominal (2S1P 18650 3.0 Ah), target solar ≥1.2 W solo sin IA activa. `EPS_Bench1_1S` se extiende para Gate IA-2 sin cambiar la capa flight-like/flight. | Cierre del target solar con IA, posible necesidad de 2S2P, conflicto pico ~3 W vs ~5 W (CONF-01). No extrapolar `5V_AI_EXT` bench-only al rail IA de vuelo. |
-| COMMS | Uplink LoRa RX-only (915), downlink/TTC UHF (435 FSK 1k2), nodo típico como clase, política resumen-first, `AI_BEHAVIOR_LOG` mayor prioridad best-effort científica, máscara operativa provisional ≥20° downlink. | Selección de módulo UHF final, adopción OpenLST-derived TTC, parámetros finos uplink LoRa. |
+| COMMS | Uplink LoRa RX-only (915), downlink/TTC UHF (435 FSK 1k2), nodo típico como clase, política resumen-first, `AI_BEHAVIOR_LOG` mayor prioridad best-effort científica, máscara operativa provisional ≥20° downlink. `PUBLIC_BEACON` SatNOGS-friendly publico; `CONTROLLED_DOWNLINK` de payload y `PRIVATE_UPLINK` solo por estacion/es propia/s o autorizada/s. | Selección de módulo UHF final, adopción OpenLST-derived TTC, parámetros finos uplink LoRa, decoder/protocolo del beacon publico, cierre regulatorio de privacidad/cifrado. |
 | FSW/OPS | SAFE por defecto, modelo dual `MISSION_MODE` / `EPS_STATE`, arbitraje por colas, power-gating, health signals, comando mínimo. | Parámetros de cuota/retención/log y tuning operativo post-pruebas. |
 | Ground/Bench SW | Pipeline 433 solo laboratorio. Arquitectura de datos de tierra documentada. | Implementación completa de persistencia/replay/export en el dashboard. |
 | Costos | BOM maestra activa con stages obligatorios. | Completar valores numéricos y cotizaciones trazables. |
@@ -175,11 +177,13 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 |---|---|---|---|
 | CONF-01 | Pico EPS: `~3 W` (Power Budget, EPS Sizing) vs estimaciones de hasta `~5 W` en RF_ANALISYS_OPENLST; además el payload IA agrega un pico hipotético total de `6–7 W` y deja el target solar con IA **TBD** | `03_Power/Power Budget.md`, `03_Power/EPS Sizing.md`, `04_Communications/RF_ANALISYS_OPENLST.md` | Medición real con hardware TX final y Gate IA-2. No cerrar hasta tener hardware. |
 | CONF-02 | Bitrate UHF: baseline 1200 bps vs OpenLST 7416 baud | `04_Communications/rf_subsystem_overview.md`, `04_Communications/RF_ANALISYS_OPENLST.md` | Definir en ADR de adopción OpenLST si se decide avanzar. |
+| CONF-03 | Privacidad/control del downlink de payload: requisito de `CONTROLLED_DOWNLINK` vs posible encuadre amateur-satellite y restricciones de cifrado/contenido | `04_Communications/satnogs_public_beacon_architecture.md`, `04_Communications/uplink_data_products_and_downlink_policy.md`, `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md` | Cerrar mecanismo de autenticacion/confidencialidad contra ENACOM/IARU/ITU antes de vuelo. |
 
 ---
 
 ## 12) Cambios recientes incorporados
 
+- 2026-07-04 (COMMS/RF SatNOGS y visibilidad de datos): nueva ADR `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`. SatNOGS queda como red receive-only para `PUBLIC_BEACON`; payload downlink (`PHOTO_DEMO`, performance IA, `AI_BEHAVIOR_LOG`, `SCIENCE`, `LORA_LOG`) y uplink de comandos quedan privados/controlados por estacion/es propia/s o autorizada/s. Agregado documento `04_Communications/satnogs_public_beacon_architecture.md`.
 - 2026-04-03 (actualización documental bench IA/EPS): `EPS_Bench1_1S` queda extendido como bench-only para Gate IA-2 con FPM bench, rail IA bench-only, `J_AI_PWR` e inyección externa de 5V para CM5 real. Actualizados: `03_Power/EPS_Bench1_1S.md`, `03_Power/EPS_PCB/EPS_Bench1S/eps_bench_mods.md`, `05_Software/ai_payload_architecture.md`, `01_Mission/mission_definition.md`, `01_Mission/requirements_matrix.md`, `01_Mission/compliance_matrix.md`, `01_Mission/validation_plan_and_stage_gates.md`, `06_Costs/BOM_master.csv`, `06_Costs/cost_overview.md`, `06_Costs/bom_overview.md`, `06_Costs/eps_bench1_1s_cost_model.md`, `07_Risk/top_risks.md`, `00_MVP/MVP v2.2.md`, `architecture.md`. No cambia el baseline de vuelo 2S + MPPT.
 - 2026-03-20 (barrido orbital/térmico, simulador v9.2 auditado): nuevas ADRs `ADR-20260320-orbit-attitude-solar-layout-baseline.md` y `ADR-20260320-thermal-design-radiator-cm5-coupling.md`. Órbita bloqueada en SSO 600 km LTAN 10h, eclipse ~34%. Actitud 10×10 nadir. Layout solar body-mounted +Y/±X/−Z (484 cm²), radiador −Y (AZ-93 o anodizado blanco). Generación simulada ~72 Wh/24h con η=24%, margen 3.4× con IA payload al 20% duty. Diseño térmico: CM5 acoplado a pared −Y por pad térmico (G≈1.5 W/K), Tmax CM5 ≤ 40°C, Tmin batt ≥ 20°C, sin heater. Actualizados: `00_MVP/MVP v2.2.md`, `SYSTEM_BASELINE.md`, `01_Mission/requirements_matrix.md`, `01_Mission/compliance_matrix.md`, `06_Costs/BOM_master.csv`, `07_Risk/top_risks.md`.
 - 2026-03-16 (sesión de entrenamiento y benchmark IA): nueva ADR `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md`. IBM Granite 350M fine-tuned adoptado como nuevo baseline funcional de banco del payload IA. SmolLM2-360M-Instruct INT4 pasa a baseline histórico/superseded. Pipeline QLoRA operativo en RTX 4060. Benchmark corrected: pass_rate BASE 14.29 % → FINE_TUNED 57.14 %; avg_score_ratio 0.3163 → 0.8313. Holdout funcional completado. Evidencia técnica en `05_Software/AI PAYLOAD/ai_payload_bench_evidence_2026-03-16.md`. ADRs actualizadas: ADR-20260314 §C superseded por ADR-20260316. Gate IA-2 definido.
@@ -199,18 +203,19 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 1. Selección final de módulo/transceptor UHF y medición real de eficiencia PA.
 2. Cierre medido del uplink LoRa con nodos típicos bajo CFO/Doppler. **BW definitivo TBD**; BW250 candidato preferente.
 3. Confirmar si la línea OpenLST-derived TTC pasa de evaluación a decisión (ADR pendiente).
-4. Completar valores numéricos del modelo ROM de costos y BOM.
-5. Cerrar parámetros de uplink LoRa: elevación mínima, canalización exacta, BW definitivo, criterio de aceptación.
-6. Resolución de CONF-01: pico EPS real con hardware TX final y consumo real del CM5. **No declarar cerrado sin medición.**
-7. Cierre del target solar con payload IA activo.
-8. Confirmar si la batería de referencia `2S1P` alcanza o si debe escalarse a `2S2P`.
-9. Coordinación IARU y camino regulatorio ENACOM.
-10. Dossier de batería y topología 2S+MPPT para compliance con integrador.
-11. Definir ICD completo con integrador.
-12. Validación experimental de base temporal del modo B2.
-13. Confirmación o revisión de máscara operativa downlink UHF ≥20° con hardware TX real.
-14. Implementación de `ground_data_architecture.md` antes de Gate B.
-15. **Gate IA-2 — Payload IA en hardware CM5 real sobre `EPS_Bench1_1S` extendido:** boot reproducible con Granite fine-tuned, inferencia en CM5 real, medición de consumo (idle/active/inference), validación térmica básica, integración OBC↔CM5 física, RuntimeSafetySupervisor integrado.
-16. Análisis térmico y de masa del payload IA (TBD — sin ensayo en hardware real).
-17. Selección de interfaz OBC ↔ CM5 (UART / SPI / I2C — TBD).
-18. Resolución de defectos residuales del fine-tuning: `ai_payload_state` contextual, `policy override` total, normalización de `decision_id`.
+4. Definir protocolo/decoder del `PUBLIC_BEACON` y paquete SatNOGS DB.
+5. Completar valores numéricos del modelo ROM de costos y BOM.
+6. Cerrar parámetros de uplink LoRa: elevación mínima, canalización exacta, BW definitivo, criterio de aceptación.
+7. Resolución de CONF-01: pico EPS real con hardware TX final y consumo real del CM5. **No declarar cerrado sin medición.**
+8. Cierre del target solar con payload IA activo.
+9. Confirmar si la batería de referencia `2S1P` alcanza o si debe escalarse a `2S2P`.
+10. Coordinación IARU y camino regulatorio ENACOM, incluyendo tratamiento de privacidad/cifrado para `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`.
+11. Dossier de batería y topología 2S+MPPT para compliance con integrador.
+12. Definir ICD completo con integrador.
+13. Validación experimental de base temporal del modo B2.
+14. Confirmación o revisión de máscara operativa downlink UHF ≥20° con hardware TX real.
+15. Implementación de `ground_data_architecture.md` antes de Gate B.
+16. **Gate IA-2 — Payload IA en hardware CM5 real sobre `EPS_Bench1_1S` extendido:** boot reproducible con Granite fine-tuned, inferencia en CM5 real, medición de consumo (idle/active/inference), validación térmica básica, integración OBC↔CM5 física, RuntimeSafetySupervisor integrado.
+17. Análisis térmico y de masa del payload IA (TBD — sin ensayo en hardware real).
+18. Selección de interfaz OBC ↔ CM5 (UART / SPI / I2C — TBD).
+19. Resolución de defectos residuales del fine-tuning: `ai_payload_state` contextual, `policy override` total, normalización de `decision_id`.
