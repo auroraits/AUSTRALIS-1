@@ -1,6 +1,6 @@
 # BOM Overview — AUSTRALIS-1 / DIY Nanosat MVP
 
-**Revisión:** 2026-04-03
+**Revisión:** 2026-07-05
 **Estado:** Active
 **Trazabilidad:** `06_Costs/BOM_master.csv`, `00_MVP/MVP v2.2.md`, `SYSTEM_BASELINE.md`
 
@@ -49,7 +49,7 @@ La BOM maestra separa explícitamente por:
 | LoRa RX orbital | Flight-Like (TBD) | SX1302-based concentrator en exploración. |
 | GNSS | Flight-Like (TBD) | Módulo GNSS TBD. |
 | Science Pack | Bench (parcial) + Flight-Like (TBD) | Sensores UV/ALS/MAG/temp TBD. |
-| Ground Segment | EGSE (parcial) | Dashboard .NET activo. |
+| Ground Segment | EGSE (parcial) | Dashboard .NET activo. Estacion terrena dual-use SatNOGS/AUSTRALIS en diseno: SDR RX dedicado para SatNOGS/public beacon, SDR transceiver separado para modem AUSTRALIS, torre/mastil y linea coaxial UHF como candidatos abiertos. |
 | Test/Tools | EGSE (parcial) | Fuente + multímetro existentes. |
 | **AI Payload experimental** | **Bench + Flight-Like (TBD)** | **Familia CM5 adoptada. Bench: CM5 8 GB + carrier board COTS externa sobre `EPS_Bench1_1S` extendido. Flight-like: CM5 4 GB + eMMC.** |
 
@@ -93,15 +93,17 @@ La BOM maestra separa explícitamente por:
 4. Completar líneas de COMMS y LoRa RX con candidatos evaluados.
 5. Añadir fuente/fecha para cada rango de costo.
 6. Separar BOM de EGSE para ensayos ambientales.
-7. **AI Payload:** cotizar bench y flight-like.
-8. **EPS:** cotizar batería de referencia `2S1P` y dejar `2S2P` como ruta de mitigación abierta.
-9. **Bench Gate IA-2:** mantener separado qué ítems son bench-only y no migran a `EPS_Flight_Like_2S_MPPT`.
+7. Ground Station: confirmar candidatos locales para SDR RX, PlutoSDR, torre/mastil, coaxial, rotor, LNA, filtros, T/R switch digital e interlocks.
+8. **AI Payload:** cotizar bench y flight-like.
+9. **EPS:** cotizar batería de referencia `2S1P` y dejar `2S2P` como ruta de mitigación abierta.
+10. **Bench Gate IA-2:** mantener separado qué ítems son bench-only y no migran a `EPS_Flight_Like_2S_MPPT`.
 
 ---
 
 ## 8) Referencias cruzadas
 
 - `06_Costs/BOM_master.csv`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
 - `06_Costs/eps_bench1_1s_cost_model.md`
 - `03_Power/EPS_Bench1_1S.md` §7
 - `04_Communications/RF_ANALISYS_OPENLST.md` §11

@@ -15,6 +15,7 @@ Define el sistema de comunicaciones:
 Documentos clave:
 - `04_Communications/rf_subsystem_overview.md`
 - `04_Communications/link_budget_uhf_preliminary.md`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
 
 ## Cómo debe trabajar un agente aquí
 - Mantener un link budget trazable (tabla) con supuestos explícitos.

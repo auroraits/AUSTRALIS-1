@@ -69,6 +69,13 @@ Top riesgos consolidados (técnicos y operativos). Este documento referencia mat
 - Ver: `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md`.
 - Gate de cierre: Gate C para beacon/decoder; Gate E/F para operacion segura end-to-end.
 
+32) **Estacion terrena dual-use mal aislada o mal instalada**
+- Riesgo: una estacion construida para SatNOGS receive-only se extiende a uplink privado sin interlocks, conmutacion T/R fail-safe, control de TX, puesta a tierra o calculo estructural adecuados.
+- Impacto: TX accidental/no autorizado, dano de LNA/SDR/PA, evidencia de pruebas no confiable, riesgo fisico por torre/antena y baja disponibilidad operacional.
+- Mitigacion: diseno dual-use desde fase 1; SatNOGS sin acceso al transmisor; switch T/R digital fail-safe; secuenciador con interlocks; pruebas por dummy load/coax antes de TX radiado; calculo estructural de torre/anclajes; puesta a tierra y proteccion de linea.
+- Ver: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
+- Gate de cierre: Gate C para RX/beacon y T/R bench; Gate E/F para operacion end-to-end con uplink autorizado.
+
 ---
 
 ## Riesgos de diseño orbital y térmico (ADR-20260320)

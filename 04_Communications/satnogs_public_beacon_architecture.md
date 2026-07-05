@@ -157,3 +157,18 @@ Gate E/F deben demostrar:
 - separacion entre productos publicos y controlados,
 - politica de uplink autenticado,
 - procedimiento para abort/safe sin depender de SatNOGS.
+
+---
+
+## 9) Estacion terrena propia dual-use
+
+La incorporacion de SatNOGS no implica construir una estacion separada. La estacion propia puede operar como estacion dual-use si se disena desde el inicio con:
+
+- modo SatNOGS receive-only para observaciones publicas;
+- modo AUSTRALIS propio para downlink controlado y uplink privado;
+- rotor/antena UHF compartidos;
+- switch T/R digital fail-safe;
+- bloqueo explicito de cualquier acceso SatNOGS al transmisor;
+- logs y evidencia propios para operaciones AUSTRALIS.
+
+Diseno de referencia: `04_Communications/ground_station_dual_use_satnogs_australis.md`.

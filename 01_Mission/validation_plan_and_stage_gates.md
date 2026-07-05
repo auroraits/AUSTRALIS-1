@@ -193,11 +193,13 @@ Pendientes (requieren hardware CM5 real — Gate IA-2):
 - `PUBLIC_BEACON` transmitido por hardware candidato, recibido por SDR/estación propia y decodificado con frame schema publico.
 - Separación verificada entre `PUBLIC_BEACON`, `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`; el beacon no incluye payload, comandos, prompts ni datos operativos sensibles.
 - Paquete preliminar SatNOGS DB preparado: frecuencia, modo, baudrate, servicio, estado, referencia publica y decoder/protocolo del beacon.
+- Estacion terrena fase 1/2 disponible para recepcion UHF direccional: rotor AZ/EL, antena 435-438 MHz, SDR, LNA/filtro, logs y pipeline de evidencia.
+- T/R switch digital y secuenciador evaluados en banco/dummy load antes de cualquier uplink radiado.
 - Validación de máscara operativa ≥20° con hardware real: link budget re-calculado con pérdidas medidas. Confirmación o revisión de `ADR-20260313-uhf-downlink-operational-mask.md`.
 
 **Estado actual:** ❌ Pendiente — hardware TTC UHF final TBD.
 
-**Evidencias requeridas:** Medición de espectro, link budget validado con hardware real, ADR de adopción, captura/decoder del `PUBLIC_BEACON`, evidencia de separación publico/controlado.
+**Evidencias requeridas:** Medición de espectro, link budget validado con hardware real, ADR de adopción, captura/decoder del `PUBLIC_BEACON`, evidencia de separación publico/controlado, evidencia de estacion terrena RX direccional y pruebas de T/R switch sin TX radiado.
 
 **Dependencias:** Selección de PA UHF, SAW, placa PCB flight-like.
 
@@ -251,6 +253,7 @@ Pendientes (requieren hardware CM5 real — Gate IA-2):
 - Payload IA integrado en el loop OBC ↔ supervisor ↔ logging.
 - LoRa RX activo en ventana de pasada simulada.
 - UHF TX/RX operativo end-to-end con estación terrena.
+- Modo SatNOGS receive-only aislado del modo AUSTRALIS privado/controlado; SatNOGS sin acceso al transmisor/PTT.
 - Science Pack I2C funcional.
 - GNSS best-effort funcional.
 - Power-gating por `EN_x` verificado.
@@ -358,6 +361,7 @@ Pendientes (requieren hardware CM5 real — Gate IA-2):
 - `00_MVP/MVP v2.2.md`
 - `07_Risk/top_risks.md`
 - `architecture.md`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
 - `05_Software/ai_payload_architecture.md`
 - `08_Decisions/ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md`
 - `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`

@@ -154,6 +154,8 @@ repositorio. El flujo operativo vigente es:
 - `04_Communications/link_budget_lora_uplink_preliminary.md`
 - `04_Communications/uplink_lora_slotted_protocol.md`
 - `04_Communications/uplink_data_products_and_downlink_policy.md`
+- `04_Communications/satnogs_public_beacon_architecture.md`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
 - `04_Communications/RF_ANALISYS_OPENLST.md` (análisis/candidato, no baseline final)
 
 **Software:**

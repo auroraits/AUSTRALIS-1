@@ -94,6 +94,7 @@ Objetivos secundarios:
 - Potencia objetivo UHF TX RF: **500 mW** (preliminar; requiere medición hardware final).
 - Modo publico: `PUBLIC_BEACON` UHF compatible con SatNOGS, documentado y decodificable por terceros, limitado a telemetria minima no sensible.
 - Downlink/uplink controlado: payload (`PHOTO_DEMO`, performance IA, `AI_BEHAVIOR_LOG` detallado, `SCIENCE`, `LORA_LOG`) y comandos TTC operan por estacion/es propia/s o autorizada/s, no por SatNOGS.
+- Estacion propia: diseno dual-use SatNOGS receive-only + AUSTRALIS privado/controlado, con antena/rotor UHF compartidos y transmisor aislado de SatNOGS.
 - Corrección de papel a 10°: **FSPL ~153 dB**, potencia recibida **~−119 dBm**, margen teórico **+1 dB**.
 - Política de datos: **resumen por pasada por defecto + detalle on-demand**.
 - Hardware TTC UHF final: **TBD**. Hardware RF orbital (PCB) no existe todavía; ver riesgo R16 en `07_Risk/top_risks.md`.
@@ -209,6 +210,7 @@ Fuentes: `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-
 
 - Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**.
 - Arquitectura UHF vigente: un TRX TTC debe permitir `PUBLIC_BEACON` SatNOGS-friendly, `CONTROLLED_DOWNLINK` para payload/operacion y `PRIVATE_UPLINK` para comandos.
+- Ground segment vigente: estacion dual-use propia con SatNOGS receive-only y AUSTRALIS privado/controlado; ver `04_Communications/ground_station_dual_use_satnogs_australis.md`.
 - OpenLST: candidato técnico / base de desarrollo. Análisis técnico activo en `04_Communications/RF_ANALISYS_OPENLST.md`.
 - **No adoptar OpenLST "tal cual"**: componente RFFM6403 (FEM) es EOL.
 - Hardware final TTC UHF: **TBD** (requiere ADR de adopción).
@@ -268,7 +270,7 @@ Fuentes: `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-
 
 - Mission: `01_Mission/mission_definition.md`, `01_Mission/requirements_matrix.md`, `01_Mission/compliance_matrix.md`
 - Power: `03_Power/Power Budget.md`, `03_Power/EPS Sizing.md`, `03_Power/EPS_Bench1_1S.md`
-- COMMS: `04_Communications/rf_subsystem_overview.md`, `04_Communications/link_budget_uhf_preliminary.md`, `04_Communications/link_budget_lora_uplink_preliminary.md`
+- COMMS: `04_Communications/rf_subsystem_overview.md`, `04_Communications/link_budget_uhf_preliminary.md`, `04_Communications/link_budget_lora_uplink_preliminary.md`, `04_Communications/ground_station_dual_use_satnogs_australis.md`
 - Software: `05_Software/software_framework_mvp22.md`, `05_Software/ground_data_architecture.md`, `05_Software/ai_payload_architecture.md`
 - Costos: `06_Costs/BOM_master.csv`, `06_Costs/bom_overview.md`
 - Riesgos: `07_Risk/top_risks.md`
@@ -282,13 +284,14 @@ Fuentes: `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-
 2. Cierre de factibilidad uplink LoRa con evidencia de banco/campo.
 3. Parámetros finos uplink LoRa: elevación mínima, canalización exacta, BW definitivo, criterio de aceptación.
 4. Actualización cuantitativa del modelo de costos.
-5. Coordinación IARU y camino regulatorio ENACOM.
-6. ICD completo con integrador (inhibición RF, fit-check, masa, propiedades mecánicas).
-7. Resolución CONF-01: pico EPS real con hardware TX final y consumo real del CM5 con Granite fine-tuned.
-8. Cierre del target solar con payload IA activo.
-9. Confirmar si la batería de referencia `2S1P` alcanza o si debe escalarse a `2S2P` tras Gate IA-1 / Gate IA-2.
-10. **Gate IA-2 — Payload IA en hardware CM5 real:** boot reproducible, inferencia Granite en CM5, medición de consumo, validación térmica básica, integración OBC↔CM5 real, RuntimeSafetySupervisor integrado.
-11. Análisis térmico, de masa y EMC del payload IA (TBD, sin ensayo en hardware real).
-12. Sourcing / BOM del payload IA (bench candidate CM5 8 GB y flight-like candidate CM5 4 GB + eMMC): TBD.
-13. Resolución de defectos residuales del fine-tuning Granite: `ai_payload_state` contextual, `policy override` total, normalización de `decision_id`.
-14. Expansión del dataset JSONL para próxima iteración de fine-tuning.
+5. Relevamiento y calculo estructural de estacion terrena dual-use: torre, anclajes, linea de transmision, T/R switch e interlocks.
+6. Coordinación IARU y camino regulatorio ENACOM.
+7. ICD completo con integrador (inhibición RF, fit-check, masa, propiedades mecánicas).
+8. Resolución CONF-01: pico EPS real con hardware TX final y consumo real del CM5 con Granite fine-tuned.
+9. Cierre del target solar con payload IA activo.
+10. Confirmar si la batería de referencia `2S1P` alcanza o si debe escalarse a `2S2P` tras Gate IA-1 / Gate IA-2.
+11. **Gate IA-2 — Payload IA en hardware CM5 real:** boot reproducible, inferencia Granite en CM5, medición de consumo, validación térmica básica, integración OBC↔CM5 real, RuntimeSafetySupervisor integrado.
+12. Análisis térmico, de masa y EMC del payload IA (TBD, sin ensayo en hardware real).
+13. Sourcing / BOM del payload IA (bench candidate CM5 8 GB y flight-like candidate CM5 4 GB + eMMC): TBD.
+14. Resolución de defectos residuales del fine-tuning Granite: `ai_payload_state` contextual, `policy override` total, normalización de `decision_id`.
+15. Expansión del dataset JSONL para próxima iteración de fine-tuning.
