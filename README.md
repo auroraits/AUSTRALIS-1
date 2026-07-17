@@ -2,9 +2,11 @@
 
 **Revisión:** 2026-07-10
 
-**Estado público:** mirror limpio publicado (`public-v0.1`)
+**Estado público:** mirror limpio publicado (`public-v0.2` vigente; `public-v0.1` inicial)
 
 Sitio oficial: https://australis.aurora.ar/
+
+Release público vigente: https://github.com/auroraits/AUSTRALIS-1/releases/tag/public-v0.2
 
 Release público inicial: https://github.com/auroraits/AUSTRALIS-1/releases/tag/public-v0.1
 
