@@ -1,6 +1,6 @@
 # Architecture Notes — AUSTRALIS-1 / DIY Nanosat
 
-**Revisión:** 2026-04-03
+**Revisión:** 2026-07-10
 **Estado:** Baseline
 
 Este archivo funciona como mapa del repositorio y snapshot arquitectónico alineado con el baseline y ADRs vigentes. Es la referencia de entrada para cualquier agente (humano o IA) que trabaje sobre el repo.
@@ -67,6 +67,7 @@ Un cambio queda "hecho" si:
 | Cambio en | Propagar a |
 |---|---|
 | Arquitectura / baseline | `00_MVP/MVP v2.2.md`, `SYSTEM_BASELINE.md`, `architecture.md`, ADR |
+| Política DIY / apertura / supply chain | `SYSTEM_BASELINE.md`, `README.md`, `01_Mission/requirements_matrix.md`, `01_Mission/compliance_matrix.md`, `06_Costs/BOM_master.csv`, `06_Costs/bom_overview.md`, `07_Risk/top_risks.md` si corresponde |
 | Energía / EPS | `03_Power/*`, `05_Software/ai_payload_architecture.md`, `01_Mission/mission_definition.md`, `01_Mission/compliance_matrix.md`, `01_Mission/validation_plan_and_stage_gates.md`, `06_Costs/*`, `07_Risk/*` |
 | COMMS / RF | `04_Communications/*`, `07_Risk/*`, `06_Costs/*` |
 | Software / FSW | `05_Software/*`, `00_MVP/MVP v2.2.md` (si cambia comportamiento) |
@@ -81,6 +82,7 @@ Un cambio queda "hecho" si:
 
 | ADR | Estado | Decisión corta |
 |---|---|---|
+| `ADR-20260710-diy-low-cost-maker-latam-design-policy.md` | Accepted | AUSTRALIS-1 queda fijado como proyecto DIY, low cost, publicable/source-available y orientado a componentes maker/COTS disponibles en Argentina/Latinoamerica, con excepciones trazadas. |
 | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md` | Accepted | SatNOGS se adopta como red receive-only para `PUBLIC_BEACON`; payload downlink y uplink de comandos quedan privados/controlados por estacion/es propia/s o autorizada/s. |
 | `ADR-20260615-ai-model-roles-granite350m-flight-candidate-2b-experimentation.md` | Accepted | Granite 350M queda como candidato de vuelo / flight candidate; Granite 3.1 2B queda reservado para experimentacion de banco y ground experimentation. |
 | `ADR-20260320-orbit-attitude-solar-layout-baseline.md` | Accepted | Órbita SSO 600 km LTAN 10h, actitud 10×10 nadir, layout solar +Y/±X/−Z, radiador −Y, sin desplegables. |
@@ -145,9 +147,9 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 | `03_Power/` | EPS por capas (bench/flight-like/flight), budget, sizing y reglas. | Activo. `EPS_Bench1_1S` extendido para Gate IA-2 con FPM bench + rail IA bench-only + `J_AI_PWR`; batería de referencia **~22 Wh**; solar con IA **TBD**. |
 | `04_Communications/` | Arquitectura RF, link budgets, protocolo uplink y política de datos. | Activo. UHF/LoRa preliminar, slotted uplink, resumen-first, análisis OpenLST, arquitectura SatNOGS `PUBLIC_BEACON` y diseno draft de estacion terrena dual-use SatNOGS/AUSTRALIS. |
 | `05_Software/` | Framework de vuelo, ops de nodos, firmware bench y dashboard de tierra. | Activo. `ai_payload_architecture.md` documenta la integración bench de Gate IA-2 sobre `EPS_Bench1_1S` extendido. |
-| `06_Costs/` | BOM maestra y modelos ROM de costos por subsistema. | Activo. Batería 2S1P de referencia reflejada en BOM; delta bench-only de Gate IA-2 separado del baseline de vuelo. |
+| `06_Costs/` | BOM maestra y modelos ROM de costos por subsistema. | Activo. Batería 2S1P de referencia reflejada en BOM; delta bench-only de Gate IA-2 separado del baseline de vuelo; politica maker/LATAM exige proveedor/region/alternativa/riesgo para items nuevos. |
 | `07_Risk/` | Riesgos top y matrices específicas de mitigación. | Activo con riesgos IA 17–30 ligados al éxito primario y a la integración bench del CM5. |
-| `08_Decisions/` | Registro ADR. | **25 ADRs `Accepted`** vigentes. |
+| `08_Decisions/` | Registro ADR. | 27 ADRs registrados: 22 `Accepted` o `Accepted (preliminar)`, 1 `Superseded` y 4 sin metadata de estado formal. |
 | `99_References/` | Fuentes externas. | Librería activa de soporte. |
 | `docs/` | Planes de prueba y notas operativas de banco. | Incluye plan COMMS uplink bench, soporte EPS/telemetría. |
 | `SYSTEM_BASELINE.md` | Punto rápido de entrada al baseline. | Sincronizado rev 2026-03-14. |
@@ -166,7 +168,7 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 | COMMS | Uplink LoRa RX-only (915), downlink/TTC UHF (435 FSK 1k2), nodo típico como clase, política resumen-first, `AI_BEHAVIOR_LOG` mayor prioridad best-effort científica, máscara operativa provisional ≥20° downlink. `PUBLIC_BEACON` SatNOGS-friendly publico; `CONTROLLED_DOWNLINK` de payload y `PRIVATE_UPLINK` solo por estacion/es propia/s o autorizada/s. Estacion propia dual-use: SatNOGS receive-only + AUSTRALIS privado con TX aislado. | Selección de módulo UHF final, adopción OpenLST-derived TTC, parámetros finos uplink LoRa, decoder/protocolo del beacon publico, cierre regulatorio de privacidad/cifrado, implementacion fisica de estacion/torre/TX interlocks. |
 | FSW/OPS | SAFE por defecto, modelo dual `MISSION_MODE` / `EPS_STATE`, arbitraje por colas, power-gating, health signals, comando mínimo. | Parámetros de cuota/retención/log y tuning operativo post-pruebas. |
 | Ground/Bench SW | Pipeline 433 solo laboratorio. Arquitectura de datos de tierra documentada. | Implementación completa de persistencia/replay/export en el dashboard. |
-| Costos | BOM maestra activa con stages obligatorios. | Completar valores numéricos y cotizaciones trazables. |
+| Costos | BOM maestra activa con stages obligatorios y politica maker/LATAM. | Completar valores numéricos, cotizaciones trazables y alternativas locales/regionales cuando existan. |
 | Riesgos | Matrices consolidadas activas. | Cerrar riesgos principales con evidencia de validación. |
 
 ---
@@ -183,6 +185,7 @@ EPS_STATE    = CRIT | LOW | NOMINAL | HIGH
 
 ## 12) Cambios recientes incorporados
 
+- 2026-07-10 (politica DIY / low cost / maker LATAM): nueva ADR `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`. El baseline queda alineado a proyecto DIY, low cost, publicable/source-available no comercial y reproducible con componentes maker/COTS disponibles en Argentina/Latinoamerica. Actualizados: `SYSTEM_BASELINE.md`, `README.md`, `01_Mission/mission_definition.md`, `01_Mission/requirements_matrix.md`, `01_Mission/compliance_matrix.md`, `06_Costs/bom_overview.md`, `07_Risk/top_risks.md`.
 - 2026-07-05 (Ground segment dual-use): agregado diseno draft `04_Communications/ground_station_dual_use_satnogs_australis.md`. Define estacion UHF direccional con rotor AZ/EL, SatNOGS receive-only, AUSTRALIS controlled downlink/private uplink, switch T/R digital fail-safe, recomendacion inicial de torre y linea de transmision.
 - 2026-07-04 (COMMS/RF SatNOGS y visibilidad de datos): nueva ADR `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`. SatNOGS queda como red receive-only para `PUBLIC_BEACON`; payload downlink (`PHOTO_DEMO`, performance IA, `AI_BEHAVIOR_LOG`, `SCIENCE`, `LORA_LOG`) y uplink de comandos quedan privados/controlados por estacion/es propia/s o autorizada/s. Agregado documento `04_Communications/satnogs_public_beacon_architecture.md`.
 - 2026-04-03 (actualización documental bench IA/EPS): `EPS_Bench1_1S` queda extendido como bench-only para Gate IA-2 con FPM bench, rail IA bench-only, `J_AI_PWR` e inyección externa de 5V para CM5 real. Actualizados: `03_Power/EPS_Bench1_1S.md`, `03_Power/EPS_PCB/EPS_Bench1S/eps_bench_mods.md`, `05_Software/ai_payload_architecture.md`, `01_Mission/mission_definition.md`, `01_Mission/requirements_matrix.md`, `01_Mission/compliance_matrix.md`, `01_Mission/validation_plan_and_stage_gates.md`, `06_Costs/BOM_master.csv`, `06_Costs/cost_overview.md`, `06_Costs/bom_overview.md`, `06_Costs/eps_bench1_1s_cost_model.md`, `07_Risk/top_risks.md`, `00_MVP/MVP v2.2.md`, `architecture.md`. No cambia el baseline de vuelo 2S + MPPT.

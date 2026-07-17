@@ -1,8 +1,8 @@
 # Mission Definition — AUSTRALIS-1
 
-**Revisión:** 2026-04-03
+**Revisión:** 2026-07-10
 **Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, ADRs Accepted en `08_Decisions/`
+**Trazabilidad:** `00_MVP/MVP v2.2.md`, ADRs Accepted en `08_Decisions/`, `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
 
 ## 1) Objetivo de misión
 
@@ -16,6 +16,20 @@ Objetivos secundarios:
 2. Validar store and forward por pasadas LEO.
 3. Operar el Science Pack (UV, ALS/visible, magnetómetro 3 ejes, temperatura multipunto).
 4. Mantener `PHOTO_DEMO` como feature opcional, no crítico y best-effort.
+
+### 1.1) Directriz transversal de proyecto
+
+La mision se mantiene como proyecto DIY, low cost y de publicacion abierta/source-available no comercial. El diseno debe poder reproducirse y auditarse con componentes maker/COTS ampliamente disponibles en Argentina y Latinoamerica durante las etapas de banco, FlatSat, EGSE y prototipado.
+
+Esto implica:
+
+- preferir clases de componentes disponibles local/regionalmente antes que SKUs unicos;
+- registrar proveedor, region, alternativa y riesgo en la BOM;
+- separar estrictamente hardware maker de banco y hardware flight-like/flight;
+- sostener codigo, firmware, scripts, documentacion publicable, CAD/PCB publicables y procedimientos en el mirror publico cuando no haya restricciones de seguridad, privacidad o terceros;
+- documentar excepciones si se usa un componente caro, exotico, EOL o dificil de conseguir.
+
+Fuente: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`.
 
 ## 2) Criterio de éxito mínimo
 1. El payload IA (CM5 + IBM Granite 350M fine-tuned, o el modelo baseline vigente según la ADR más reciente) completa **al menos 5 ciclos de inferencia** en órbita con propuestas validadas por el `RuntimeSafetySupervisor` y logging completo descargado a tierra.
@@ -33,12 +47,14 @@ Objetivos secundarios:
 - Telemetría histórica y trending operativo.
 
 ## 4) Parámetros orbitales de diseño
-- Tipo: LEO circular.
-- Altitud: 500-600 km.
-- Inclinación: TBD (seleccionada según acceso de lanzamiento, habilitando pasadas sobre Buenos Aires — latitud -34.6).
-- Período: ~95 min (600 km) a ~94 min (500 km).
+- Tipo: SSO (Sun-Synchronous Orbit), LEO circular.
+- Altitud de diseño: 600 km (rango aceptable 550-650 km).
+- Inclinación: ~98° (rango 97.6°-98.8°).
+- LTAN: 10:00h preferido (simétrico con 14:00h).
+- Período: ~96 min a 600 km.
 - Duración de misión objetivo: >=30 días operativos.
 - Para presupuesto EPS preliminar: supuesto de diseño 90 min con 60 min sol / 30 min eclipse (ver `03_Power/Power Budget.md`). `03_Power/EPS_DESIGN_RULES.md` es guía técnica draft, no normativa.
+- Fuente normativa: `08_Decisions/ADR-20260320-orbit-attitude-solar-layout-baseline.md`.
 
 ## 5) Segmento usuario
 - Nodos IoT en tierra como objetivo secundario de misión.

@@ -1,8 +1,8 @@
 # BOM Overview — AUSTRALIS-1 / DIY Nanosat MVP
 
-**Revisión:** 2026-07-05
+**Revisión:** 2026-07-10
 **Estado:** Active
-**Trazabilidad:** `06_Costs/BOM_master.csv`, `00_MVP/MVP v2.2.md`, `SYSTEM_BASELINE.md`
+**Trazabilidad:** `06_Costs/BOM_master.csv`, `00_MVP/MVP v2.2.md`, `SYSTEM_BASELINE.md`, `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
 
 ---
 
@@ -38,6 +38,21 @@ La BOM maestra separa explícitamente por:
 
 ---
 
+## 2.1) Politica maker / LATAM / low cost
+
+Para items nuevos o revisados, la BOM debe sostener la politica DIY low cost del proyecto:
+
+- Preferir componentes maker/COTS con disponibilidad en Argentina o Latinoamerica para banco, FlatSat, EGSE y prototipos.
+- Registrar proveedor, region, alternativa y riesgo de disponibilidad en cada fila relevante.
+- Definir clases tecnicas cuando sea posible; evitar bloquear el diseno a un SKU unico de marketplace.
+- Marcar como excepcion cualquier componente caro, exotico, EOL, import-only sin alternativa regional o dependiente de un unico proveedor.
+- Mantener separada la ruta `Bench` / `Flight-Like` / `Flight`: un modulo maker comprado localmente puede cerrar evidencia de banco, pero no se convierte automaticamente en componente de vuelo.
+- Para `Flight-Like` y `Flight`, agregar evidencia de ambiente, compliance, masa, consumo, termica, vibracion/outgassing cuando aplique.
+
+Fuente: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`.
+
+---
+
 ## 3) Subsistemas cubiertos
 
 | Subsistema | Stage activo | Notas |
@@ -49,7 +64,7 @@ La BOM maestra separa explícitamente por:
 | LoRa RX orbital | Flight-Like (TBD) | SX1302-based concentrator en exploración. |
 | GNSS | Flight-Like (TBD) | Módulo GNSS TBD. |
 | Science Pack | Bench (parcial) + Flight-Like (TBD) | Sensores UV/ALS/MAG/temp TBD. |
-| Ground Segment | EGSE (parcial) | Dashboard .NET activo. Estacion terrena dual-use SatNOGS/AUSTRALIS en diseno: SDR RX dedicado para SatNOGS/public beacon, SDR transceiver separado para modem AUSTRALIS, torre/mastil y linea coaxial UHF como candidatos abiertos. |
+| Ground Segment | EGSE (parcial) | Dashboard .NET activo. Estacion terrena dual-use SatNOGS/AUSTRALIS en diseno: SDR RX dedicado para SatNOGS/public beacon, SDR transceiver separado para modem AUSTRALIS, torre/mastil, linea coaxial UHF y estacion meteorologica local como candidatos abiertos. |
 | Test/Tools | EGSE (parcial) | Fuente + multímetro existentes. |
 | **AI Payload experimental** | **Bench + Flight-Like (TBD)** | **Familia CM5 adoptada. Bench: CM5 8 GB + carrier board COTS externa sobre `EPS_Bench1_1S` extendido. Flight-like: CM5 4 GB + eMMC.** |
 
@@ -93,7 +108,7 @@ La BOM maestra separa explícitamente por:
 4. Completar líneas de COMMS y LoRa RX con candidatos evaluados.
 5. Añadir fuente/fecha para cada rango de costo.
 6. Separar BOM de EGSE para ensayos ambientales.
-7. Ground Station: confirmar candidatos locales para SDR RX, PlutoSDR, torre/mastil, coaxial, rotor, LNA, filtros, T/R switch digital e interlocks.
+7. Ground Station: confirmar candidatos locales para SDR RX, PlutoSDR, torre/mastil, coaxial, rotor, LNA, filtros, estacion meteorologica local, T/R switch digital e interlocks.
 8. **AI Payload:** cotizar bench y flight-like.
 9. **EPS:** cotizar batería de referencia `2S1P` y dejar `2S2P` como ruta de mitigación abierta.
 10. **Bench Gate IA-2:** mantener separado qué ítems son bench-only y no migran a `EPS_Flight_Like_2S_MPPT`.
