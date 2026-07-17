@@ -1,8 +1,8 @@
 # Compliance Matrix — AUSTRALIS-1 / DIY Nanosat MVP
 
-**Revisión:** 2026-04-03
+**Revisión:** 2026-07-10
 **Estado:** Active
-**Trazabilidad:** `08_Decisions/ADR-20260313-compliance-matrix-artefacto-sistema.md`
+**Trazabilidad:** `08_Decisions/ADR-20260313-compliance-matrix-artefacto-sistema.md`, `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
 
 Este es un artefacto vivo del sistema. Debe actualizarse cuando cambian requisitos, se obtiene evidencia o cambia el estado de un ítem.
 
@@ -11,6 +11,15 @@ Estados permitidos:
 - `Partial` — evidencia parcial o análisis preliminar disponible.
 - `Closed` — evidencia completa y verificada.
 - `Blocked by Integrator` — depende de ICD/documentación del integrador de lanzamiento (TBD).
+
+---
+
+## 0) Politica de diseno y supply chain
+
+| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| CX-SYS-01 | El proyecto shall mantener diseno DIY, low cost y publicacion abierta/source-available no comercial con componentes maker/COTS disponibles en Argentina/Latinoamerica cuando sea viable. | `MIS-REQ-23`; `ADR-20260710-diy-low-cost-maker-latam-design-policy.md` | Sistema | I+A | Revision de baseline, repo publico, BOM y trade studies | Open | La licencia publica sigue siendo source-available no comercial segun `LICENSE.md`; no declarar OSI open source sin cambio de licencia. |
+| CX-SYS-02 | Cada item nuevo de BOM/trade study shall registrar clase tecnica, proveedor/region, alternativa y riesgo; excepciones por SKU unico, EOL, costo alto o baja disponibilidad regional shall quedar justificadas. | `MIS-REQ-24`; `ADR-20260710-diy-low-cost-maker-latam-design-policy.md` | Sistema/Costos | I+A | Revision de `BOM_master.csv`, `bom_overview.md` y riesgos de supply chain | Open | Aplica a nuevas decisiones y a saneamiento progresivo de BOM existente. |
 
 ---
 
@@ -46,6 +55,7 @@ Estados permitidos:
 | CX-RF-05 | La operación de la estación terrena shall cumplir el camino regulatorio ENACOM aplicable. | ENACOM; `04_Communications/RF_ANALISYS_OPENLST.md` §4.1 | Operaciones | D | Documentación ENACOM | Open | TBD. |
 | CX-RF-06 | El CubeSat shall NO transmitir RF dentro de un tiempo mínimo post-eyección (wait time). | CDS Rev 14.1 §3.3.2; ICD integrador | COMMS/FSW | T | Prueba de secuencia de boot + inhibición RF | Blocked by Integrator | Duración exacta depende del ICD. |
 | CX-RF-07 | La estacion terrena dual-use shall mantener SatNOGS en modo receive-only sin acceso al transmisor/PTT y shall verificar switch T/R digital fail-safe antes de uplink radiado. | `MIS-REQ-21`; `04_Communications/ground_station_dual_use_satnogs_australis.md` | Ground/COMMS | T+D+I | Prueba de interlocks, logs de T/R switch y revision de permisos SatNOGS | Open | Requiere hardware de estacion, secuenciador y procedimiento de uplink. |
+| CX-GND-01 | La estacion terrena shall registrar clima local y ambiente interior de gabinete, y usar viento/lluvia/humedad como entradas de inhibicion y park automatico. | `MIS-REQ-22`; `04_Communications/ground_station_dual_use_satnogs_australis.md` | Ground | T+D+I | Logs de clima por pasada, prueba de park por viento/lluvia y alarma de humedad interior | Open | Requiere estacion meteorologica local, sensores interiores y conexion al scheduler/rotator. |
 
 ---
 

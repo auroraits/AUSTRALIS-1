@@ -1,8 +1,8 @@
 # Requirements Matrix — AUSTRALIS-1 / DIY Nanosat MVP
 
-**Revisión:** 2026-04-03
+**Revisión:** 2026-07-10
 **Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, ADRs Accepted en `08_Decisions/`
+**Trazabilidad:** `00_MVP/MVP v2.2.md`, ADRs Accepted en `08_Decisions/`, `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
 
 Matriz de requisitos verificables (IDs, statement, rationale, verificación, dueño y trazabilidad).
 
@@ -37,6 +37,9 @@ Convención:
 | MIS-REQ-19 | La arquitectura UHF shall soportar un `PUBLIC_BEACON` compatible con SatNOGS, documentado y decodificable por terceros, limitado a telemetria minima no sensible. | Recepcion distribuida publica sin exponer payload/operacion | T/D | COMMS/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md` |
 | MIS-REQ-20 | El downlink de payload/operacion y el uplink de comandos shall operar como perfiles privados/controlados (`CONTROLLED_DOWNLINK`, `PRIVATE_UPLINK`) mediante estacion/es propia/s o autorizada/s, no mediante SatNOGS. | Seguridad operacional, control de mision y separacion publico/privado | T/D | COMMS/FSW/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
 | MIS-REQ-21 | La estacion terrena propia shall separar fisica/logicamente el modo SatNOGS receive-only del modo AUSTRALIS privado/controlado, impidiendo que SatNOGS tenga acceso al transmisor, PTT, credenciales de comando o camino de uplink. | Evitar TX accidental y preservar seguridad operacional | T/D/I | Ground/COMMS | `04_Communications/ground_station_dual_use_satnogs_australis.md`, `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md` |
+| MIS-REQ-22 | La estacion terrena propia shall incluir instrumentacion meteorologica local para viento, lluvia, temperatura, humedad, presion y ambiente interior de gabinete, integrada al logging y a las inhibiciones/park automatico. | Autonomia segura, proteccion mecanica/electronica y evidencia contextual de pasadas | T/D/I | Ground | `04_Communications/ground_station_dual_use_satnogs_australis.md` |
+| MIS-REQ-23 | El proyecto shall mantener una politica de diseno DIY, low cost y de publicacion abierta/source-available no comercial, priorizando componentes maker/COTS ampliamente disponibles en Argentina y Latinoamerica para banco, FlatSat, EGSE y prototipos. | Reproducibilidad, costo, colaboracion abierta y viabilidad regional | I/A | Sistema | `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`, `SYSTEM_BASELINE.md` |
+| MIS-REQ-24 | La BOM y los trade studies shall definir componentes por clase tecnica cuando sea posible, registrar proveedor/region/alternativa/riesgo, y justificar cualquier SKU unico, componente caro, exotico, EOL o de baja disponibilidad regional. | Evitar lock-in de supply chain y mantener ruta maker -> flight-like -> flight | I/A | Sistema/Costos | `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`, `06_Costs/bom_overview.md` |
 
 ## 2) Requisitos P1 — Uplink con nodos típicos (success-first)
 

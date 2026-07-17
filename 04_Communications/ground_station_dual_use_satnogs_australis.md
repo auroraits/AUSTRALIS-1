@@ -51,7 +51,8 @@ Baseline recomendado:
 - path TX separado logicamente para uplink privado;
 - switch T/R digital fail-safe, sin separacion de antenas RX/TX;
 - scheduler que arbitre SatNOGS vs ventanas AUSTRALIS;
-- UPS, watchdogs, telemetria local, control remoto y park automatico por viento/falla.
+- estacion meteorologica local para viento, lluvia, temperatura, humedad y presion;
+- UPS, watchdogs, telemetria local, control remoto y park automatico por clima/falla.
 
 No se recomienda separar antenas para RX y TX en esta etapa. La decision de diseno es una sola antena UHF compartida, con conmutacion/proteccion RF.
 
@@ -298,15 +299,61 @@ Autonomia minima objetivo:
 - NTP + GNSS o fuente de tiempo redundante;
 - actualizacion TLE automatica con cache local;
 - rotator watchdog y park automatico;
-- sensor de viento/lluvia o al menos anemometro para inhibir tracking/TX;
+- estacion meteorologica local con anemometro, direccion de viento, lluvia, temperatura exterior, humedad exterior, presion, temperatura interior de gabinete y humedad interior;
 - UPS para miniPC/RPi, red, rotator controller y control RF;
 - PDU o relays para power-cycle remoto;
 - VPN/SSH seguro;
 - camara local opcional para verificar posicion/entorno;
-- logging append-only de IQ/audio, frames, comandos, potencia/SWR, rotor, clima y errores;
+- logging append-only de IQ/audio, frames, comandos, potencia/SWR, rotor, clima, ambiente interior de gabinete y errores;
 - backups automaticos de evidencia de pasadas.
 
 Para `PRIVATE_UPLINK`, la autonomia debe estar limitada por una politica de armado. La estacion puede preparar ventanas y validar interlocks automaticamente, pero el permiso de transmitir debe responder a licencia, procedimiento y autorizacion operacional definida.
+
+---
+
+## 10.1) Estacion meteorologica local
+
+La estacion terrena debe incluir instrumentacion meteorologica propia. No debe depender solo de reportes de clima externos porque el viento, lluvia y humedad relevantes son los del mastil y del gabinete.
+
+Sensores minimos:
+
+- anemometro para velocidad de viento;
+- veleta o estimacion de direccion de viento;
+- sensor de lluvia o superficie humeda;
+- temperatura exterior;
+- humedad exterior;
+- presion barometrica;
+- temperatura interior del gabinete electronico;
+- humedad interior del gabinete electronico.
+
+Sensores recomendados:
+
+- sensor de apertura de gabinete;
+- sensor de inundacion/agua en base estanca;
+- sensor de corriente y tension PoE/DC interna;
+- heater o elemento anti-condensacion controlado por humedad interior;
+- respiradero hidrofobico para compensacion de presion y humedad.
+
+Uso operacional:
+
+- inhibir tracking si el viento excede el limite operativo definido;
+- ordenar park automatico si el viento supera el limite de seguridad o hay lluvia intensa;
+- bloquear cualquier TX radiado si viento, lluvia, humedad interior o temperatura de gabinete estan fuera de limites;
+- registrar condiciones ambientales junto con cada observacion SatNOGS/AUSTRALIS;
+- disparar alerta si sube la humedad interior, si aparece agua en base o si la temperatura interior excede margen de SDR/RPi.
+
+Limites preliminares para diseno RX-only:
+
+| Condicion | Accion preliminar |
+|---|---|
+| Viento <=10 m/s | Tracking normal |
+| Viento 10-15 m/s | Tracking permitido con monitoreo |
+| Viento >15 m/s | Inhibir nuevas pasadas y park |
+| Viento >20 m/s | Park obligatorio / no tracking |
+| Lluvia intensa | Inhibir mantenimiento exterior y revisar ruido RF |
+| Humedad interior alta o condensacion | Alertar, activar mitigacion y evitar operacion desatendida |
+
+Estos limites son placeholders de ingenieria. Deben ajustarse cuando se conozcan masa, area proyectada, torque real, rigidez de mastil y especificaciones de antena/rotor.
 
 ---
 
@@ -331,12 +378,14 @@ Objetivo de salida pre-flight: estacion probada como SatNOGS receive-only y como
 
 - Relevar terraza, altura real, entorno, line-of-sight por azimut, ubicacion de shack, recorrido de coax y puesta a tierra.
 - Medir ruido UHF local con SDR.
+- Definir ubicacion del modulo meteorologico, ruta de cableado, exposicion de anemometro/veleta y punto de medicion interior del gabinete.
 - Confirmar estructura portante con profesional.
 
 ### Fase 1 - SatNOGS RX direccional
 
 - Montar torre/mastil y rotor.
 - Instalar UHF cross-Yagi, LNA, filtro y SDR.
+- Instalar estacion meteorologica local e integrar viento/lluvia/ambiente interior con park automatico.
 - Integrar SatNOGS Client.
 - Registrar observaciones y ruido por al menos varias semanas.
 
@@ -364,16 +413,19 @@ Objetivo de salida pre-flight: estacion probada como SatNOGS receive-only y como
 
 - altura insuficiente para recepcion <20 deg si hay arboles cercanos;
 - sobrecarga por viento o anclaje inadecuado;
+- medicion meteorologica local ausente, mal ubicada o no integrada a park/inhibiciones;
 - perdida TX por coax si la linea es larga o cable inadecuado;
 - dano de LNA/SDR por secuencia TX incorrecta;
 - TX accidental desde software SatNOGS o sistema no autorizado;
 - ruido urbano UHF no caracterizado;
+- condensacion o humedad interior en gabinete electronico;
 - falta de cierre regulatorio para uplink y downlink controlado.
 
 Mitigaciones:
 
 - empezar con centro de fase ~5 m sobre terraza y mascara nominal >=20 deg;
 - medir ruido y desempeno real antes de subir altura;
+- integrar anemometro/lluvia/ambiente interior como interlocks y evidencia de pasada;
 - usar switch T/R fail-safe con interlocks;
 - usar coax de baja perdida y puesta a tierra correcta;
 - bloquear SatNOGS fuera de cualquier control TX;
@@ -440,6 +492,25 @@ Procurement priority for Phase 1:
 2. LMR-400-class coax only after measuring the real route and connector plan.
 3. Tower/mast only after structural details and roof anchor path are confirmed.
 4. PlutoSDR for AUSTRALIS modem development after the receive station is stable, or earlier only as bench equipment.
+
+### Weather / environment candidates
+
+Required BOM roles:
+
+| BOM role | Candidate class | Fit | Recommendation |
+|---|---|---|---|
+| Wind safety | Outdoor anemometer + wind direction sensor | Provides local mast-level wind for tracking inhibit and park logic. | Required for autonomous operation. Prefer pulse/RS485/Modbus output with documented calibration. |
+| Rain / wet surface | Outdoor rain sensor or tipping-bucket rain gauge | Detects unsafe maintenance/weather conditions and correlates RF noise/observations. | Required for unattended station; avoid exposed cheap PCB-only rain plates as sole safety sensor. |
+| Outdoor environment | Temperature / humidity / pressure sensor in shielded enclosure | Records local weather context for passes. | Use radiation shield and avoid direct sun/heated surfaces. |
+| Cabinet environment | Internal temperature / humidity sensor | Detects condensation and thermal stress in SDR/RPi/PoE electronics. | Required for sealed dome/base design. Add hydrophobic vent and optional anti-condensation heater if needed. |
+| Power telemetry | PoE/DC voltage and current monitor | Detects brownout, motor stalls and heater load. | Recommended for root-cause analysis and remote maintenance. |
+
+Selection notes:
+
+- Weather data is part of the station evidence record, not just a dashboard feature.
+- Wind and rain must feed the rotator/scheduler interlock path, not only a web UI.
+- Cabinet humidity should alarm before condensation appears on SDR, Pi, RF connectors or motor drivers.
+- Sensor location matters: an anemometer hidden behind parapets is not valid for park/inhibit decisions.
 
 ---
 

@@ -1,8 +1,8 @@
 # Top Risks — AUSTRALIS-1 / DIY Nanosat MVP
 
-**Revisión:** 2026-04-03
+**Revisión:** 2026-07-10
 **Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, `01_Mission/compliance_matrix.md`
+**Trazabilidad:** `00_MVP/MVP v2.2.md`, `01_Mission/compliance_matrix.md`, `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
 
 Top riesgos consolidados (técnicos y operativos). Este documento referencia matrices específicas por tema.
 
@@ -75,6 +75,13 @@ Top riesgos consolidados (técnicos y operativos). Este documento referencia mat
 - Mitigacion: diseno dual-use desde fase 1; SatNOGS sin acceso al transmisor; switch T/R digital fail-safe; secuenciador con interlocks; pruebas por dummy load/coax antes de TX radiado; calculo estructural de torre/anclajes; puesta a tierra y proteccion de linea.
 - Ver: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
 - Gate de cierre: Gate C para RX/beacon y T/R bench; Gate E/F para operacion end-to-end con uplink autorizado.
+
+33) **Perdida de reproducibilidad DIY por supply chain no LATAM**
+- Riesgo: el diseno se apoya en SKUs caros, exoticos, EOL, import-only o de un unico proveedor, volviendo dificil reproducir el sistema en Argentina/Latinoamerica.
+- Impacto: sube costo, demora bancos, dificulta colaboracion abierta, rompe la ruta maker -> flight-like -> flight y puede forzar redisenos tardios.
+- Mitigacion: aplicar `ADR-20260710-diy-low-cost-maker-latam-design-policy`; definir componentes por clase tecnica; registrar proveedor/region/alternativa/riesgo en BOM; marcar excepciones; mantener alternativas COTS maker para banco y EGSE.
+- Ver: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`, `06_Costs/bom_overview.md`.
+- Gate de cierre: revision de BOM/trade studies en Gate B y antes de congelar hardware flight-like.
 
 ---
 

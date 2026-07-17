@@ -1,6 +1,6 @@
 # AUSTRALIS-1 — DIY Nanosat
 
-**Revisión:** 2026-06-15
+**Revisión:** 2026-07-10
 
 **Estado público:** mirror limpio publicado (`public-v0.1`)
 
@@ -49,6 +49,20 @@ Objetivos secundarios vigentes:
 - CONOPS: **store and forward** por pasadas LEO.
 - Política RF MVP: **no transmitir ISM desde órbita** (LoRa en satélite es RX-only).
 
+## Directrices de diseño
+
+AUSTRALIS-1 es un proyecto DIY, low cost y de publicacion abierta/source-available no comercial. El diseno prioriza componentes maker/COTS disponibles en Argentina y Latinoamerica para banco, FlatSat, EGSE y prototipos, manteniendo una ruta trazable hacia hardware flight-like y flight.
+
+Reglas practicas:
+
+- definir requisitos por clase tecnica antes que por SKU unico;
+- registrar proveedor, region, alternativa y riesgo en la BOM;
+- justificar componentes caros, exoticos, EOL, import-only o con baja disponibilidad regional;
+- publicar codigo, firmware, scripts, documentacion publicable, CAD/PCB publicables y procedimientos cuando no haya restricciones de seguridad, privacidad o terceros;
+- no declarar flight-ready a hardware maker/de banco sin evidencia y ADR correspondiente.
+
+Fuente: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`.
+
 ## Baseline y mapa del repositorio
 
 | Documento | Rol |
@@ -66,6 +80,7 @@ Objetivos secundarios vigentes:
 ## Decisiones bloqueadas (resumen)
 
 - **Plataforma:** 1.5U (100 × 100 × 150 mm).
+- **Politica DIY/low cost:** componentes maker/COTS disponibles en Argentina/Latinoamerica para banco/prototipos, BOM con proveedor/region/alternativa/riesgo y excepciones trazadas.
 - **EPS vuelo:** topología de batería **2S + MPPT**, referencia **2S1P con 18650 de 3.0 Ah (~22 Wh nominal)**. Ruta de mitigación `2S2P (~44 Wh)` abierta si el power budget con IA lo exige tras Gate IA-1.
 - **Solar:** el target **≥1.2 W netos en sol** sigue vigente para el escenario **sin payload IA activo**. Con payload IA activo, el target solar queda **TBD** hasta medición real del CM5 y cierre del duty-cycle orbital.
 - **COMMS:**
@@ -107,7 +122,7 @@ Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**.
 OpenLST: candidato en análisis, no baseline final. Hardware TTC UHF final: **TBD**.
 La arquitectura UHF debe permitir beacon publico SatNOGS-friendly y separar payload/uplink en perfiles privados/controlados. Ver `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
 
-## Estado público actual (2026-06-15)
+## Estado documental actual (2026-07-10)
 
 - El proyecto está publicado como mirror limpio `AUSTRALIS-1`, con licencia no comercial PolyForm NC + CC BY-NC-SA.
 - La web oficial `https://australis.aurora.ar/` enlaza este repositorio público.
@@ -115,7 +130,7 @@ La arquitectura UHF debe permitir beacon publico SatNOGS-friendly y separar payl
 - Granite 3.1 2B queda como modelo de experimentación de banco, comparativas y ground experimentation; no es candidato primario de vuelo bajo el presupuesto actual.
 - Benchmark corrected: pass_rate BASE 14 % → FINE_TUNED 57 %; avg_score_ratio 0.32 → 0.83. Holdout funcional completado.
 - SmolLM2-360M-Instruct INT4 pasa a baseline histórico/superseded para la función de modelo IA.
-- **25 ADRs `Accepted`** en total (incluye ADR-20260316-ai-payload-granite350m-baseline-funcional-banco, ADR-20260615-ai-model-roles-granite350m-flight-candidate-2b-experimentation y ADR-20260704-satnogs-public-beacon-private-payload-uplink).
+- Registro ADR: 27 archivos en `08_Decisions/`; 22 decisiones `Accepted` o `Accepted (preliminar)`, 1 `Superseded` y 4 pendientes de normalizar metadata de estado. No usar el total de archivos como conteo de ADRs `Accepted`.
 - Misión redefinida como **AUSTRALIS-1 — Experimental Autonomic Flight AI-Assisted CubeSat** (desde 2026-03-14).
 - Payload IA es el objetivo científico primario; IoT store-and-forward es objetivo secundario.
 - `EPS_STATE` en cuatro niveles: `CRIT | LOW | NOMINAL | HIGH`.

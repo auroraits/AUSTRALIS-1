@@ -1,8 +1,8 @@
 # System Baseline — AUSTRALIS-1 (DIY Nanosat MVP)
 
-**Revisión:** 2026-03-21
+**Revisión:** 2026-07-10
 **Estado:** Baseline
-**Trazabilidad:** ADR-20260320-orbit-attitude-solar-layout-baseline, ADR-20260320-thermal-design-radiator-cm5-coupling
+**Trazabilidad:** ADR-20260320-orbit-attitude-solar-layout-baseline, ADR-20260320-thermal-design-radiator-cm5-coupling, ADR-20260710-diy-low-cost-maker-latam-design-policy
 
 Este documento resume el baseline canónico del sistema y separa lo **bloqueado** de lo que sigue **en evaluación**.
 
@@ -36,6 +36,24 @@ Objetivos secundarios:
 - Store and forward por pasadas LEO.
 - Science Pack (UV, ALS, magnetómetro, temperatura).
 - `PHOTO_DEMO` opcional, no crítico, best-effort.
+
+---
+
+## 2.1) Directrices de diseño DIY / low cost / abierto
+
+AUSTRALIS-1 se diseña como proyecto DIY, low cost y de publicacion abierta/source-available no comercial, con foco en componentes maker/COTS ampliamente disponibles en Argentina y Latinoamerica.
+
+Directrices normativas:
+
+- Priorizar clases de componentes maker/COTS conseguibles en el mercado latinoamericano para banco, FlatSat, EGSE y prototipos.
+- Definir requisitos por clase tecnica cuando sea posible, no por SKU unico de marketplace.
+- Mantener una ruta trazable `COTS bench -> flight-like -> flight`; el hardware maker de banco no se declara hardware de vuelo.
+- Documentar en BOM proveedor, region, alternativa y riesgo de disponibilidad.
+- Marcar como excepcion cualquier componente caro, exotico, EOL, de disponibilidad limitada o dependiente de un unico proveedor.
+- Mantener codigo, firmware, scripts, documentacion publicable, CAD/PCB publicables y procedimientos en el mirror publico cuando no expongan secretos, datos privados, material controlado o restricciones de terceros.
+- No sacrificar seguridad, compliance, medicion o trazabilidad por costo.
+
+Fuente: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`.
 
 ---
 
@@ -220,6 +238,15 @@ Fuentes: `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-
 ---
 
 ## 6) Últimas actualizaciones de subsistema incorporadas
+
+### 2026-07-10 — Politica DIY / low cost / maker LATAM
+
+- `ADR-20260710-diy-low-cost-maker-latam-design-policy.md` — fija directriz transversal: proyecto DIY, low cost, publicable/source-available no comercial, reproducible con componentes maker/COTS disponibles en Argentina/Latinoamerica.
+- `01_Mission/requirements_matrix.md` — agrega `MIS-REQ-23` y `MIS-REQ-24`.
+- `01_Mission/compliance_matrix.md` — agrega `CX-SYS-01` y `CX-SYS-02`.
+- `06_Costs/bom_overview.md` — agrega politica de seleccion maker/LATAM/low cost.
+- `07_Risk/top_risks.md` — agrega riesgo transversal de perdida de reproducibilidad por supply chain no LATAM.
+- `README.md` y `architecture.md` — sincronizados con la directriz.
 
 ### Desde 2026-03-16 (sesión de entrenamiento y benchmark IA)
 
