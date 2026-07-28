@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,10 @@ CX_RE = re.compile(r"^CX-[A-Z0-9-]+$")
 PROC_RE = re.compile(r"PROC-[A-Z]+-\d+")
 RISK_RE = re.compile(r"RSK-[A-Z0-9-]+")
 ADR_RE = re.compile(r"ADR-\d{8}-[a-z0-9-]+")
+MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]*]\(([^)]+)\)")
+AUDIT_ROOT_PATH_RE = re.compile(
+    r"^(?:\.github/|\d{2}_[^/]+/|docs/|tools/)"
+)
 VCRM_STATES = {
     "Planned",
     "Implemented",
@@ -52,13 +57,21 @@ def controlled_files(suffix: str):
             yield path
 
 
+def split_markdown_row(line: str) -> list[str]:
+    row = line.strip()
+    if row.startswith("|"):
+        row = row[1:]
+    if row.endswith("|") and not row.endswith(r"\|"):
+        row = row[:-1]
+    return [cell.strip() for cell in re.split(r"(?<!\\)\|", row)]
+
+
 def markdown_rows(path: Path) -> list[list[str]]:
     rows: list[list[str]] = []
     for line in path.read_text(encoding="utf-8-sig").splitlines():
         if not line.startswith("|") or re.match(r"^\|\s*:?-+", line):
             continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        rows.append(cells)
+        rows.append(split_markdown_row(line))
     return rows
 
 
@@ -67,11 +80,103 @@ def csv_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(stream))
 
 
+def validate_markdown_documents(errors: list[str]) -> tuple[int, int]:
+    markdown_count = 0
+    table_count = 0
+
+    for path in controlled_files(".md"):
+        markdown_count += 1
+        expected_columns: int | None = None
+        header_columns: int | None = None
+
+        for line_number, line in enumerate(
+            path.read_text(encoding="utf-8-sig").splitlines(),
+            start=1,
+        ):
+            if line.lstrip().startswith("|"):
+                cells = split_markdown_row(line)
+                is_separator = bool(cells) and all(
+                    re.fullmatch(r"\s*:?-{3,}:?\s*", cell)
+                    for cell in cells
+                )
+                if is_separator:
+                    if header_columns is None:
+                        errors.append(
+                            f"{path.relative_to(ROOT)}:{line_number}: "
+                            "table separator has no header"
+                        )
+                    elif len(cells) != header_columns:
+                        errors.append(
+                            f"{path.relative_to(ROOT)}:{line_number}: "
+                            f"table separator has {len(cells)} columns; "
+                            f"header has {header_columns}"
+                        )
+                    expected_columns = len(cells)
+                    table_count += 1
+                elif expected_columns is not None:
+                    if len(cells) != expected_columns:
+                        errors.append(
+                            f"{path.relative_to(ROOT)}:{line_number}: "
+                            f"table row has {len(cells)} columns; "
+                            f"expected {expected_columns}"
+                        )
+                else:
+                    header_columns = len(cells)
+            else:
+                expected_columns = None
+                header_columns = None
+
+            for raw_target in MARKDOWN_LINK_RE.findall(line):
+                raw_target = raw_target.strip()
+                if raw_target.startswith("<") and ">" in raw_target:
+                    target = raw_target[1 : raw_target.index(">")]
+                else:
+                    target = raw_target.split(maxsplit=1)[0]
+                if (
+                    not target
+                    or target.startswith("#")
+                    or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I)
+                ):
+                    continue
+                target = unquote(target).split("#", 1)[0].split("?", 1)[0]
+                if not target:
+                    continue
+                if target.startswith("/"):
+                    destination = ROOT / target.lstrip("/")
+                else:
+                    destination = path.parent / target
+                if not destination.exists():
+                    errors.append(
+                        f"{path.relative_to(ROOT)}:{line_number}: "
+                        f"broken local link {raw_target!r}"
+                    )
+
+    audit_ledger = ROOT / "docs/AUDIT_REMEDIATION_INDEX_2026-07-27.md"
+    if audit_ledger.exists():
+        for line_number, line in enumerate(
+            audit_ledger.read_text(encoding="utf-8-sig").splitlines(),
+            start=1,
+        ):
+            for token in re.findall(r"`([^`]+)`", line):
+                if not AUDIT_ROOT_PATH_RE.match(token):
+                    continue
+                candidate = token.split(" --", 1)[0]
+                candidate = re.sub(r":\d+(?:-\d+)?$", "", candidate)
+                if not (ROOT / candidate).exists():
+                    errors.append(
+                        f"{audit_ledger.relative_to(ROOT)}:{line_number}: "
+                        f"nonexistent controlled path {candidate!r}"
+                    )
+
+    return markdown_count, table_count
+
+
 def main() -> int:
     errors: list[str] = []
     json_count = 0
     jsonl_count = 0
     python_count = 0
+    markdown_count, table_count = validate_markdown_documents(errors)
 
     for path in controlled_files(".json"):
         try:
@@ -239,6 +344,7 @@ def main() -> int:
         f"{len(procedures)} procedures,",
         f"{len(top_risks)} parent risks,",
         f"{len(adr_files)} ADRs,",
+        f"{markdown_count} Markdown files/{table_count} tables,",
         f"{json_count} JSON files,",
         f"{jsonl_count} JSONL records,",
         f"{python_count} Python files.",
