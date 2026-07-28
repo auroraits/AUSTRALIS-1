@@ -14,6 +14,13 @@ class MadgwickAHRS {
 
   void setBeta(float beta) { beta_ = beta; }
 
+  void reset() {
+    q0_ = 1.0f;
+    q1_ = 0.0f;
+    q2_ = 0.0f;
+    q3_ = 0.0f;
+  }
+
   void updateIMU(float gx, float gy, float gz, float ax, float ay, float az, float dtSeconds) {
     if (dtSeconds <= 0.0f) {
       return;

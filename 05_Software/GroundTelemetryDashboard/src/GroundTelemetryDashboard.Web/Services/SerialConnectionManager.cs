@@ -6,6 +6,8 @@ public sealed class SerialConnectionManager
     private string? _portName;
     private int _baud;
     private bool _connected;
+    private string _state = "DISCONNECTED";
+    private string? _errorCode;
     private long _generation;
 
     public SerialConnectionManager(IConfiguration configuration)
@@ -30,7 +32,9 @@ public sealed class SerialConnectionManager
         {
             _portName = portName.Trim();
             _baud = requestedBaud;
-            _connected = true;
+            _connected = false;
+            _state = "REQUESTED";
+            _errorCode = null;
             _generation++;
             return Snapshot();
         }
@@ -47,6 +51,8 @@ public sealed class SerialConnectionManager
             }
 
             _connected = false;
+            _state = "DISCONNECTED";
+            _errorCode = null;
             _generation++;
             return true;
         }
@@ -60,6 +66,55 @@ public sealed class SerialConnectionManager
         }
     }
 
+    public bool MarkOpening(long generation)
+    {
+        lock (_sync)
+        {
+            if (generation != _generation || _state != "REQUESTED")
+            {
+                return false;
+            }
+            _state = "OPENING";
+            return true;
+        }
+    }
+
+    public bool MarkOpen(long generation)
+    {
+        lock (_sync)
+        {
+            if (generation != _generation || _state != "OPENING")
+            {
+                return false;
+            }
+            _connected = true;
+            _state = "OPEN";
+            _errorCode = null;
+            return true;
+        }
+    }
+
+    public bool MarkFault(long generation, string errorCode)
+    {
+        lock (_sync)
+        {
+            if (generation != _generation)
+            {
+                return false;
+            }
+            _connected = false;
+            _state = "FAULT";
+            _errorCode = errorCode;
+            return true;
+        }
+    }
+
     private ConnectionStatus Snapshot() =>
-        new(_connected, _portName, _baud, _generation);
+        new(
+            _connected,
+            _state,
+            _portName,
+            _baud,
+            _generation,
+            _errorCode);
 }

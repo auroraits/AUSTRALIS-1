@@ -74,6 +74,41 @@ def main() -> int:
         + matrix["M02"] * (matrix["M10"] * matrix["M21"] - matrix["M11"] * matrix["M20"])
     )
     assert determinant == 1, f"Sensor-to-body transform determinant is {determinant}"
+    rows = [
+        [matrix[f"M{row}{column}"] for column in range(3)]
+        for row in range(3)
+    ]
+    columns = [
+        [matrix[f"M{row}{column}"] for row in range(3)]
+        for column in range(3)
+    ]
+    for label, vectors in (("row", rows), ("column", columns)):
+        for index, vector in enumerate(vectors):
+            assert sum(value * value for value in vector) == 1, (
+                f"SENSOR_TO_BODY {label} {index} is not unit length"
+            )
+        for first in range(3):
+            for second in range(first + 1, 3):
+                assert sum(
+                    vectors[first][index] * vectors[second][index]
+                    for index in range(3)
+                ) == 0, (
+                    f"SENSOR_TO_BODY {label}s {first}/{second} are not orthogonal"
+                )
+
+    assert "GYRO_CAL_MIN_VALID" in tx, "Calibration minimum sample gate missing"
+    assert "GYRO_CAL_MAX_MEAN_RAD_S" in tx, "Gyro mean-motion gate missing"
+    assert "GYRO_CAL_MAX_STD_RAD_S" in tx, "Gyro stationarity gate missing"
+    assert "GYRO_CAL_ACCEL_MAX_STD_G" in tx, "Accel stationarity gate missing"
+    assert "resetFilterAfterCalibration" in tx, "Filter reset after calibration missing"
+    assert "g_calibrationValid ? QUALITY_IMU_VALID : 0" in tx, (
+        "IMU quality flag is not gated by calibration validity"
+    )
+    assert re.search(
+        r"bool\s+calibrateGyroBias\(\)\s*\{\s*.*?g_calibrationValid\s*=\s*false",
+        tx,
+        flags=re.DOTALL,
+    ), "A failed recalibration must invalidate prior quality"
 
     print(
         "PASS:",
@@ -83,6 +118,8 @@ def main() -> int:
         f"rf_rate={1_000_000 / tx_period_us:.2f} Hz",
         f"filter_rate={1_000_000 / filter_period_us:.1f} Hz",
         f"det={determinant}",
+        "orthonormal=yes",
+        "calibration_gate=yes",
     )
     return 0
 

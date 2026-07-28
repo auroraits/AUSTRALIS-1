@@ -1,13 +1,11 @@
 using System.Globalization;
+using System.Diagnostics;
 using GroundTelemetryDashboard.Core.Models;
 
 namespace GroundTelemetryDashboard.Core.Parsing;
 
 public static class SerialLineParser
 {
-    private const double QuaternionNormMinSquared = 0.81;
-    private const double QuaternionNormMaxSquared = 1.21;
-
     public static bool TryParseCsvLine(string line, out TelemetrySample? sample) =>
         TryParseCsvLine(line, out sample, out _);
 
@@ -25,34 +23,66 @@ public static class SerialLineParser
         }
 
         var parts = line.Trim().Split(',', StringSplitOptions.TrimEntries);
-        if (parts.Length is not (8 or 12 or 15))
+        if (parts.Length is not (8 or 12 or 15 or 17))
         {
             errorCode = "FIELD_COUNT";
             return false;
         }
 
-        var protocolVersion = parts.Length == 8 ? 1 : parts.Length == 12 ? 3 : 0;
+        var protocolVersion = parts.Length == 8 ? 1 : parts.Length == 12 ? 2 : 0;
         var bootId = 0L;
+        var sensorType = 0;
         var qualityFlags = 0;
+        var dtMs = 0L;
         var seqIndex = 0;
         var timeIndex = 1;
         var sensorStart = 2;
 
-        if (parts.Length == 15)
+        if (parts.Length is 15 or 17)
         {
-            if (!TryParseLong(parts[0], 4, 4, out var parsedVersion) ||
+            if (!TryParseLong(parts[0], 1, 4, out var parsedVersion) ||
                 !TryParseLong(parts[1], 0, uint.MaxValue, out bootId) ||
-                !TryParseLong(parts[4], 0, byte.MaxValue, out var parsedFlags))
+                !TryParseLong(
+                    parts.Length == 17 ? parts[4] : "0",
+                    0,
+                    byte.MaxValue,
+                    out var parsedSensorType) ||
+                !TryParseLong(
+                    parts.Length == 17 ? parts[5] : parts[4],
+                    0,
+                    byte.MaxValue,
+                    out var parsedFlags))
             {
-                errorCode = "V4_HEADER";
+                errorCode = "VERSIONED_HEADER";
                 return false;
             }
 
             protocolVersion = (int)parsedVersion;
+            sensorType = (int)parsedSensorType;
             qualityFlags = (int)parsedFlags;
             seqIndex = 2;
             timeIndex = 3;
-            sensorStart = 5;
+            sensorStart = parts.Length == 17 ? 6 : 5;
+            if (parts.Length == 17 &&
+                !TryParseLong(parts[16], 0, ushort.MaxValue, out dtMs))
+            {
+                errorCode = "DT_MS";
+                return false;
+            }
+            if (protocolVersion < 4 &&
+                (bootId != 0 || qualityFlags != 0))
+            {
+                errorCode = "LEGACY_HEADER";
+                return false;
+            }
+            if (protocolVersion == 4)
+            {
+                if (parts.Length != 17)
+                {
+                    errorCode = "V4_REQUIRES_SENSOR_AND_DT";
+                    return false;
+                }
+            }
         }
 
         if (!TryParseLong(parts[seqIndex], 0, uint.MaxValue, out var seq) ||
@@ -87,24 +117,14 @@ public static class SerialLineParser
             values[6] = 1.0;
         }
 
-        var normSquared =
-            values[6] * values[6] +
-            values[7] * values[7] +
-            values[8] * values[8] +
-            values[9] * values[9];
-        if (normSquared < QuaternionNormMinSquared ||
-            normSquared > QuaternionNormMaxSquared)
-        {
-            errorCode = "QUATERNION_NORM";
-            return false;
-        }
-
         sample = new TelemetrySample(
             protocolVersion,
             bootId,
             seq,
             tMs,
+            sensorType,
             qualityFlags,
+            dtMs,
             values[0],
             values[1],
             values[2],
@@ -115,7 +135,9 @@ public static class SerialLineParser
             values[7],
             values[8],
             values[9],
-            DateTime.UtcNow);
+            DateTime.UtcNow,
+            Stopwatch.GetTimestamp(),
+            "HOST_UTC_UNVERIFIED");
         return true;
     }
 

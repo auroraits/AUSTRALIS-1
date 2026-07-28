@@ -16,6 +16,7 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddSingleton<TelemetryState>();
 builder.Services.AddSingleton<EvidenceRecorder>();
 builder.Services.AddSingleton<SerialConnectionManager>();
+builder.Services.AddSingleton<ControlRequestToken>();
 builder.Services.AddHostedService<SerialTelemetryHostedService>();
 
 var app = builder.Build();
@@ -54,8 +55,15 @@ app.MapGet("/api/evidence/status", (EvidenceRecorder evidence) =>
         ? null
         : Path.Combine(evidence.RunDirectory, "evidence.jsonl");
     var verification = evidenceFile is not null && File.Exists(evidenceFile)
-        ? EvidenceVerifier.VerifyFile(evidenceFile)
-        : new EvidenceVerificationResult(false, 0, "EVIDENCE_DISABLED_OR_MISSING");
+        ? EvidenceVerifier.VerifyBundle(
+            evidence.RunDirectory!,
+            requireClosed: false)
+        : new EvidenceVerificationResult(
+            false,
+            0,
+            "INVALID",
+            "EVIDENCE_DISABLED_OR_MISSING",
+            null);
     return Results.Ok(new
     {
         evidence.Enabled,
@@ -64,11 +72,21 @@ app.MapGet("/api/evidence/status", (EvidenceRecorder evidence) =>
         verification
     });
 });
+app.MapGet(
+    "/api/control-token",
+    (ControlRequestToken token) => Results.Ok(new { token = token.Value }));
 app.MapPost("/api/connect", (
     ConnectRequest request,
+    HttpRequest httpRequest,
     SerialConnectionManager manager,
-    EvidenceRecorder evidence) =>
+    EvidenceRecorder evidence,
+    ControlRequestToken controlToken) =>
 {
+    if (!controlToken.Validate(
+            httpRequest.Headers["X-Australis-Control-Token"].FirstOrDefault()))
+    {
+        return Results.Unauthorized();
+    }
     var knownPorts = SerialPort.GetPortNames();
     if (!knownPorts.Contains(
             request.PortName,
@@ -93,9 +111,16 @@ app.MapPost("/api/connect", (
     }
 });
 app.MapPost("/api/disconnect", (
+    HttpRequest httpRequest,
     SerialConnectionManager manager,
-    EvidenceRecorder evidence) =>
+    EvidenceRecorder evidence,
+    ControlRequestToken controlToken) =>
 {
+    if (!controlToken.Validate(
+            httpRequest.Headers["X-Australis-Control-Token"].FirstOrDefault()))
+    {
+        return Results.Unauthorized();
+    }
     manager.Disconnect();
     var status = manager.GetStatus();
     evidence.RecordConnection(status, "requested_disconnect");

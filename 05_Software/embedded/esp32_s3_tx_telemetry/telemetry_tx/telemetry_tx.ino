@@ -32,6 +32,12 @@ static const float MADGWICK_BETA = 0.12f;
 static const uint32_t FILTER_DT_US = 10000UL;        // 100 Hz filtro
 static const uint32_t TX_DT_US = 500000UL;           // 2 Hz RF, con margen de airtime
 static const uint16_t GYRO_CAL_SAMPLES = 400;
+static const uint16_t GYRO_CAL_MIN_VALID = 380;
+static const float GYRO_CAL_MAX_MEAN_RAD_S = 0.035f;
+static const float GYRO_CAL_MAX_STD_RAD_S = 0.02f;
+static const float GYRO_CAL_ACCEL_MEAN_MIN_G = 0.90f;
+static const float GYRO_CAL_ACCEL_MEAN_MAX_G = 1.10f;
+static const float GYRO_CAL_ACCEL_MAX_STD_G = 0.03f;
 
 // SENSOR_TO_BODY debe ser una rotacion cartesiana derecha. Identidad es el
 // unico baseline permitido hasta medir la orientacion fisica del sensor.
@@ -43,6 +49,22 @@ static_assert(
       - M01 * (M10 * M22 - M12 * M20)
       + M02 * (M10 * M21 - M11 * M20) == 1,
     "SENSOR_TO_BODY must have determinant +1");
+static_assert(
+    M00 * M00 + M01 * M01 + M02 * M02 == 1 &&
+    M10 * M10 + M11 * M11 + M12 * M12 == 1 &&
+    M20 * M20 + M21 * M21 + M22 * M22 == 1 &&
+    M00 * M10 + M01 * M11 + M02 * M12 == 0 &&
+    M00 * M20 + M01 * M21 + M02 * M22 == 0 &&
+    M10 * M20 + M11 * M21 + M12 * M22 == 0,
+    "SENSOR_TO_BODY rows must be orthonormal");
+static_assert(
+    M00 * M00 + M10 * M10 + M20 * M20 == 1 &&
+    M01 * M01 + M11 * M11 + M21 * M21 == 1 &&
+    M02 * M02 + M12 * M12 + M22 * M22 == 1 &&
+    M00 * M01 + M10 * M11 + M20 * M21 == 0 &&
+    M00 * M02 + M10 * M12 + M20 * M22 == 0 &&
+    M01 * M02 + M11 * M12 + M21 * M22 == 0,
+    "SENSOR_TO_BODY columns must be orthonormal");
 
 // RH_ASK en 2000 bps (OOK/ASK)
 RH_ASK ask(2000, 255, TX_PIN, 255, false);
@@ -100,6 +122,12 @@ static uint8_t g_mpuAddr = MPU_ADDR_DEFAULT;
 static float g_gyroBiasX = 0.0f;
 static float g_gyroBiasY = 0.0f;
 static float g_gyroBiasZ = 0.0f;
+static bool g_calibrationValid = false;
+static uint16_t g_calibrationValidSamples = 0;
+static float g_calibrationGyroStdMax = NAN;
+static float g_calibrationGyroMeanNorm = NAN;
+static float g_calibrationAccelMean = NAN;
+static float g_calibrationAccelStd = NAN;
 
 static String g_serialCmd;
 
@@ -171,28 +199,112 @@ void mapAxes(float &ax, float &ay, float &az, float &gx, float &gy, float &gz) {
   mapVectorToBody(gx, gy, gz);
 }
 
-void calibrateGyroBias() {
+bool calibrateGyroBias() {
+  // El artículo debe permanecer inmóvil durante toda esta adquisición. Un
+  // intento fallido invalida el flag de calidad hasta una calibración exitosa.
+  g_calibrationValid = false;
   double sumX = 0.0;
   double sumY = 0.0;
   double sumZ = 0.0;
+  double sumSqX = 0.0;
+  double sumSqY = 0.0;
+  double sumSqZ = 0.0;
+  double sumAccelNorm = 0.0;
+  double sumSqAccelNorm = 0.0;
   uint16_t valid = 0;
 
   for (uint16_t i = 0; i < GYRO_CAL_SAMPLES; ++i) {
     int16_t axRaw, ayRaw, azRaw, gxRaw, gyRaw, gzRaw;
     if (readImu(axRaw, ayRaw, azRaw, gxRaw, gyRaw, gzRaw)) {
-      sumX += (((float)gxRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
-      sumY += (((float)gyRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
-      sumZ += (((float)gzRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double gx =
+          (((double)gxRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double gy =
+          (((double)gyRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double gz =
+          (((double)gzRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double ax = ((double)axRaw) / ACCEL_LSB_PER_G;
+      const double ay = ((double)ayRaw) / ACCEL_LSB_PER_G;
+      const double az = ((double)azRaw) / ACCEL_LSB_PER_G;
+      const double accelNorm = sqrt(ax * ax + ay * ay + az * az);
+      sumX += gx;
+      sumY += gy;
+      sumZ += gz;
+      sumSqX += gx * gx;
+      sumSqY += gy * gy;
+      sumSqZ += gz * gz;
+      sumAccelNorm += accelNorm;
+      sumSqAccelNorm += accelNorm * accelNorm;
       valid++;
     }
     delay(5);
   }
 
-  if (valid > 0) {
-    g_gyroBiasX = (float)(sumX / valid);
-    g_gyroBiasY = (float)(sumY / valid);
-    g_gyroBiasZ = (float)(sumZ / valid);
+  g_calibrationValidSamples = valid;
+  if (valid < GYRO_CAL_MIN_VALID) {
+    g_calibrationGyroStdMax = NAN;
+    g_calibrationGyroMeanNorm = NAN;
+    g_calibrationAccelMean = NAN;
+    g_calibrationAccelStd = NAN;
+    return false;
   }
+
+  const double meanX = sumX / valid;
+  const double meanY = sumY / valid;
+  const double meanZ = sumZ / valid;
+  const double varX = max(0.0, sumSqX / valid - meanX * meanX);
+  const double varY = max(0.0, sumSqY / valid - meanY * meanY);
+  const double varZ = max(0.0, sumSqZ / valid - meanZ * meanZ);
+  const double accelMean = sumAccelNorm / valid;
+  const double accelVariance =
+      max(0.0, sumSqAccelNorm / valid - accelMean * accelMean);
+  const double gyroStdMax =
+      max(sqrt(varX), max(sqrt(varY), sqrt(varZ)));
+  const double gyroMeanNorm =
+      sqrt(meanX * meanX + meanY * meanY + meanZ * meanZ);
+  const double accelStd = sqrt(accelVariance);
+
+  g_calibrationGyroStdMax = (float)gyroStdMax;
+  g_calibrationGyroMeanNorm = (float)gyroMeanNorm;
+  g_calibrationAccelMean = (float)accelMean;
+  g_calibrationAccelStd = (float)accelStd;
+  if (gyroMeanNorm > GYRO_CAL_MAX_MEAN_RAD_S ||
+      gyroStdMax > GYRO_CAL_MAX_STD_RAD_S ||
+      accelMean < GYRO_CAL_ACCEL_MEAN_MIN_G ||
+      accelMean > GYRO_CAL_ACCEL_MEAN_MAX_G ||
+      accelStd > GYRO_CAL_ACCEL_MAX_STD_G) {
+    return false;
+  }
+
+  g_gyroBiasX = (float)meanX;
+  g_gyroBiasY = (float)meanY;
+  g_gyroBiasZ = (float)meanZ;
+  g_calibrationValid = true;
+  return true;
+}
+
+void resetFilterAfterCalibration() {
+  madgwick.reset();
+  const uint32_t nowUs = micros();
+  g_lastFilterUs = nowUs;
+  g_lastTxUs = nowUs;
+}
+
+void printCalibrationStatus(bool attemptValid) {
+  Serial.printf(
+      "#CAL,status=%s,active_valid=%u,valid_samples=%u,"
+      "gyro_mean_norm_rad_s=%.6f,gyro_std_max_rad_s=%.6f,"
+      "accel_mean_g=%.6f,accel_std_g=%.6f,"
+      "gyro_bias=%.6f,%.6f,%.6f\n",
+      attemptValid ? "PASS" : "FAIL_STATIONARY_CHECK",
+      g_calibrationValid ? 1U : 0U,
+      g_calibrationValidSamples,
+      g_calibrationGyroMeanNorm,
+      g_calibrationGyroStdMax,
+      g_calibrationAccelMean,
+      g_calibrationAccelStd,
+      g_gyroBiasX,
+      g_gyroBiasY,
+      g_gyroBiasZ);
 }
 
 void handleSerialCommands() {
@@ -204,11 +316,12 @@ void handleSerialCommands() {
       g_serialCmd.toUpperCase();
 
       if (g_serialCmd == "CAL" || g_serialCmd == "RECAL") {
-        calibrateGyroBias();
-        Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
+        const bool calibrationAttemptValid = calibrateGyroBias();
+        resetFilterAfterCalibration();
+        printCalibrationStatus(calibrationAttemptValid);
       } else if (g_serialCmd == "INFO") {
         Serial.printf("#SENSOR:MPU6050 addr=0x%02X\n", g_mpuAddr);
-        Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
+        printCalibrationStatus(g_calibrationValid);
       }
       g_serialCmd = "";
       continue;
@@ -261,16 +374,14 @@ void setup() {
     Serial.println("ERR: MPU6050 init fail");
   }
 
-  calibrateGyroBias();
-
-  g_lastFilterUs = micros();
-  g_lastTxUs = g_lastFilterUs;
+  const bool calibrationAttemptValid = calibrateGyroBias();
+  resetFilterAfterCalibration();
 
   Serial.printf("#SENSOR:MPU6050 addr=0x%02X\n", g_mpuAddr);
   Serial.printf("#BOOT,id=%08lX packet_version=%u rf_rate_hz=2\n",
                 (unsigned long)g_bootId,
                 PACKET_VERSION);
-  Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
+  printCalibrationStatus(calibrationAttemptValid);
   Serial.println("Telemetry TX ready");
 }
 
@@ -318,9 +429,10 @@ void loop() {
   pkt.magic = PACKET_MAGIC;
   pkt.version = PACKET_VERSION;
   pkt.sensor_type = SENSOR_TYPE_MPU6050;
-  pkt.quality_flags = QUALITY_IMU_VALID;
+  pkt.quality_flags = g_calibrationValid ? QUALITY_IMU_VALID : 0;
   const float accelNormG = sqrtf(axBody * axBody + ayBody * ayBody + azBody * azBody);
-  if (accelNormG >= 0.5f && accelNormG <= 1.5f) {
+  if (g_calibrationValid &&
+      accelNormG >= 0.5f && accelNormG <= 1.5f) {
     pkt.quality_flags |= QUALITY_ACCEL_REFERENCE_VALID;
   }
   pkt.boot_id = g_bootId;
