@@ -510,7 +510,12 @@ try {
     frameHeatCapacity_J_K:450,
     batteryHeatCapacity_J_K:100,
     cm5HeatCapacity_J_K:60,
-    panelTemperatureCoefficient_per_K:-0.0035
+    panelTemperatureCoefficient_per_K:-0.0035,
+    initialNodeTemperature_K:293.15,
+    numericalSubstepMax_s:20,
+    numericalClampMin_K:150,
+    numericalClampMax_K:450,
+    cm5ForcedOffInEclipse:true
   });
 
   const BA = { latDeg: -34.6037, lonDeg: -58.3816, heightKm: 0.03 };
@@ -1281,6 +1286,9 @@ try {
     const referenceThermal = allRadiatorResults[5]; // -Z only for 3D visualization
     const hotValues = allRadiatorResults.map(r => r.hotMaxC);
     const battValues = allRadiatorResults.map(r => r.battMinEclipseC);
+    const battMinAllValues = allRadiatorResults.map(r => r.battMinAllC);
+    const battMaxAllValues = allRadiatorResults.map(r => r.battMaxAllC);
+    const battMinSunlitValues = allRadiatorResults.map(r => r.battMinSunlitC);
     const energyValues = allRadiatorResults.map(r => r.panelElectricalWhPerDay);
 
     return {
@@ -1296,6 +1304,9 @@ try {
       referenceRadiatorFace: referenceThermal.radiatorFace,
       hotMaxCRange: [Math.min(...hotValues), Math.max(...hotValues)],
       battMinEclipseCRange: [Math.min(...battValues), Math.max(...battValues)],
+      battMinAllCRange: [Math.min(...battMinAllValues), Math.max(...battMinAllValues)],
+      battMaxAllCRange: [Math.min(...battMaxAllValues), Math.max(...battMaxAllValues)],
+      battMinSunlitCRange: [Math.min(...battMinSunlitValues), Math.max(...battMinSunlitValues)],
       panelElectricalWhPerDayRange: [Math.min(...energyValues), Math.max(...energyValues)],
       allRadiators: allRadiatorResults
     };
@@ -1327,8 +1338,13 @@ try {
     G_cm5_face[radiatorFace-1] = THERMAL_ASSUMPTIONS.cm5RadiatorConductance_W_K;
     G_batt_face[views.nadirIndex-1] = THERMAL_ASSUMPTIONS.batteryNadirConductance_W_K;
 
-    let T_face = new Array(6).fill(293.15);
-    let T_frame = 293.15, T_batt = 293.15, T_cm5 = 293.15;
+    const initialTemperatureK = THERMAL_ASSUMPTIONS.initialNodeTemperature_K;
+    const numericalMinK = THERMAL_ASSUMPTIONS.numericalClampMin_K;
+    const numericalMaxK = THERMAL_ASSUMPTIONS.numericalClampMax_K;
+    let T_face = new Array(6).fill(initialTemperatureK);
+    let T_frame = initialTemperatureK;
+    let T_batt = initialTemperatureK;
+    let T_cm5 = initialTemperatureK;
     const C_face = THERMAL_ASSUMPTIONS.faceHeatCapacity_J_K.slice();
     // Unverified placeholders; model remains incomplete until CAD/test correlation.
     const C_frame = THERMAL_ASSUMPTIONS.frameHeatCapacity_J_K;
@@ -1350,6 +1366,9 @@ try {
 
     let hotMaxC = -1e9;
     let battMinEclipseC = 1e9;
+    let battMinSunlitC = 1e9;
+    let battMinAllC = 1e9;
+    let battMaxAllC = -1e9;
     const panelFaceEnergyWh = new Array(6).fill(0);
     let netPanelWh = 0;
 
@@ -1362,7 +1381,7 @@ try {
       // CM5 power model: active during duty window, OFF (or idle) outside
       const inDutyWindow = ((time % cm5Cycle) < cm5Duty * cm5Cycle);
       let P_cm5;
-      if(s.eclipse){
+      if(s.eclipse && THERMAL_ASSUMPTIONS.cm5ForcedOffInEclipse){
         P_cm5 = 0; // CM5 off during eclipse
       } else if(inDutyWindow){
         P_cm5 = P_cm5_active;
@@ -1370,7 +1389,10 @@ try {
         P_cm5 = cm5OffIsIdle ? P_cm5_idle : 0; // OFF = 0W, idle = P_idle
       }
 
-      const substeps = Math.max(1, Math.ceil(dtSec / 20));
+      const substeps = Math.max(
+        1,
+        Math.ceil(dtSec / THERMAL_ASSUMPTIONS.numericalSubstepMax_s)
+      );
       const h = dtSec / substeps;
 
       // Albedo modulation factor from series (varies with orbital position)
@@ -1383,10 +1405,26 @@ try {
 
         for(let i=0;i<6;i++){
           const inc = Number.isFinite(s.sunBody[i]) ? clamp(s.sunBody[i], 0, 1) : 0;
-          const Ti = clamp(finiteOr(T_face[i], 293.15), 150, 450);
-          const Tf = clamp(finiteOr(T_frame, 293.15), 150, 450);
-          const Tb = clamp(finiteOr(T_batt, 293.15), 150, 450);
-          const Tc = clamp(finiteOr(T_cm5, 293.15), 150, 450);
+          const Ti = clamp(
+            finiteOr(T_face[i], initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
+          const Tf = clamp(
+            finiteOr(T_frame, initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
+          const Tb = clamp(
+            finiteOr(T_batt, initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
+          const Tc = clamp(
+            finiteOr(T_cm5, initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
 
           const incidentSolar = SOLAR_CONSTANT_W_M2 * areas[i] * inc;
           const qsun = alphaSolar[i] * incidentSolar;
@@ -1413,35 +1451,93 @@ try {
           P_panelGross += pface;
         }
 
-        const Tf = clamp(finiteOr(T_frame, 293.15), 150, 450);
-        const Tb = clamp(finiteOr(T_batt, 293.15), 150, 450);
-        const Tc = clamp(finiteOr(T_cm5, 293.15), 150, 450);
+        const Tf = clamp(
+          finiteOr(T_frame, initialTemperatureK),
+          numericalMinK,
+          numericalMaxK
+        );
+        const Tb = clamp(
+          finiteOr(T_batt, initialTemperatureK),
+          numericalMinK,
+          numericalMaxK
+        );
+        const Tc = clamp(
+          finiteOr(T_cm5, initialTemperatureK),
+          numericalMinK,
+          numericalMaxK
+        );
         const dT_frame = (
           -qFrameToFace.reduce((acc,q)=>acc + q, 0)
           + G_cm5_frame * (Tc - Tf)
           + G_batt_frame * (Tb - Tf)
         ) / C_frame;
 
-        const sumQcm5 = G_cm5_face.reduce((acc,g,i)=>acc + g * (Tc - clamp(finiteOr(T_face[i],293.15),150,450)), 0);
+        const sumQcm5 = G_cm5_face.reduce(
+          (acc,g,i)=>acc + g * (
+            Tc - clamp(
+              finiteOr(T_face[i], initialTemperatureK),
+              numericalMinK,
+              numericalMaxK
+            )
+          ),
+          0
+        );
         const dT_cm5 = (P_cm5 - G_cm5_frame * (Tc - Tf) - sumQcm5) / C_cm5;
-        const sumQbatt = G_batt_face.reduce((acc,g,i)=>acc + g * (Tb - clamp(finiteOr(T_face[i],293.15),150,450)), 0);
+        const sumQbatt = G_batt_face.reduce(
+          (acc,g,i)=>acc + g * (
+            Tb - clamp(
+              finiteOr(T_face[i], initialTemperatureK),
+              numericalMinK,
+              numericalMaxK
+            )
+          ),
+          0
+        );
         const dT_batt = (- G_batt_frame * (Tb - Tf) - sumQbatt) / C_batt;
 
         for(let i=0;i<6;i++){
-          T_face[i] = clamp(finiteOr(T_face[i],293.15) + h * dT_face[i], 150, 450);
+          T_face[i] = clamp(
+            finiteOr(T_face[i], initialTemperatureK) + h * dT_face[i],
+            numericalMinK,
+            numericalMaxK
+          );
         }
-        T_frame = clamp(finiteOr(T_frame,293.15) + h * dT_frame, 150, 450);
-        T_cm5 = clamp(finiteOr(T_cm5,293.15) + h * dT_cm5, 150, 450);
-        T_batt = clamp(finiteOr(T_batt,293.15) + h * dT_batt, 150, 450);
+        T_frame = clamp(
+          finiteOr(T_frame, initialTemperatureK) + h * dT_frame,
+          numericalMinK,
+          numericalMaxK
+        );
+        T_cm5 = clamp(
+          finiteOr(T_cm5, initialTemperatureK) + h * dT_cm5,
+          numericalMinK,
+          numericalMaxK
+        );
+        T_batt = clamp(
+          finiteOr(T_batt, initialTemperatureK) + h * dT_batt,
+          numericalMinK,
+          numericalMaxK
+        );
 
-        if(!s.eclipse) hotMaxC = Math.max(hotMaxC, T_cm5 - K0);
-        if(s.eclipse) battMinEclipseC = Math.min(battMinEclipseC, T_batt - K0);
+        const cm5C = T_cm5 - K0;
+        const battC = T_batt - K0;
+        hotMaxC = Math.max(hotMaxC, cm5C);
+        battMinAllC = Math.min(battMinAllC, battC);
+        battMaxAllC = Math.max(battMaxAllC, battC);
+        if(s.eclipse) {
+          battMinEclipseC = Math.min(battMinEclipseC, battC);
+        } else {
+          // Sunlit is only a charge-eligibility proxy; charge state is not modeled.
+          battMinSunlitC = Math.min(battMinSunlitC, battC);
+        }
         netPanelWh += P_panelGross * uiP.epsEff * h / 3600;
       }
     }
 
     if(!Number.isFinite(hotMaxC) || hotMaxC < -200) hotMaxC = T_cm5 - K0;
     if(!Number.isFinite(battMinEclipseC) || battMinEclipseC > 200) battMinEclipseC = T_batt - K0;
+    if(!Number.isFinite(battMinSunlitC) || battMinSunlitC > 200) battMinSunlitC = T_batt - K0;
+    if(!Number.isFinite(battMinAllC) || battMinAllC > 200) battMinAllC = T_batt - K0;
+    if(!Number.isFinite(battMaxAllC) || battMaxAllC < -200) battMaxAllC = T_batt - K0;
     if(!Number.isFinite(netPanelWh)) netPanelWh = 0;
     for(let i=0;i<panelFaceEnergyWh.length;i++){
       if(!Number.isFinite(panelFaceEnergyWh[i])) panelFaceEnergyWh[i] = 0;
@@ -1453,6 +1549,9 @@ try {
     return {
       hotMaxC,
       battMinEclipseC,
+      battMinSunlitC,
+      battMinAllC,
+      battMaxAllC,
       panelElectricalWh: netPanelWh,
       panelElectricalWhPerDay,
       panelFaceEnergyWh,
@@ -1598,7 +1697,7 @@ try {
       </div>`;
     document.getElementById('bestSummary').innerHTML = summary;
 
-    let html = '<table><thead><tr><th>Caso</th><th>Actitud ideal</th><th>i SSO</th><th>alt</th><th>LTAN</th><th>drift LTAN</th><th>Pases BA</th><th>Eclipse</th><th>Wh/día (rango 6 rad)</th><th>Tmax CM5 (rango)</th><th>Tmin batt eclipse (rango)</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Caso</th><th>Actitud ideal</th><th>i SSO</th><th>alt</th><th>LTAN</th><th>drift LTAN</th><th>Pases BA</th><th>Eclipse</th><th>Wh/día (rango 6 rad)</th><th>Tmax CM5 all (rango)</th><th>T batt all (rango global)</th><th>Tmin batt sunlit (proxy carga)</th><th>Tmin batt eclipse</th></tr></thead><tbody>';
     rows.slice(0,20).forEach((r,idx)=>{
       html += `<tr>
         <td>${idx+1}</td>
@@ -1611,6 +1710,8 @@ try {
         <td>${fmtNum(r.eclipseFraction*100,1,'%')}</td>
         <td>${fmtNum(r.panelElectricalWhPerDayRange[0],2)}–${fmtNum(r.panelElectricalWhPerDayRange[1],2)}</td>
         <td>${fmtNum(r.hotMaxCRange[0],1,'°C')}–${fmtNum(r.hotMaxCRange[1],1,'°C')}</td>
+        <td>${fmtNum(r.battMinAllCRange[0],1,'°C')}–${fmtNum(r.battMaxAllCRange[1],1,'°C')}</td>
+        <td>${fmtNum(r.battMinSunlitCRange[0],1,'°C')}–${fmtNum(r.battMinSunlitCRange[1],1,'°C')}</td>
         <td>${fmtNum(r.battMinEclipseCRange[0],1,'°C')}–${fmtNum(r.battMinEclipseCRange[1],1,'°C')}</td>
       </tr>`;
     });
@@ -1771,7 +1872,9 @@ try {
     ];
     faces.forEach(f => header.push(
       `Rad${f}_Wh_per_day`, `Rad${f}_Tcm5max_C`,
-      `Rad${f}_TbattMinEclipse_C`, `Rad${f}_Panels`
+      `Rad${f}_TbattMinAll_C`, `Rad${f}_TbattMaxAll_C`,
+      `Rad${f}_TbattMinSunlit_C`, `Rad${f}_TbattMinEclipse_C`,
+      `Rad${f}_Panels`
     ));
 
     const rows = lastSweepResults.map((r,i) => {
@@ -1790,12 +1893,15 @@ try {
           cells.push(
             finiteOr(ar.panelElectricalWhPerDay,0).toFixed(6),
             finiteOr(ar.hotMaxC,999).toFixed(3),
+            finiteOr(ar.battMinAllC,-999).toFixed(3),
+            finiteOr(ar.battMaxAllC,999).toFixed(3),
+            finiteOr(ar.battMinSunlitC,-999).toFixed(3),
             finiteOr(ar.battMinEclipseC,-999).toFixed(3),
             ar.panelFaces.map(f=>faceName(f)).join('+')
           );
         }
       } else {
-        for(let fi=0; fi<6; fi++) cells.push('','','','');
+        for(let fi=0; fi<6; fi++) cells.push('','','','','','','');
       }
       return cells.map(csvCell).join(',');
     });

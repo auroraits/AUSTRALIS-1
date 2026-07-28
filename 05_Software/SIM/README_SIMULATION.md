@@ -29,7 +29,11 @@ Correcciones incluidas:
 - propiedades ópticas, masas y conductancias no derivadas del CAD/ensayo;
 - solo se disipa CM5; faltan OBC, EPS, RF, ADCS, batería y storage;
 - `gemma4:e2b`/CM5 usa potencia ingresada por usuario, no evidencia;
-- no se modela charge-inhibit, Tmax de batería ni estado de carga;
+- el CM5 se fuerza apagado durante eclipse como hipótesis del modelo;
+- `Tmin batt sunlit` es solo un proxy de elegibilidad de carga: no se modelan
+  corriente, estado de carga ni charge-inhibit;
+- temperatura inicial, substep y clamps numéricos se exportan como hipótesis
+  y requieren prueba de convergencia;
 - no hay correlación thermal balance/TVAC.
 
 Por ello, el simulador exporta todos los casos en orden de entrada, sin

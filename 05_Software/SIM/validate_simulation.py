@@ -40,6 +40,9 @@ def main() -> int:
         "Earth emission": "qradEarthOut",
         "PV heat extraction": "- pface - qradSpace - qradEarthOut",
         "daily normalization": "panelElectricalWhPerDay",
+        "CM5 all-state maximum": "hotMaxC = Math.max(hotMaxC, cm5C)",
+        "sunlit battery metric": "battMinSunlitC",
+        "numerical assumptions": "numericalSubstepMax_s",
         "manifest": "csvSha256",
         "incomplete status": "INCOMPLETE_NOT_FOR_DESIGN_DECISIONS",
     }
@@ -56,6 +59,7 @@ def main() -> int:
         "min-max ranking": "normalizeScore(",
         "global score": "totalScore",
         "automatic best radiator": "BestRad",
+        "sun-only CM5 maximum": "if(!s.eclipse) hotMaxC",
     }
     for label, token in forbidden.items():
         if token in text:
