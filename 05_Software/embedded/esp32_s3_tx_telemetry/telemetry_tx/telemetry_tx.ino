@@ -109,7 +109,10 @@ enum : uint8_t {
   PACKET_VERSION = 4,
   SENSOR_TYPE_MPU6050 = 1,
   QUALITY_IMU_VALID = 1 << 0,
-  QUALITY_ACCEL_REFERENCE_VALID = 1 << 1
+  QUALITY_ACCEL_REFERENCE_VALID = 1 << 1,
+  TX_STARTED = 0,
+  TX_BUSY = 1,
+  TX_REJECTED = 2
 };
 
 static uint32_t g_seq = 0;
@@ -335,14 +338,8 @@ void handleSerialCommands() {
 
 // La transferencia RH_ASK es asincrona. No se usa waitPacketSent(): el filtro
 // de 100 Hz debe continuar mientras los bits salen por interrupciones.
-enum TxStartResult : uint8_t {
-  TX_STARTED,
-  TX_BUSY,
-  TX_REJECTED
-};
-
-TxStartResult tryStartTransmit(const TelemetryPacket &pkt) {
-  if (ask.mode() == RHModeTx) {
+uint8_t tryStartTransmit(const TelemetryPacket &pkt) {
+  if (ask.mode() == RHGenericDriver::RHModeTx) {
     return TX_BUSY;
   }
   const uint8_t *payload = reinterpret_cast<const uint8_t *>(&pkt);
@@ -457,7 +454,7 @@ void loop() {
   }
 
   g_lastPacket.seq = g_seq;
-  const TxStartResult txResult = tryStartTransmit(g_lastPacket);
+  const uint8_t txResult = tryStartTransmit(g_lastPacket);
   if (txResult == TX_BUSY) {
     g_txBusySkips++;
     return;
