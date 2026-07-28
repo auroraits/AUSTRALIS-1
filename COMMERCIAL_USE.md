@@ -1,5 +1,7 @@
 # Commercial use
 
+Status: **No operational licensing contact designated**
+
 AUSTRALIS-1 / DIY-Nanosat is public for education, personal experimentation,
 non-commercial research and non-commercial open collaboration.
 
@@ -7,7 +9,13 @@ The public license does not authorize commercial exploitation.
 
 ## Commercial use requires permission
 
-Contact the project owner before using this repository for:
+The legal identity authorized to grant permission and the operational contact
+channel are both **TBD**. Until they are designated in a counsel-reviewed
+revision of this file, no email, issue, pull request, website message or informal
+conversation constitutes commercial permission.
+
+Written permission from the confirmed rightsholder is required before using this
+repository for:
 
 - paid products, paid services, consulting deliverables, contract R&D or client work;
 - manufacturing, selling, licensing, sublicensing or distributing derived hardware;

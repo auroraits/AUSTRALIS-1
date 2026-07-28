@@ -5,15 +5,18 @@ generated build outputs and binary reference archives in the public tree.
 
 ## AI model ecosystem
 
-- IBM Granite model family: upstream models are published by IBM. Granite 4.0
-  documentation and the Hugging Face model card identify Granite 4.0 350M as
-  Apache 2.0 licensed. In this repository, the Granite 350M family is treated as
-  the compact flight-candidate line, not as a flight-ready model.
+- `gemma4:e2b` is the current evaluation candidate. The mutable tag is not an
+  immutable identity and does not prove license, provenance or reproducibility.
+  Upstream model identity, digest, runtime build and applicable license must be
+  captured before benchmarking or redistribution. No weights are vendored here.
+- IBM Granite model families are historical/deferred in the current baseline.
+  The prior repository evidence attributed to Granite 350M was executed with
+  Granite 3.1 2B and cannot validate Granite 350M.
   - https://www.ibm.com/granite/docs/models/granite
   - https://huggingface.co/ibm-granite/granite-4.0-350m-base
 - IBM Granite 3.1 2B Instruct is an Apache 2.0 upstream model used only for
-  bench and ground experimentation in this repository, not as the primary flight
-  candidate.
+  historical bench and ground experimentation in this repository, not as the
+  current flight candidate.
   - https://huggingface.co/ibm-granite/granite-3.1-2b-instruct
 - Hugging Face Transformers, PEFT, TRL and Datasets are third-party dependencies
   used by the AI payload scripts. They remain under their upstream licenses.
@@ -26,9 +29,10 @@ upstream license.
 
 - `System.IO.Ports` is referenced as a NuGet dependency by the .NET dashboard.
   Generated DLLs and native runtime libraries are not stored in the public tree.
-- Browser-side dashboard dependencies are loaded from public CDNs in the current
-  prototype (`SignalR`, `Chart.js`, `three.js`). Review their upstream licenses
-  before redistributing a packaged offline build.
+- Browser-side dashboard dependencies must be pinned and packaged with their
+  upstream notices for offline/reproducible operation. The release manifest
+  records exact versions and digests; an unpinned CDN reference is not accepted
+  as verification evidence.
 
 ## Hardware and reference designs
 

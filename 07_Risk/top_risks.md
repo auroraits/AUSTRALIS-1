@@ -65,6 +65,7 @@ No hay riesgos cerrados en esta revisión.
 | RSK-GND-02 | Viento/clima/torre sin control → daño/indisponibilidad | 3 | 5 | 15 | Ground/Structure | hazard threshold sin park/inhibit | structural/weather analysis, calibrated sensors, E-stop | TRR | Open |
 | RSK-COST-01 | BOM/LCC sin totales/fuentes → proyecto inviable tardíamente | 4 | 4 | 16 | Cost/PM | review sin low/likely/high y reserves | WBS/LCC, BOE, FX/date, NRE, launch/tests/spares | PDR/CDR | Open |
 | RSK-SUP-01 | EOL/import-only/single source → rediseño/schedule slip | 4 | 3 | 12 | Procurement | no alternativa/lead/lifecycle | regional alternatives, quotes, lifecycle and spares | PDR/CDR | Open |
+| RSK-LEGAL-01 | Titularidad/licencias/provenance ambiguas → distribución o licencia no autorizada | 4 | 5 | 20 | Legal/Configuration | release sin chain of title, textos exactos, SPDX/manifest o contacto autorizado | revisión profesional, manifest de provenance/licencias y sign-off de release | Before release | Open |
 | RSK-PROG-01 | Owner/authority/schedule indefinidos → acciones nunca cierran | 4 | 4 | 16 | PM/QA | review sin responsable nominal/due date | assign names at SRR, action register and reserves | SRR/each review | Open |
 | RSK-PH-01 | PHOTO_DEMO deriva a EO/legal/privacy scope → compliance/schedule impact | 2 | 4 | 8 | Payload/Legal | targeting, products, tasking or commercialization | keep optional/off; capability review with specialist/authority | PDR if included | Open |
 

@@ -103,3 +103,7 @@ El repositorio es **source-available no comercial**, no “open source” OSI:
 Ver `LICENSE.md`, `THIRD_PARTY_NOTICES.md`, `COMMERCIAL_USE.md` y
 `CONTRIBUTING.md`. Modelo, dataset y artefactos deberán registrar provenance,
 licencia y digest antes de distribuirse o usarse como evidencia.
+
+La autoridad entre ramas, tags y otros repositorios se define en
+`REPOSITORY_GOVERNANCE.md`. La trazabilidad de artefactos se define en
+`ARTIFACT_PROVENANCE.md` y la clasificación de licencia en `LICENSE_SCOPE.md`.

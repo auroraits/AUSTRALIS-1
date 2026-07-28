@@ -1,7 +1,14 @@
 # Legal enforcement review
 
-Status: working legal-risk memo for counsel review. This is not legal advice and
-does not replace review by a qualified lawyer in the relevant jurisdictions.
+Status: **Preliminary / counsel review required**
+
+Review date: 2026-07-27
+
+This working legal-risk memo is not legal advice, does not establish ownership
+or grant authority to license material, and does not replace review by a
+qualified lawyer in every relevant jurisdiction. Any wording below that says
+"recommended" or "required" is a project-control recommendation, not a legal
+conclusion.
 
 ## Goal
 
@@ -147,3 +154,7 @@ counsel should decide whether to:
    separate commercial license template; or
 2. replace it with a custom AUSTRALIS non-commercial research license drafted for
    software, hardware design files, datasets, AI assets and mission architecture.
+
+Until counsel confirms chain of title, license scope, the responsible legal
+entity and a contact authorized to contract, the repository must not represent
+commercial permission as available or granted.
