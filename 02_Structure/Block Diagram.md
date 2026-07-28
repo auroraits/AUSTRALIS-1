@@ -1,5 +1,15 @@
 # MVP v1.4 — Block Diagram + ICD
 
+**Revisión:** 2026-07-27
+**Estado:** Historical Snapshot
+**Trazabilidad:** instantánea histórica v1.4; no es el ICD activo de AUSTRALIS-1
+
+> **No usar para diseño, fabricación o verificación.** Este documento omite
+> bloques vigentes o todavía por definir (payload IA, ADCS, BMS/cargador 2S,
+> inhibiciones de lanzamiento, RBF, mecanismos desplegables y ruta térmica) y
+> conserva interfaces anteriores al MVP v2.2. El estado mecánico vigente y sus
+> pendientes están en `02_Structure/STRUCTURE_BASELINE_PRELIMINARY.md`.
+
 Este documento es un **entregable técnico utilizable directamente** en herramientas **gratuitas online**, alineado y dependiente del documento **MVP** vigente.
 
 Incluye:
@@ -160,4 +170,5 @@ GNSS es **best-effort**, nunca bloqueante.
 
 ---
 
-**Este documento es utilizable como ICD inicial y base de esquemáticos.**
+**Uso permitido:** trazabilidad histórica únicamente. No constituye un ICD
+vigente ni una base liberable de esquemáticos.

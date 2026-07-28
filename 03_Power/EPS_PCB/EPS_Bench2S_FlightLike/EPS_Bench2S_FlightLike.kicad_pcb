@@ -27,12 +27,6 @@
 	(net 7 "SW_5V_RF_EN")
 	(net 8 "SW_3V3_OBC_EN")
 
-	(gr_rect (start 20 20) (end 80 80)
-		(stroke (width 0.1) (type solid))
-		(fill none)
-		(layer "Edge.Cuts")
-	)
-
 	(footprint "MountingHole:MountingHole_3.2mm_M3"
 		(layer "F.Cu")
 		(at 24 24)

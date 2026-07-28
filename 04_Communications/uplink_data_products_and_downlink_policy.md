@@ -1,115 +1,259 @@
-# Uplink LoRa — Productos de datos y política de downlink (resumen vs detalle)
+# Productos de datos y política de downlink
 
-**Fecha de revisión:** 2026-03-14 (repriorización AI_BEHAVIOR_LOG y misión AUSTRALIS-1)
-**Estado:** Active
+**Revisión:** 2026-07-27
+**Estado:** Active — tamaños, tasas y cuotas pendientes de medición
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/uhf_command_security_protocol.md`
 
-## 1) Problema
-El uplink LoRa puede producir muchos paquetes por pasada si escalamos nodos.
-El downlink UHF (baseline 1k2) es el cuello de botella. Por lo tanto, el sistema debe:
-- registrar todo a bordo,
-- **bajar por defecto solo resúmenes**,
-- permitir “drill-down” a detalle bajo comando,
-- y garantizar que el dataset primario del payload IA conserve prioridad científica superior.
+## 1) Principio
 
-## 2) Productos de datos
+UHF 1200 bit/s es un recurso escaso. Ningún producto puede declararse
+descargable hasta demostrar:
 
-### 2.1 Resumen por pasada (default)
-Estructura lógica (ejemplo):
-- `pass_id` (timestamp/contador)
-- `window_start/end`
-- `elevation_max_est` (si se tiene)
-- `rx_total`, `rx_crc_ok`, `rx_crc_fail`
-- `per_node[]` (para N nodos, limitado a top-K):
-  - `node_id`
-  - `ok_count`, `fail_count`
-  - `seq_min/seq_max` (o último seq)
-  - `rssi_avg`, `snr_avg`
-  - `cfo_avg` (y/o min/max)
+```text
+producción + backlog inicial
+<= capacidad neta de contactos autorizados
+   - reservas críticas
+   - retransmisiones
+```
 
-Downlink: en cola `HOUSEKEEPING` o `LORA_LOG` con prioridad baja pero garantizando “al menos un resumen por pasada”.
+El sistema conserva raw data a bordo, baja resúmenes primero y permite
+drill-down por comandos autenticados. La retención y la evidencia de misión no
+dependen de que “quede tiempo” después de housekeeping.
 
-### 2.2 Catálogo (índice de paquetes) por nodo
-Para selección posterior:
-- por `node_id`: lista compacta de `(seq, t_rx, flags)` o hashes.
+## 2) Capacidad física
 
-### 2.3 Detalle (on-demand)
-- últimos K paquetes de un `node_id`, o rango de tiempo.
-- transferencia por chunks reanudables (idéntico patrón conceptual al [PHOTO_DEMO]).
+Para bitrate \(R\), contacto \(T\), fracción TX \(D\) y eficiencia total
+\(\eta\):
 
-## 3) Comandos (TTC UHF) necesarios
-Sin definir el encoding todavía, el set mínimo conceptual:
-- `LORA_SUMMARY_GET(pass_id)`
-- `LORA_NODE_CATALOG_GET(node_id, since)`
-- `LORA_NODE_DUMP(node_id, last_k | time_range)`
-- `DL_SET_LIMITS(queue=LORA_LOG, quota)`
-- `ABORT`
+\[
+B_{net}=R\,T\,D\,\eta/8
+\]
 
-## 4) Implicancias
-- El flight software debe persistir:
-  - payload + metadata por paquete (timestamp, RSSI/SNR/CFO, CRC status).
-- Se requiere política de retención (rolling buffer) si el storage es limitado.
+\(\eta\) incluye preámbulo, framing, identificación, autenticación cuando
+aplique, FEC, ARQ, gaps y Packet Error Rate (PER). No se adopta un valor hasta
+medir la waveform.
 
-## 5) Visibilidad de productos de downlink (actualizado 2026-07-04)
+Ejemplo aritmético a 1200 bit/s y 8 min:
 
-Decision vigente: `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
+| Uso TX | Bytes antes de overhead | KiB |
+|---:|---:|---:|
+| 100 % | 72 000 B | 70.31 |
+| 60 % | 43 200 B | 42.19 |
+| 30 % | 21 600 B | 21.09 |
 
-La politica de datos distingue dos productos UHF:
+`70.3 KiB` es techo bruto continuo, no volumen de pasada garantizado. La
+duración útil debe derivarse de elevación, actitud, patrón, autorización y
+link budget; no de “visibilidad” geométrica total.
 
-- `PUBLIC_BEACON`: producto publico, corto, derivado de `HOUSEKEEPING`, compatible con SatNOGS y decodificable por terceros. No contiene payload, comandos, prompts, datos crudos ni informacion operacional sensible.
-- `CONTROLLED_DOWNLINK`: producto privado/controlado para estacion/es propia/s o autorizada/s. Incluye payload y operacion completa: `AI_BEHAVIOR_LOG` detallado, performance IA, `SCIENCE`, `LORA_LOG`, `OPTIONAL_PAYLOAD` / `PHOTO_DEMO`, catalogos, dumps y detalle on-demand.
+## 3) Ledger obligatorio
 
-El uplink UHF de comandos, prompts versionados, seleccion de dumps y comandos de seguridad es `PRIVATE_UPLINK` y no se opera mediante SatNOGS.
+Antes de Gate E, cada fila debe tener valores medidos o límites justificados:
 
-Nota: "privado/controlado" significa que no es interfaz publica SatNOGS. No debe interpretarse como confidencialidad criptografica cerrada hasta definir mecanismo y confirmar compatibilidad regulatoria.
+| ProductID | Bytes/evento min/nom/max | Eventos/día | Producción/día | Retención | Pérdida admisible | Cuota/contacto | Evidencia |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `PUBLIC_BEACON` | TBD | TBD | TBD | N/A | TBD | TBD | TBD |
+| `HOUSEKEEPING` | TBD | TBD | TBD | TBD | TBD | reserva estricta | TBD |
+| `COMMAND_ACK` | TBD | por comando | TBD | TBD | 0 para comando aceptado | reserva estricta | TBD |
+| `AI_BEHAVIOR_LOG` | TBD | duty IA medido | TBD | TBD | criterio misión TBD | mínimo protegido | TBD |
+| `LORA_PASS_SUMMARY` | TBD | por ventana | TBD | TBD | TBD | mínimo protegido | TBD |
+| `LORA_RAW` | TBD | tráfico recibido | TBD | TBD | TBD | on-demand | TBD |
+| `SCIENCE` | TBD | TBD | TBD | TBD | TBD | mínimo protegido | TBD |
+| `OPTIONAL_PAYLOAD` | TBD | opcional | TBD | TBD | best-effort | residual | TBD |
 
-## 6) Prioridad de colas de downlink (actualizado 2026-07-04)
+El ledger incluye:
 
-Con la redefinición de misión AUSTRALIS-1, la prioridad de colas del Downlink Manager queda:
+- versión exacta de schema y serialización;
+- overhead por capa;
+- compresión y costo de índices;
+- duplicación/ACK/ARQ;
+- crecimiento de logs de sistema;
+- días sin contacto;
+- peor caso de producción;
+- storage reservado, high-water mark y margen.
 
-| Prioridad | Cola | Descripción |
-|---|---|---|
-| 1 (estricta) | `HOUSEKEEPING` | Telemetría de salud y housekeeping del sistema. Prioridad absoluta. |
-| 2 (estricta) | `COMMAND_ACK` | Acuses de recibo de comandos. Prioridad absoluta. |
-| 3 (best-effort) | `AI_BEHAVIOR_LOG` | Logs de comportamiento del payload IA. Dato científico primario de misión. |
-| 4 (best-effort) | `LORA_LOG` | Logs de paquetes LoRa recibidos. |
-| 5 (best-effort) | `SCIENCE` | Telemetría científica del Science Pack. |
-| 6 (best-effort) | `OPTIONAL_PAYLOAD` | Cargas opcionales (PHOTO_DEMO). Mínima prioridad. |
+## 4) Colas y no-starvation
 
-**Regla permanente:** ninguna cola de prioridad menor puede bloquear o desplazar `HOUSEKEEPING` ni `COMMAND_ACK`.
+Orden lógico:
 
-`PUBLIC_BEACON` no agrega una cola cientifica nueva: es una vista publica/minima derivada de `HOUSEKEEPING` y planificada para recepcion comunitaria. Los productos de payload siguen en las colas privadas/controladas existentes.
+1. `HOUSEKEEPING`;
+2. `COMMAND_ACK`;
+3. `AI_BEHAVIOR_LOG`;
+4. `LORA_LOG`;
+5. `SCIENCE`;
+6. `OPTIONAL_PAYLOAD`.
 
-## 7) Uplink para payload IA (Prompt uplink)
+`HOUSEKEEPING` y `COMMAND_ACK` tienen prioridad estricta, pero también límites
+de producción y frames acotados. Si crecen sin límite, el sistema entra en
+fault en vez de consumir toda la pasada.
 
-Con la decisión de incorporar el payload IA como objetivo científico primario, el sistema debe soportar:
+Las colas best-effort usan:
 
-### 6.1 Uplink de prompts versionados
+- reserva mínima configurable por producto crítico de misión;
+- cuota máxima por contacto;
+- aging/deadline para evitar starvation;
+- prioridad dinámica por retención restante;
+- preemption solo en frontera de frame/chunk;
+- métricas de backlog, edad del dato y drops por causa.
 
-El sistema debe poder recibir por uplink UHF **system prompts / policy prompts versionados** para modificar el comportamiento del modelo IA en órbita sin reemplazar el modelo.
+`OPTIONAL_PAYLOAD` nunca consume la reserva de otra cola.
 
-Comandos conceptuales (TBD encoding):
-- `AI_PROMPT_UPLOAD(version, content)` — sube nuevo prompt versionado.
-- `AI_PROMPT_ACTIVATE(version)` — activa un prompt almacenado.
-- `AI_PROMPT_RESET_SAFE` — revierte al prompt seguro por defecto.
-- `AI_PROMPT_STATUS` — consulta prompt activo + versión.
-- `AI_POWER_SET(ON/OFF)` — enciende / apaga rail AI.
+## 5) Productos LoRa
 
-Los prompts se almacenan persistentemente en el CM5 (PromptStore). El OBC registra qué prompt estaba activo en cada decisión del Behavior Logger.
+### 5.1 Resumen por ventana
 
-### 6.2 Downlink de AI behavior logs
+Incluye:
 
-Los logs del Behavior Logger del payload IA se descargan por la cola `AI_BEHAVIOR_LOG` como **dato científico primario de misión**.
+- `protocol_version`, `pass_id`;
+- start/end y time quality;
+- TLE/source/hash y configuración RX;
+- elevación estimada y su incertidumbre;
+- `rx_total`, `crc_ok/fail`, `auth_ok/fail`, `replay/duplicate`;
+- por nodo: counts, secuencia, RSSI/SNR/CFO con quality flags;
+- configuración SF/BW/CR/canal;
+- digest del catálogo/raw set.
 
-- Política: best-effort, sin desplazar colas de prioridad estricta.
-- Capacidad de la cola y cuota por pasada: TBD (depende del duty-cycle del payload IA).
-- Formato: estructura de evento mínimo con campos: timestamp, model_version, prompt_version, decision_id, recommended_action, confidence, supervisor_result, MISSION_MODE, EPS_STATE, state_snapshot_hash.
+El resumen va en `LORA_LOG`, no se disfraza como housekeeping. Una bandera
+compacta de salud del experimento puede derivarse para beacon.
 
-## 8) Referencias
-- `05_Software/software_framework_mvp22.md` (DownlinkManager/FaultManager)
-- `05_Software/ai_payload_architecture.md` (arquitectura payload IA)
+### 5.2 Catálogo
+
+Índice versionado para selección:
+
+- `node_id`, `boot_epoch`, rango `seq`;
+- timestamp/time quality;
+- estado CRC/auth/replay;
+- offset/longitud en storage;
+- digest del registro.
+
+### 5.3 Raw/on-demand
+
+Cada registro raw conserva bytes recibidos más metadata RF y provenance. La
+transferencia es por chunks reanudables, con digest de objeto y ACK autenticado.
+
+Un `node_id` autenticado no prueba ubicación física. La evidencia “originado en
+Buenos Aires” requiere correlación con inventario, sitio y log TX local.
+
+## 6) Producto de comportamiento IA
+
+El producto es independiente del modelo candidato. Cada evento debe permitir
+reproducir la inferencia y la decisión:
+
+- event/decision ID;
+- tiempo y quality;
+- snapshot de entrada completo o referencia inmutable + digest;
+- raw model output;
+- modelo, revisión/digest, cuantización y runtime;
+- prompt/policy digest;
+- decoding, seed y parámetros;
+- supervisor/guardrail version;
+- recomendación, autorización/rechazo y razón;
+- comando/acción efectivamente aplicada;
+- estado/resultados posteriores;
+- latencia, energía y temperaturas;
+- OBC/CM5 firmware/configuration IDs.
+
+`confidence` solo se conserva si tiene definición y calibración. No se usa un
+número arbitrario como evidencia.
+
+La demostración de `N` logs requiere probar:
+
+- producción esperada;
+- espacio y retención;
+- contactos útiles;
+- cuota mínima;
+- transferencia íntegra;
+- decodificación y correlación en ground.
+
+## 7) Comandos de datos
+
+Todos usan `04_Communications/uhf_command_security_protocol.md`:
+
+- `LORA_SUMMARY_GET(pass_id)`;
+- `LORA_NODE_CATALOG_GET(node_id, since)`;
+- `LORA_NODE_DUMP(selector)`;
+- `AI_LOG_CATALOG_GET(selector)`;
+- `OBJECT_DOWNLOAD_REQUEST(object_id, range)`;
+- `DL_SET_LIMITS(queue, quota)`;
+- `ABORT`.
+
+El OBC valida schema, rol, rangos y disponibilidad. Un comando no puede fijar
+cuota negativa, eliminar reservas críticas ni seleccionar memoria fuera del
+catálogo.
+
+## 8) Persistencia a bordo
+
+La arquitectura debe definir:
+
+- record framing y schema versionados;
+- append-only journal y recuperación tras power loss;
+- boot/session ID;
+- checksums/ECC;
+- índices reconstruibles;
+- política de wrap y protección de datos no descargados;
+- wear/endurance;
+- timestamps con quality;
+- digest de objetos y chunks;
+- counters de drop por causa.
+
+No se elimina un producto requerido hasta recibir ACK de ground autenticado y
+verificar la política de retención.
+
+## 9) Ground y evidencia
+
+Ground conserva:
+
+- raw RF/IQ cuando aplique;
+- frames pre/post decode;
+- configuración de receptor/decoder;
+- TLE, scheduler y time source;
+- comandos/ACK;
+- objetos/chunks y hashes;
+- métricas de contacto;
+- software/commit y calibraciones.
+
+Una UI en memoria no es evidencia persistente. La adquisición debe escribir
+raw append-only antes de alimentar dashboards y permitir replay determinista.
+
+## 10) Seguridad, contenido y SatNOGS
+
+- `PUBLIC_BEACON` es público y mínimo.
+- `CONTROLLED_DOWNLINK` no es confidencial por nombre.
+- Si se opera en amateur-satellite, waveform/framing/identificación/decoder se
+  publican según el régimen.
+- Productos que requieran secreto no se transmiten sin servicio/autorización
+  compatible.
+- Comandos y ACK usan autenticación sin cifrado hasta decisión distinta
+  autorizada.
+
+## 11) Criterio de cierre del data budget
+
+El presupuesto cierra solo si un análisis reproducible demuestra, en caso
+nominal y peor caso:
+
+- producción diaria por ProductID;
+- capacidad neta por contacto con PER/overhead;
+- calendario de contactos bajo máscara operativa;
+- backlog/retención y días sin contacto;
+- reservas y ausencia de starvation;
+- recuperación de todos los datos del criterio mínimo;
+- margen explícito y sensibilidad a fallas.
+
+El análisis debe citar commit, inputs, script, raw results y hash.
+
+<!-- FEATURE:PHOTO_DEMO START -->
+
+## 12) [PHOTO_DEMO]
+
+`PHOTO_DEMO` permanece opcional, off-by-default y en `OPTIONAL_PAYLOAD`. Usa
+solo capacidad residual, chunks reanudables y nunca reduce reservas de misión.
+
+<!-- FEATURE:PHOTO_DEMO END -->
+
+## 13) Referencias
+
+- `04_Communications/rf_subsystem_overview.md`
 - `04_Communications/uplink_lora_slotted_protocol.md`
+- `04_Communications/uhf_command_security_protocol.md`
 - `04_Communications/satnogs_public_beacon_architecture.md`
-- `01_Mission/mission_definition.md`
-- `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`
-- `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`
-- `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
+- `docs/COMMS/rf_calculations.py`

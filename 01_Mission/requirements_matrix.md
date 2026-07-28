@@ -1,115 +1,140 @@
-# Requirements Matrix — AUSTRALIS-1 / DIY Nanosat MVP
+# Requirements Matrix — AUSTRALIS-1
 
-**Revisión:** 2026-07-10
-**Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, ADRs Accepted en `08_Decisions/`, `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
+**Revisión:** 2026-07-27
+**Estado:** Active — baseline pre-SRR
+**Trazabilidad:** `00_MVP/MVP v2.2.md` y ADRs `Accepted`
 
-Matriz de requisitos verificables (IDs, statement, rationale, verificación, dueño y trazabilidad).
+## Convenciones
 
-Convención:
-- **"shall"** = requisito normativo verificable.
-- Fuente normativa: ADR `Accepted` → `00_MVP/MVP v2.2.md` → documentación de subsistema.
-- Las referencias a `EPS_DESIGN_RULES.md` son de contexto técnico (draft, no normativo).
-- Verificación: **T**(Test), **A**(Analysis), **I**(Inspection), **D**(Demonstration).
+- `shall` identifica una obligación verificable.
+- Método: `T` Test, `A` Analysis, `I` Inspection, `D` Demonstration.
+- `Active` significa requisito vigente; no significa verificado.
+- `Proposed` conserva un ID para evaluación, pero no es obligación del
+  baseline hasta una decisión `Accepted`.
+- El estado de verificación vive en
+  `verification_cross_reference_matrix.csv`.
+- Todo criterio `TBD` debe cerrarse en SRR/PDR antes de ejecutar la
+  verificación correspondiente.
 
-## 1) Requisitos de misión / sistema
+## 1. Misión y sistema
 
-| ID | Requisito (shall) | Rationale | Verif. | Dueño | Trazabilidad |
-|---|---|---|---|---|---|
-| MIS-REQ-01 | El satélite shall operar en formato 1.5U (100×100×150 mm). | Compatibilidad mecánica | I | Estructura | `00_MVP/MVP v2.2.md` |
-| MIS-REQ-02 | El uplink de usuario shall usar LoRa RX-only en 915 MHz en órbita. | Objetivo secundario de misión / riesgo regulatorio | T | COMMS | `01_Mission/mission_definition.md` |
-| MIS-REQ-03 | El downlink/TTC shall usar UHF 435 MHz, FSK, 1200 bps (baseline). | Robustez y ecosistema | T | COMMS | `ADR-20260218-uhf-link-budget-preliminary.md`, `00_MVP/MVP v2.2.md` |
-| MIS-REQ-04 | El sistema shall registrar ≥10 paquetes LoRa recibidos en órbita como objetivo secundario de misión. | Evidencia secundaria end-to-end | D | COMMS/OBC | `00_MVP/MVP v2.2.md`, `ADR-20260314-mission-redef-ai-primary.md` |
-| MIS-REQ-05 | El sistema shall descargar a tierra evidencia de los paquetes LoRa recibidos (payload + métricas). | Auditoría end-to-end | D | COMMS/Ground | `04_Communications/uplink_data_products_and_downlink_policy.md` |
-| MIS-REQ-06 | El EPS de vuelo shall usar topología de batería 2S. | Márgenes y arquitectura EPS | I | EPS | `ADR-20260218-battery-topology-2s-flight.md` |
-| MIS-REQ-07 | El Science Pack MVP shall excluir HV de radiación. | Reducción de riesgo/potencia | I | Science/EPS | `ADR-20260218-geiger-removed-from-mvp.md` |
-| MIS-REQ-08 | El sistema shall operar en SAFE en eclipse por defecto, degradar a `MISSION_MODE=SAFE` cuando `EPS_STATE=CRIT` y tratar `EPS_STATE=LOW` como condición de conservación con `SAFE` por defecto. | Supervivencia energética y seguridad operacional | T | FSW/EPS | `01_Mission/mission_definition.md`, `ADR-20260314-eps-state-4-levels.md` |
-| MIS-REQ-09 | El OBC (On-Board Computer) shall implementar arbitraje de downlink por colas con prioridad estricta `HOUSEKEEPING` y `COMMAND_ACK`, y con `AI_BEHAVIOR_LOG` como cola best-effort de mayor prioridad científica. | Control y seguridad operativa + dato científico primario | T | FSW/COMMS | `ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`, `ADR-20260314-mission-redef-ai-primary.md` |
-| MIS-REQ-10 | El sistema shall exponer health mínimo por subsistema (`PGOOD_x`,`EN_x`,`FAULT_x`,`HB_x`), `EPS_STATE` (`CRIT`,`LOW`,`NOMINAL`,`HIGH`) y contadores de reset/fault. | Diagnóstico / tolerancia a fallas | T | EPS/FSW | `00_MVP/MVP v2.2.md`, `ADR-20260314-eps-state-4-levels.md` |
-| MIS-REQ-11 | El uplink mínimo shall soportar `SET_MODE`, `POWER_SET`, `DL_SELECT`, `DL_SET_LIMITS`, `REQUEST_STATUS`, `ABORT`. | Control manual | T | COMMS/FSW | `04_Communications/rf_subsystem_overview.md` |
-| MIS-REQ-12 | El sistema shall implementar modelo canónico de modos: `MISSION_MODE` (`SAFE`,`NOMINAL`,`DOWNLINK_WINDOW`) y `EPS_STATE` (`CRIT`,`LOW`,`NOMINAL`,`HIGH`). La actividad científica shall ejecutarse como actividad dentro de `NOMINAL`, no como modo independiente. | Coherencia CONOPS/energía; modelo operativo único | T | FSW/EPS | `01_Mission/mission_definition.md`, `ADR-20260314-eps-state-4-levels.md` |
-| MIS-REQ-13 | El EPS de vuelo shall implementar arquitectura 2S + MPPT (Maximum Power Point Tracking). El banco `EPS_Bench1_1S` es validación funcional, no hardware de vuelo. | Separación inequívoca bench/flight-like/flight | I | EPS | `08_Decisions/ADR-20260313-eps-separacion-bench-flightlike-flight.md` |
-| MIS-REQ-14 | El nodo típico LoRa terrestre shall pertenecer a la clase definida (radio clase SX1262/SX1276, MCU clase ESP32-S3, +20–21 dBm, sin PA/LNA/TCXO externo, antena 0–2 dBi). No se fija SKU de mercado como requisito normativo. | Compatibilidad/costo; evitar dependencia de SKU | I/D | COMMS/Node | `08_Decisions/ADR-20260313-nodo-tipico-lora-clase.md` |
-| MIS-REQ-15 | Shall existir una compliance matrix viva (`01_Mission/compliance_matrix.md`) que trace requisitos clave del sistema con estado, owner y evidencia. | Gobierno documental y trazabilidad de requisitos | I | Sistema | `08_Decisions/ADR-20260313-compliance-matrix-artefacto-sistema.md` |
-| MIS-REQ-16 | El sistema shall completar al menos 5 ciclos de inferencia del payload IA en órbita (con el modelo baseline vigente según ADR más reciente) con logging completo descargado a tierra. | Criterio de éxito primario | D | FSW/Ground | `ADR-20260314-mission-redef-ai-primary.md`, `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md`, `00_MVP/MVP v2.2.md` |
-| MIS-REQ-17 | El sistema shall recolectar y descargar al menos 100 registros `AI_BEHAVIOR_LOG` con datos válidos. | Dataset científico primario | D | FSW/Ground | `ADR-20260314-mission-redef-ai-primary.md`, `05_Software/ai_payload_architecture.md` |
-| MIS-REQ-18 | El sistema shall recibir, aplicar y utilizar en inferencia al menos 1 prompt versionado subido por uplink. | Validación de reconfiguración en órbita | D | COMMS/FSW | `ADR-20260314-mission-redef-ai-primary.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
-| MIS-REQ-19 | La arquitectura UHF shall soportar un `PUBLIC_BEACON` compatible con SatNOGS, documentado y decodificable por terceros, limitado a telemetria minima no sensible. | Recepcion distribuida publica sin exponer payload/operacion | T/D | COMMS/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md` |
-| MIS-REQ-20 | El downlink de payload/operacion y el uplink de comandos shall operar como perfiles privados/controlados (`CONTROLLED_DOWNLINK`, `PRIVATE_UPLINK`) mediante estacion/es propia/s o autorizada/s, no mediante SatNOGS. | Seguridad operacional, control de mision y separacion publico/privado | T/D | COMMS/FSW/Ground | `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/uplink_data_products_and_downlink_policy.md` |
-| MIS-REQ-21 | La estacion terrena propia shall separar fisica/logicamente el modo SatNOGS receive-only del modo AUSTRALIS privado/controlado, impidiendo que SatNOGS tenga acceso al transmisor, PTT, credenciales de comando o camino de uplink. | Evitar TX accidental y preservar seguridad operacional | T/D/I | Ground/COMMS | `04_Communications/ground_station_dual_use_satnogs_australis.md`, `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md` |
-| MIS-REQ-22 | La estacion terrena propia shall incluir instrumentacion meteorologica local para viento, lluvia, temperatura, humedad, presion y ambiente interior de gabinete, integrada al logging y a las inhibiciones/park automatico. | Autonomia segura, proteccion mecanica/electronica y evidencia contextual de pasadas | T/D/I | Ground | `04_Communications/ground_station_dual_use_satnogs_australis.md` |
-| MIS-REQ-23 | El proyecto shall mantener una politica de diseno DIY, low cost y de publicacion abierta/source-available no comercial, priorizando componentes maker/COTS ampliamente disponibles en Argentina y Latinoamerica para banco, FlatSat, EGSE y prototipos. | Reproducibilidad, costo, colaboracion abierta y viabilidad regional | I/A | Sistema | `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`, `SYSTEM_BASELINE.md` |
-| MIS-REQ-24 | La BOM y los trade studies shall definir componentes por clase tecnica cuando sea posible, registrar proveedor/region/alternativa/riesgo, y justificar cualquier SKU unico, componente caro, exotico, EOL o de baja disponibilidad regional. | Evitar lock-in de supply chain y mantener ruta maker -> flight-like -> flight | I/A | Sistema/Costos | `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`, `06_Costs/bom_overview.md` |
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| MIS-REQ-01 | El vehículo shall ser compatible con la clase CubeSat 1.5U. | CAD y artículo medido cumplen el dibujo CDS completo; `Z=170.2 ±0.1 mm`; fit-check ICD aprobado. | I+D | ADR-20260727-cubesat-1p5u-cds-envelope | Structure | Active |
+| MIS-REQ-02 | El radio LoRa orbital shall ser RX-only y no tendrá camino de TX habilitable. | Inspección de esquema/PCB y prueba negativa de todos los modos muestran cero transmisión LoRa orbital. | I+T | ADR-20260727-rf-regulatory-command-security-baseline | COMMS | Active |
+| MIS-REQ-03 | El TTC UHF shall operar únicamente en frecuencia, waveform y potencia coordinadas/autorizadas. | Dossier ENACOM/IARU/ITU aprobado y configuración RF coincide con el dossier y medición OTA. | I+T+D | ADR-20260727-rf-regulatory-command-security-baseline | COMMS/Operations | Active |
+| MIS-REQ-04 | Si se autoriza el experimento Tierra→espacio, el sistema shall demostrar recepción store-and-forward con protocolo preregistrado. | Protocolo fija N nodos/frames, PHY, elevación, denominador e IC; resultado cumple threshold aprobado. | T+D+A | Mission Definition §4 | COMMS/Ground | Active |
+| MIS-REQ-05 | Cada frame terrestre aceptado shall conservar payload, identidad autenticada, tiempo, RSSI, SNR, CFO, CRC y provenance. | Export/replay reproduce cada frame y sus quality flags sin campos obligatorios nulos; CRC/node ID solos no reciben crédito de origen. | T+I | ADR-20260727-rf-regulatory-command-security-baseline | COMMS/Ground | Active |
+| MIS-REQ-06 | La arquitectura EPS flight-like/flight shall usar batería 2S. | Esquema, BOM y artículo muestran dos celdas/grupos en serie y rango compatible; pruebas de protección aprobadas. | I+T | ADR-20260218-battery-topology-2s-flight | EPS | Active |
+| MIS-REQ-07 | El Science Pack MVP shall excluir fuentes de alta tensión/radiación Geiger. | BOM, esquema, software y artículo carecen de etapa HV; inspección aprobada. | I | ADR-20260218-geiger-removed-from-mvp | Science/EPS | Active |
+| MIS-REQ-08 | El sistema shall bootear en SAFE, usar SAFE por defecto en eclipse y forzar SAFE con `EPS_STATE=CRIT`. | Tests nominales, límites y fallas logran transición dentro del tiempo TBD sin energizar cargas prohibidas. | T | ADR-20260314-eps-state-4-levels | FSW/EPS | Active |
+| MIS-REQ-09 | El downlink manager shall priorizar `HOUSEKEEPING`, luego `COMMAND_ACK`, y ubicar `AI_BEHAVIOR_LOG` como mayor prioridad científica best-effort. | Ensayo de colas saturadas preserva prioridades, cuota mínima/aging aprobados y ausencia de starvation crítico. | T+A | ADR-20260218-downlink-arbitration-and-subsystem-power-framework | FSW/COMMS | Active |
+| MIS-REQ-10 | El sistema shall exponer health por subsistema y contadores de boot/reset/fault con session ID. | Schema y tests de inyección cubren `EN/PGOOD/FAULT/HB`, estados, contadores, reboot y wrap. | T+I | MVP v2.2 §8 | FSW/EPS | Active |
+| MIS-REQ-11 | El TTC shall soportar comandos mínimos de modo, potencia, downlink, status y abort, autenticados y protegidos contra replay. | Suite verifica comando válido y rechaza replay, clave/rol erróneo, frame truncado, rollback y contador perdido. | T | ADR-20260727-rf-regulatory-command-security-baseline | FSW/COMMS | Active |
+| MIS-REQ-12 | El sistema shall implementar exactamente `MISSION_MODE={SAFE,NOMINAL,DOWNLINK_WINDOW}` y `EPS_STATE={CRIT,LOW,NOMINAL,HIGH}`. | State-machine tests cubren todos los estados/transiciones; no aparece `SCIENCE` ni `EPS_STATE=SAFE`. | T+I | ADR-20260314-eps-state-4-levels | FSW/EPS | Active |
+| MIS-REQ-13 | Hardware `Bench`, `Flight-Like`, `Flight` y `EGSE` shall permanecer separado en diseño, BOM y evidencia. | Revisión de configuración no encuentra una fila/claim que mezcle artículos o transfiera evidencia entre stages. | I | ADR-20260313-eps-separacion-bench-flightlike-flight | Systems/QA | Active |
+| MIS-REQ-14 | El nodo terrestre de prueba shall identificarse por clase técnica y configuración exacta, no por SKU implícito. | Test report registra radio, MCU, potencia, antena, reloj, firmware y calibración; BOM conserva alternativas. | I+T | ADR-20260313-nodo-tipico-lora-clase | Node/COMMS | Active |
+| MIS-REQ-15 | Shall existir VCRM y compliance matrix controladas para todo requisito. | Cero ReqID sin método, criterio, ProcedureID, gate, risk/evidence state; revisión independiente aprobada. | I | ADR-20260727-verification-and-review-governance | Systems/QA | Active |
+| MIS-REQ-16 | El payload IA shall ejecutar el protocolo científico preregistrado en órbita. | Muestra, escenarios, control y análisis coinciden con protocolo congelado; no conformidades críticas=0. | D+A | Mission Definition §3–4 | AI/Science/Ground | Active |
+| MIS-REQ-17 | El sistema shall descargar al menos 100 eventos IA completos y la muestra estadística requerida, si fuera mayor. | Validador de schema acepta 100% de eventos usados; cantidad ≥ máximo(100,N preregistrado). | T+D | Mission Definition §4, §8 | FSW/Ground | Active |
+| MIS-REQ-18 | El sistema shall cargar, autenticar, activar y usar al menos un prompt versionado. | Cadena upload→verify→activate→infer→rollback queda correlacionada; replay/alteración son rechazados. | T+D | ADR-20260727-rf-regulatory-command-security-baseline | FSW/COMMS | Active |
+| MIS-REQ-19 | El UHF shall emitir un beacon público documentado compatible con la coordinación vigente. | Decoder público reproduce frames capturados; identificación/contenido/intervalo cumplen autorización. | T+D+I | ADR-20260727-rf-regulatory-command-security-baseline | COMMS/Ground | Active |
+| MIS-REQ-20 | Downlink operacional y uplink de comando shall usar perfiles controlados con autenticación; no se asumirá confidencialidad por framing cerrado. | Threat model, protocolo y tests demuestran autenticidad/anti-replay; contenido cumple regulación. | A+T+I | ADR-20260727-rf-regulatory-command-security-baseline | Security/COMMS | Active |
+| MIS-REQ-21 | La estación shall aislar SatNOGS RX-only de PTT, claves y control AUSTRALIS. | Inspección física/permisos y tests de falla demuestran que el proceso SatNOGS no puede transmitir. | I+T | ADR-20260727-rf-regulatory-command-security-baseline | Ground/COMMS | Active |
+| MIS-REQ-22 | Propuesta: la estación shall medir las condiciones ambientales necesarias para operación segura y provenance de cada pasada. | Antes de adoptarlo, una ADR Accepted y hazard analysis definen sensores, umbrales, park/inhibit, calidad y calibración. | A+T+D | `04_Communications/ground_station_dual_use_satnogs_australis.md` (Draft) | Ground | Proposed — EGSE |
+| MIS-REQ-23 | El proyecto shall conservar política DIY/low-cost sin reducir seguridad, compliance o trazabilidad. | Cada excepción costosa/EOL/import-only está justificada; ningún criterio de seguridad se degrada por costo. | I+A | ADR-20260710-diy-low-cost-maker-latam-design-policy | Systems/Cost | Active |
+| MIS-REQ-24 | BOM y trade studies shall registrar clase, alternativa, fuente/fecha, costo, lead time, stage, riesgo y trazabilidad. | Auditoría de BOM no encuentra campos obligatorios vacíos salvo `TBD` explícito con plan de cierre. | I | ADR-20260710-diy-low-cost-maker-latam-design-policy | Cost/Procurement | Active |
 
-## 2) Requisitos P1 — Uplink con nodos típicos (success-first)
+## 2. Uplink terrestre experimental
 
-| ID | Requisito (shall) | Rationale | Verif. | Dueño | Trazabilidad |
-|---|---|---|---|---|---|
-| COMMS-UL-01 | El uplink LoRa shall soportar nodos de clase típica (+20–21 dBm, sin PA externo, antena 0–2 dBi) con mejoras solo de antena+firmware. No se fija SKU de mercado como requisito. | Compatibilidad/costo con clase objetivo | D | COMMS | `ADR-20260313-nodo-tipico-lora-clase.md`; análisis de soporte: `04_Communications/link_budget_lora_uplink_preliminary.md` (Preliminary) |
-| COMMS-UL-02 | Los nodos shall operar en modo B2 slotted (pass-aware) para reducir colisiones cuando dispongan de base temporal válida. Sin base temporal validada, shall hacer fallback a B1. | Escalabilidad + integridad de slots | T | Node FW | `ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-rx.md`; ver también `ADR-20260313-b2-uplink-timebase-requirement.md` |
-| COMMS-UL-03 | Los nodos shall poder predecir pasadas offline usando TLE+SGP4. | Sin NTP | T | Node FW | `ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-rx.md` |
-| COMMS-UL-04 | El receptor orbital shall registrar por paquete: timestamp, RSSI, SNR, CFO y CRC status. | Evidencia / debug | T | COMMS/OBC | `01_Mission/mission_definition.md` |
-| COMMS-UL-05 | El sistema shall bajar por defecto un resumen por pasada (agregado) y permitir detalle on-demand. | Cuello de downlink | T | FSW/COMMS | `04_Communications/uplink_data_products_and_downlink_policy.md` |
-| COMMS-UL-06 | El modo B2 (pass-aware slotted) shall disponer de una base temporal validada (deriva dentro del guard time) antes de considerarse aceptado. Opciones: base validada experimentalmente, cristal/RTC externo adecuado, o resincronización activa ≤24 h antes de la pasada. Sin base temporal validada, el nodo shall operar en B1. | Evitar desalineación de slots por deriva de RTC no validada | T | Node FW | `ADR-20260313-b2-uplink-timebase-requirement.md`; ver `04_Communications/uplink_lora_slotted_protocol.md` §10 |
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| COMMS-UL-01 | Si el experimento es autorizado y ejecutado, shall usar nodos de clase típica sin PA/LNA externo salvo nueva ADR. | Configuración medida y registrada cumple límites de clase aprobados en SRR. | I+T | ADR-20260313-nodo-tipico-lora-clase | COMMS/Node | Active |
+| COMMS-UL-02 | Si se selecciona B2 slotted, shall habilitarse solo con base temporal validada; al perderla el nodo shall quedar fail-silent. B1 solo se permite como modo separado autorizado. | Deriva worst-case permanece dentro del guard aprobado; pérdida de `time_valid` inhibe TX; B1 no se activa sin autorización, airtime y energía aprobados. | T+A | ADR-20260727-rf-regulatory-command-security-baseline | Node FW | Active |
+| COMMS-UL-03 | Si se selecciona predicción TLE/SGP4, shall usar fuente auténtica, object ID, expiry y error budget. | Casos de TLE válido/viejo/firmado erróneo/rollback cumplen ventana y fallback aprobados. | T+A | ADR-20260727-rf-regulatory-command-security-baseline | Node FW/Ground | Active |
+| COMMS-UL-04 | Si el experimento se ejecuta, el receptor shall registrar tiempo, RSSI, SNR, CFO, CRC, canal/PHY, session y quality flags. | Schema/replay reproduce todos los campos con unidades y calibración identificadas. | T+I | MIS-REQ-05 | COMMS/OBC | Active |
+| COMMS-UL-05 | Si el experimento se ejecuta, el downlink shall usar resumen por pasada y detalle on-demand con data budget y retención definidos. | Simulación/ensayo de peor carga cumple retención, cuotas y no-starvation aprobadas. | A+T | MIS-REQ-09 | FSW/COMMS | Active |
+| COMMS-UL-06 | Si se adopta slotting/retry/multicanal, shall dimensionarse con ToA correcto y modelo de colisión/near-far. | Cálculo independiente y Monte Carlo/test reproducen capacidad/PDR dentro de tolerancia aprobada. | A+T | ADR-20260727-rf-regulatory-command-security-baseline | COMMS/Node | Active |
+| COMMS-UL-07 | Todo frame de sensor aceptado shall usar identidad/versiones explícitas, autenticación criptográfica y anti-replay por nodo. | Suite negativa rechaza spoof, replay, reset/wrap, epoch/clave erróneos y frame truncado; evidencia de origen físico correlaciona credencial con provisioning y ground log controlado. | T+A | ADR-20260727-rf-regulatory-command-security-baseline | Node/COMMS/Security | Active |
 
-## 3) Requisitos de compliance y validación
+## 3. Compliance de lanzamiento y regulación
 
-| ID | Requisito (shall) | Rationale | Verif. | Dueño | Trazabilidad |
-|---|---|---|---|---|---|
-| COMP-REQ-01 | El sistema shall operar dentro de form factor 1.5U (100×100×150 mm) con masa, CG (Centro de Gravedad) y propiedades mecánicas según ICD del integrador. | Compatibilidad dispenser | I | Estructura | `01_Mission/compliance_matrix.md`, ICD integrador (TBD) |
-| COMP-REQ-02 | Los TX shall implementar los RF inhibits (mínimo 3 inhibiciones independientes) requeridos por el integrador de lanzamiento. | Seguridad de lanzamiento | I | COMMS/EPS | `01_Mission/compliance_matrix.md`, CDS Rev 14.1 (placeholder) |
-| COMP-REQ-03 | El satélite shall NO transmitir desde ISM (LoRa) en órbita durante el MVP. El uplink LoRa orbital es RX-only. | Riesgo regulatorio | T | COMMS | `00_MVP/MVP v2.2.md`, `01_Mission/compliance_matrix.md` |
-| COMP-REQ-04 | Shall existir evidencia de coordinación IARU antes de cerrar el bandplan amateur-sat para operación. | Regulatorio internacional | D | Operaciones | `01_Mission/compliance_matrix.md` (CX-RF-04) |
-| COMP-REQ-05 | Los materiales de estructura y PCB shall cumplir requisitos de venting, outgassing y compatibilidad de vacío del integrador (TBD). | Seguridad dispenser / vacío | I | Estructura | `01_Mission/compliance_matrix.md` |
-| COMP-REQ-06 | Shall existir dossier de batería y carga para topología 2S + MPPT (incluyendo quimismo, capacidad, curvas de carga/descarga y certificaciones si aplica). | Seguridad / compliance batería | I/D | EPS | `01_Mission/compliance_matrix.md` |
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| COMP-REQ-01 | El vehículo shall cumplir envolvente, masa y propiedades mecánicas CDS/ICD para 1.5U. | Dossier + medición + fit-check aceptados por integrador. | I+D | CDS Rev.14.1; ICD TBD | Structure | Active |
+| COMP-REQ-02 | La arquitectura de launch safety shall incluir deployment switch sobre funciones powered, RBF, al menos tres inhibits RF y tres de deployables, y timers mínimos CDS o más restrictivos del ICD. | Inspección y fault-injection prueban independencia; deployables permanecen inhibidos ≥30 min y TX ≥45 min post-eyección aun con reset/brownout; integrador acepta. | I+T | CDS Rev.14.1 §§2.3–2.4; ICD TBD | EPS/COMMS | Active |
+| COMP-REQ-03 | El satélite shall permanecer sin transmisión ISM orbital. | Análisis de caminos y prueba negativa de software/hardware completados. | I+T | MIS-REQ-02 | COMMS | Active |
+| COMP-REQ-04 | Bandplan amateur-satellite shall contar con coordinación IARU y trámite UIT vía administración. | Dossier escrito con estado de coordinación/notificación antes de congelar RF. | I+D | IARU/ITU/ENACOM | Operations | Active |
+| COMP-REQ-05 | Materiales y volúmenes shall cumplir venting/outgassing/compatibilidad de vacío aplicables. | Material declaration y análisis/ensayos aceptados por ICD; sin volumen sellado no analizado. | I+A+T | CDS/ICD; ASTM E595 si aplica | Structure/Materials | Active |
+| COMP-REQ-06 | Shall existir dossier de batería completo y aceptado. | Incluye celda, lotes, BMS, carga, balanceo, protecciones, térmica, transporte, tests y pasivación. | I+T | CDS/ICD | EPS/Safety | Active |
 
-## 4) Requisitos de feature opcional PHOTO_DEMO
+## 4. PHOTO_DEMO opcional
 
-| ID | Requisito (shall) | Rationale | Verif. | Dueño | Trazabilidad |
-|---|---|---|---|---|---|
-| MIS-REQ-PH-01 | El payload [PHOTO_DEMO] shall iniciar OFF por defecto al boot. | Off-by-default | T | FSW/EPS | `08_Decisions/ADR-20260313-photo-demo-opcional-no-critico.md` |
-| MIS-REQ-PH-02 | El payload [PHOTO_DEMO] shall usar cuota best-effort por pasada sin desplazar housekeeping/comandos/LORA_LOG. | Aislamiento cadena principal | T | FSW/COMMS | `08_Decisions/ADR-20260313-photo-demo-opcional-no-critico.md` |
-| MIS-REQ-PH-03 | El payload [PHOTO_DEMO] shall transferir imagen por chunks reanudables tras selección uplink. | Robustez de transferencia | T | FSW/COMMS | `00_MVP/MVP v2.2.md` §17 |
-| MIS-REQ-PH-04 | La falla de [PHOTO_DEMO] shall no degradar la cadena principal de misión. | Aislamiento | T | FSW | `08_Decisions/ADR-20260313-photo-demo-opcional-no-critico.md` |
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| MIS-REQ-PH-01 | `PHOTO_DEMO` shall iniciar OFF. | 100% de boots/resets ensayados mantienen rail y función OFF. | T | ADR-20260313-photo-demo-opcional-no-critico | FSW/EPS | Active |
+| MIS-REQ-PH-02 | `PHOTO_DEMO` shall ser best-effort sin desplazar colas críticas/científicas prioritarias. | Saturación/falla inducida no viola cuotas/prioridades. | T | ADR-20260313-photo-demo-opcional-no-critico | FSW/COMMS | Active |
+| MIS-REQ-PH-03 | Si se incluye, la transferencia shall ser reanudable e íntegra. | Pérdida/reset/reorder produce archivo final con digest correcto o descarte seguro. | T | ADR-20260313-photo-demo-opcional-no-critico | FSW/Ground | Active |
+| MIS-REQ-PH-04 | Su falla shall no degradar el bus ni el éxito primario. | Fault injection demuestra aislamiento de potencia, CPU, storage y colas. | T | ADR-20260313-photo-demo-opcional-no-critico | Systems/FSW | Active |
 
-## 5) Requisitos del payload IA experimental
+## 5. Payload IA
 
-| ID | Requisito (shall) | Rationale | Verif. | Dueño | Trazabilidad |
-|---|---|---|---|---|---|
-| IA-REQ-01 | El payload IA shall ser power-gated de forma independiente en un rail dedicado. | Aislamiento eléctrico; carga no crítica para supervivencia. | T | EPS/FSW | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-02 | El payload IA shall iniciar en estado OFF por defecto al boot. | Seguridad operacional; off-by-default. | T | FSW | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-03 | El payload IA shall estar OFF en `MISSION_MODE = SAFE`, en eclipse y cuando `EPS_STATE` sea `CRIT` o `LOW`. | Supervivencia energética; SAFE primero. | T | FSW/EPS | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`, `ADR-20260314-eps-state-4-levels.md` |
-| IA-REQ-04 | El payload IA shall nunca sobreescribir ni bypass las reglas de seguridad determinísticas de misión. | OBC es autoridad de vuelo. | T | FSW | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-05 | El OBC (On-Board Computer) shall validar toda recomendación del payload IA a través del Runtime Safety Supervisor antes de ejecutarla. | Supervisor determinístico obligatorio. | T | FSW | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-06 | El sistema shall soportar uplink de system prompts / policy prompts versionados para modificar el comportamiento del payload IA en órbita sin reemplazar el modelo. | Adaptabilidad en órbita; separación modelo/política. | T | COMMS/FSW | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-07 | El sistema shall registrar telemetría de comportamiento del payload IA por evento (timestamp, model_version, prompt_version, decision_id, recommended_action, confidence, supervisor_result, MISSION_MODE, EPS_STATE). | Dataset científico de la misión. | T | FSW/Ground | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-08 | El payload IA shall poder ser deshabilitado desde tierra en cualquier momento. | Control operacional; ground safety. | T | COMMS/FSW | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-09 | La familia de hardware baseline del payload IA shall ser CM5 (Raspberry Pi Compute Module 5). No se fija SKU de marketplace como requisito normativo. | Familia tecnológica adoptada; sin dependencia de SKU. | I | EPS/SYS | `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` |
-| IA-REQ-10 | El modelo baseline funcional del payload IA shall ser IBM Granite 350M fine-tuned (LoRA/QLoRA), con licencia Apache 2.0, hasta que una nueva ADR `Accepted` lo reemplace. El modelo final de vuelo es TBD y no se declara hasta Gate IA-2. | Baseline funcional definido por ADR-20260316; evita cambio de modelo sin trazabilidad formal. | I | FSW/SYS | `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md` |
-| IA-REQ-11 | El modelo baseline experimental del payload IA shall modificarse únicamente mediante una nueva ADR `Accepted`. No se permite cambio de modelo por edición directa de documentos de subsistema. | Gobierno del baseline de modelo; trazabilidad de cambios de comportamiento IA. | I | SYS | `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md` |
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| IA-REQ-01 | El payload IA shall usar rail power-gated independiente de cargas críticas. | Esquema/PCB y pruebas de short/inrush/backfeed prueban fault containment. | I+T | ADR-20260727-ai-payload-gemma4-e2b-candidate | EPS/FSW | Active |
+| IA-REQ-02 | El payload IA shall iniciar OFF. | 100% de boots, resets y brownouts mantienen IA OFF hasta autorización válida. | T | ADR-20260727-ai-payload-gemma4-e2b-candidate | FSW/EPS | Active |
+| IA-REQ-03 | IA shall estar OFF en SAFE, eclipse y EPS CRIT/LOW. | Boundary/fault tests cubren todas las combinaciones sin bypass. | T | ADR-20260727-ai-payload-gemma4-e2b-candidate | FSW/EPS | Active |
+| IA-REQ-04 | IA shall no sobreescribir reglas ni estado autoritativo del OBC. | Interfaces no ofrecen write directo; adversarial tests no alteran estado sin supervisor. | I+T | ADR-20260727-ai-payload-gemma4-e2b-candidate | FSW/Safety | Active |
+| IA-REQ-05 | El OBC shall validar schema, tool, argumentos, clase, precondiciones y postcondiciones antes de actuar. | Suite negativa produce hard-fail para salida envuelta, campos/rangos inválidos y acciones prohibidas. | T | ADR-20260727-ai-payload-gemma4-e2b-candidate | FSW/Safety | Active |
+| IA-REQ-06 | Prompts/policies shall ser versionados, autenticados, staged y activados separadamente. | Tests de upload/activate/rollback/replay/corrupción cumplen protocolo. | T | ADR-20260727-rf-regulatory-command-security-baseline | FSW/Security | Active |
+| IA-REQ-07 | Cada inferencia shall generar el registro científico completo definido en Mission Definition §8. | Validador schema acepta 100% de eventos usados en análisis y liga raw/postestado. | T+I | Mission Definition §8 | FSW/Ground | Active |
+| IA-REQ-08 | El payload shall disponer de disable local autónomo y de comando autenticado aplicable en la siguiente oportunidad de contacto. | Kill local cumple tiempo máximo TBD; comando válido deshabilita/lockout; ausencia de contacto no compromete seguridad. | T | ADR-20260727-ai-payload-gemma4-e2b-candidate | FSW/COMMS | Active |
+| IA-REQ-09 | La plataforma candidata shall registrar configuración exacta y no se promoverá a vuelo sin COTS-to-flight. | Manifest de hardware y dossier de radiación/térmica/EMC/almacenamiento aprobados antes de CDR. | I+A+T | ADR-20260727-ai-payload-gemma4-e2b-candidate | Systems/AI | Active |
+| IA-REQ-10 | `gemma4:e2b` shall tratarse como candidato no validado hasta cumplir su gate de evidencia. | Digest/licencia/dataset/suite/mediciones completos; review autoriza cualquier promoción. | I+T+A | ADR-20260727-ai-payload-gemma4-e2b-candidate | AI/Science | Active |
+| IA-REQ-11 | Todo cambio de candidato/modelo shall realizarse mediante ADR y nueva configuración de evidencia. | Auditoría no encuentra cambio de tag/digest sin ADR; métricas no se transfieren entre artefactos. | I | ADR-20260727-ai-payload-gemma4-e2b-candidate | Systems/QA | Active |
+| IA-REQ-12 | El transporte local OBC↔IA shall usar framing exacto y versionado, límites de tamaño/timeout/retry, CRC, secuencia y sesión explícitas, semántica de reset/wrap e idempotencia. La autenticación RF es una frontera distinta: todo estado `auth` local shall ser derivado por el verificador OBC y nunca aceptado como afirmación del modelo. | Suite de transporte aprueba nominal, máximo tamaño, timeout/retry y reset/wrap; rechaza frame truncado, CRC inválido, duplicado, reordenado, versión/tamaño desconocidos y acción no idempotente. Un campo `auth` aportado por la salida IA no concede autoridad y el OBC liga cualquier autorización a evidencia verificada aguas arriba. | I+T | ADR-20260727-ai-payload-gemma4-e2b-candidate; ADR-20260727-rf-regulatory-command-security-baseline | FSW/AI/Security | Active |
 
-> **Nota:** Los requisitos IA-REQ-xx son verificables en banco a partir de Gate IA-2 (para CM5 real). La plataforma de banco prevista para esa verificación es `EPS_Bench1_1S` extendido, con rail IA bench-only por `J_AI_PWR` y `JP1` reservado a control/sense/telemetría. IA-REQ-10 tiene evidencia funcional de banco (benchmark corrected + holdout, 2026-03-16). El modelo Granite 350M fine-tuned ha alcanzado el estado de baseline funcional de banco; queda pendiente validación en hardware CM5 real. No se fijan consumos, masa ni térmica como requisitos cerrados ni se valida aquí el rail IA de vuelo.
+## 6. Estructura, ADCS y térmico
 
-## 6) Requisitos estructurales y térmicos (2026-03-20)
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| STR-REQ-01 | El layout de caras shall derivarse de CAD y análisis orbital/térmico/solar corregido, y congelarse por ADR. | Modelo reproducible, requisitos absolutos y review seleccionan layout; no depende de score arbitrario. | A+I | ADR-20260727-orbit-attitude-analysis-reopened | Structure/Thermal | Active |
+| STR-REQ-02 | El diseño shall incluir arquitectura ADCS capaz de los pointing/stability limits aprobados. | Error budget, simulación con dispersión y pruebas HIL satisfacen límites TBD en SRR/PDR. | A+T | ADR-20260727-orbit-attitude-analysis-reopened | ADCS | Active |
+| THR-REQ-01 | Toda superficie térmica shall tener α/ε medidos y cumplir el modelo correlacionado. | Cupón/material as-built medido; valores worst-case degradados mantienen límites aprobados. | T+A | ADR-20260727-thermal-power-baselines-reopened | Thermal/Materials | Active |
+| THR-REQ-02 | La ruta térmica IA→estructura shall alcanzar la conductancia asignada por el modelo. | Ensayo calorimétrico incluye TIM, contactos, spreading y tolerancias; G medida ≥ allocation TBD. | T | ADR-20260727-thermal-power-baselines-reopened | Thermal/Structure | Active |
+| THR-REQ-03 | Batería/cargador shall respetar límites de carga, descarga, almacenamiento y supervivencia de la celda final. | TVAC/cycling y fault tests prueban interlocks en todos los umbrales con tolerancia. | T+A | ADR-20260727-thermal-power-baselines-reopened | EPS/Thermal | Active |
+| THR-REQ-04 | Material térmico shall cumplir outgassing del ICD. | Datasheet/lot test aceptado; TML/CVCM conforme límite aplicable. | I+T | COMP-REQ-05 | Materials | Active |
 
-| ID | Requisito (shall) | Rationale | Verif. | Dueño | Trazabilidad |
-|---|---|---|---|---|---|
-| STR-REQ-01 | El layout de caras shall asignar paneles solares a +Y, ±X, −Z y radiador a −Y (LTAN 10h). | Maximizar energía solar con disipación térmica efectiva. | A / I | Structure | `ADR-20260320-orbit-attitude-solar-layout-baseline.md` |
-| STR-REQ-02 | La actitud nominal shall ser 10×10 nadir (+Z Tierra, +X ram). | Score máximo en barrido orbital. | A | Mission/ADCS | `ADR-20260320-orbit-attitude-solar-layout-baseline.md` |
-| THR-REQ-01 | El recubrimiento del radiador shall tener α_solar ≤ 0.20 y ε_IR ≥ 0.88. | Mantener Tmax CM5 ≤ 40°C en condiciones nominales. | T / A | Structure/Thermal | `ADR-20260320-thermal-design-radiator-cm5-coupling.md` |
-| THR-REQ-02 | El CM5 shall estar acoplado térmicamente al panel radiador con G ≥ 0.60 W/K. | Disipar hasta 4.5 W pico con ΔT ≤ 8°C. | T | Structure/Thermal | `ADR-20260320-thermal-design-radiator-cm5-coupling.md` |
-| THR-REQ-03 | La temperatura mínima de batería en eclipse shall ser ≥ −10°C. | Límite operativo Li-ion en descarga. | A / T | EPS/Thermal | `ADR-20260320-thermal-design-radiator-cm5-coupling.md` |
-| THR-REQ-04 | El recubrimiento del radiador shall cumplir TML ≤ 1.0% y CVCM ≤ 0.1%. | CDS Rev. 14.1 §2.1.7 outgassing. | I / T | Structure/Thermal | CDS Rev. 14.1 §2.1.7 |
+## 7. Requisitos de aseguramiento incorporados por auditoría
 
-> **Nota:** STR-REQ-xx y THR-REQ-xx son verificables a partir de Gate IA-1 (térmica CM5) y PDR mecánico. THR-REQ-03 tiene evidencia preliminar del simulador v9.2 (Tmin batt ≥ 20°C); cierre requiere TVAC o ensayo en banco térmico.
+| ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
+|---|---|---|---|---|---|---|
+| SYS-REQ-01 | El experimento IA shall tener protocolo preregistrado antes de SRR. | Documento aprobado contiene todos los elementos de Mission Definition §3–4. | I | ADR-20260727-verification-and-review-governance | Science/Systems | Active |
+| SYS-REQ-02 | Todo claim cuantitativo shall citar configuración, unidades, artefacto y resultado exacto. | Inventario exhaustivo automatizado de la población de claims activos tiene trazabilidad completa; cero claim huérfano y cero resultado transferido por analogía. | I | AGENTS.md §13, “Evidencia y reproducibilidad” | QA/Systems | Active |
+| SYS-REQ-03 | Readiness shall seguir SRR→PDR→CDR→TRR→Q/AR→FRR sin dependencias preliminares. | Review records y entrance/exit criteria completos; waivers controlados. | I | ADR-20260727-verification-and-review-governance | Systems/QA | Active |
+| SYS-REQ-04 | Shall existir configuración identificada del artículo ensayado. | Cada EvidenceID liga BOM/CAD/FW/model/config hashes y serial/lote aplicables. | I | ADR-20260727-verification-and-review-governance | Configuration/QA | Active |
+| SYS-REQ-05 | Ningún requisito shall cerrarse por análisis preliminar sin criterio/evidencia controlada. | VCRM usa `Verified` solo con ProcedureID, configuración y EvidenceID aprobado. | I | ADR-20260727-verification-and-review-governance | QA | Active |
+| SYS-REQ-06 | Owners shall ser roles asignados nominalmente antes de ejecutar su review. | Acta de review registra nombre, autoridad, fecha y firma/aprobación. | I | ADR-20260727-verification-and-review-governance | Project Management | Active |
+| SYS-REQ-07 | Hallazgos y waivers shall conservar disposición, autoridad y riesgo residual. | Registro auditado sin hallazgo crítico huérfano; waiver liga RiskID y expiración/condición. | I | ADR-20260727-verification-and-review-governance | QA/Risk | Active |
+| EPS-REQ-01 | `EPS_STATE` shall ser una máquina verificable con thresholds, histéresis, dwell y fallas de sensor. | Especificación y boundary tests cubren boot/unknown, ruido, debounce y precedencia. | I+T | MVP v2.2 §8 | EPS/FSW | Active |
+| EPS-REQ-02 | El diseño EPS shall pasar revisión de esquema/ERC/BOM/DRC antes de fabricación. | Cero corto/ERC/DRC bloqueante; checklist y release package firmados. | I | ADR-20260727-thermal-power-baselines-reopened | EPS/QA | Active |
+| PWR-REQ-01 | Shall existir un balance integrado de potencia y energía con margen positivo para la configuración aprobada. | Ledger por modo incluye todas las cargas, inrush, simultaneidad, conversiones, sol/eclipse, batería, BOL/EOL, degradación e incertidumbre; inputs medidos y worst-case/Monte Carlo aprobados. | A+T | ADR-20260727-thermal-power-baselines-reopened | EPS/Systems | Active |
+| ADCS-REQ-01 | ADCS shall detumble desde la envolvente de tasas de liberación del ICD. | HIL/analysis satisface tiempo y energía TBD para todos los casos aprobados. | A+T | STR-REQ-02 | ADCS | Active |
+| ADCS-REQ-02 | Budgets solar/térmico/RF shall incluir pointing error, jitter y safe/degraded attitude. | Sensibilidad/worst-case muestra cumplimiento sin actitud perfecta implícita. | A | STR-REQ-02 | ADCS/Systems | Active |
+| ORB-REQ-01 | La selección orbital shall incluir plan de mitigación de debris, vida orbital, fin de vida y evaluación de reentry aplicables. | Análisis reproducible con configuración/dispersiones controladas satisface requisitos de jurisdicción, integrador y autoridad aplicables; review aprueba lifetime, disposición y riesgo de reentry antes de congelar órbita. | A+I | ADR-20260727-orbit-attitude-analysis-reopened | Mission/Regulatory | Active |
+| SCI-REQ-01 | Cada sensor del Science Pack que se adopte shall tener propósito, rango, resolución, exactitud, calibración, unidades, cadencia y metadata aprobados. | Trade y procedimiento del sensor exacto demuestran trazabilidad de requisito→calibración→raw→producto; componentes no seleccionados permanecen candidatos. | I+T+A | MVP v2.2 §§2–3 | Science/Systems | Active |
+| DATA-REQ-01 | Ground shall persistir raw append-only, metadata, parsed data, replay y export. | Power-loss/restart/replay produce dataset íntegro con digests y sin depender de RAM. | T | Mission Definition §6 | Ground SW | Active |
+| DATA-REQ-02 | Métricas de pérdida shall distinguir session/boot, wrap, duplicados y reordenamiento. | Tests unitarios con todos los casos producen PER/gaps esperados. | T | DATA-REQ-01 | Ground SW | Active |
+| SEC-REQ-01 | TTC y prompts shall usar autenticación criptográfica y anti-replay. | Suite negativa completa aprobada; CRC/hash simple no es la única protección. | T+A | ADR-20260727-rf-regulatory-command-security-baseline | Security/FSW | Active |
+| SEC-REQ-02 | El threat model shall cubrir spoofing, replay, key compromise, DoS y recovery. | Review de seguridad aprueba assets, adversarios, mitigaciones y riesgos residuales. | A+I | ADR-20260727-rf-regulatory-command-security-baseline | Security | Active |
+| RAD-REQ-01 | Shall existir análisis/mitigación TID, DDD, SEE y SEL para hardware COTS. | Entorno, shielding, derating, latch-up/EDAC y test/heritage aprobados antes de CDR. | A+T+I | MVP v2.2 §14 | Radiation/Systems | Active |
+| ENV-REQ-01 | El artículo flight-like/flight shall completar el programa ambiental aplicable. | Pre/post funcional, vibration, TVAC/thermal balance, EMC, deployment y RF E2E aprobados según ICD. | T | ADR-20260727-verification-and-review-governance | AIT/QA | Active |
 
-## 7) Notas
-- Requisitos numéricos finos (elevación mínima, canales exactos, BW125 vs BW250) quedan como **TBD** hasta completar `docs/COMMS/uplink_lora_bench_testing_plan.md`.
-- **BW final del uplink LoRa sigue TBD.** BW250 es el candidato preferente para robustez frente a CFO/Doppler; BW125 requiere evidencia de banco/campo con margen suficiente.
-- **Criterio provisional de downlink UHF:** la validación nominal del downlink UHF se establece provisionalmente para elevaciones ≥20°. Operación a <20° es experimental/oportunista, no criterio nominal de éxito del MVP. Ver `04_Communications/link_budget_uhf_preliminary.md` §6.2 y `ADR-20260313-uhf-downlink-operational-mask.md`.
-- **SatNOGS / visibilidad de datos:** SatNOGS se usa solo para `PUBLIC_BEACON` receive-only. Payload, ciencia, PHOTO_DEMO, logs IA detallados y uplink de comandos quedan en perfiles privados/controlados. Cifrado/autenticacion y restricciones de contenido quedan sujetos al cierre regulatorio final.
-- **Estacion dual-use:** la estacion propia puede compartir antena/rotor con SatNOGS, pero el modo SatNOGS queda estrictamente receive-only y sin acceso al transmisor. Ver `04_Communications/ground_station_dual_use_satnogs_australis.md`.
-- El target solar con payload IA activo queda **TBD** hasta medición real del CM5 y cierre del duty-cycle orbital.
-- `SOLAR_ONLY` se considera contingencia en evaluación; no requisito bloqueado de aceptación MVP hasta nueva ADR `Accepted`.
-- Requisitos marcados con "ICD integrador (TBD)" quedan como `Blocked by Integrator` en la compliance matrix hasta recibir documentación del integrador de lanzamiento.
-- Las referencias a documentos `Preliminary` o `Proposed` en la columna de trazabilidad son **análisis de soporte**, no fuente normativa única. El `shall` se respalda en ADR `Accepted` o baseline cuando existe.
+## 8. Regla de cambio
+
+Cambiar statement, criterio o lifecycle exige:
+
+1. actualizar VCRM;
+2. evaluar riesgos/budgets/interfaces;
+3. ADR si cambia arquitectura o misión;
+4. registrar revisión y autoridad.

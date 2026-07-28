@@ -5,11 +5,11 @@
 	(uuid "10000000-0000-0000-0000-000000000001")
 	(paper "A4")
 	(title_block
-		(title "EPS Bench 2S - Top")
-		(comment 1 "Interconexión jerárquica")
+		(title "EPS 2S NON-FABRICABLE PLACEHOLDER")
+		(comment 1 "NO FABRICAR / INTERFACES NO IMPLEMENTADAS")
 	)
 	(lib_symbols)
-	(text "Top-level: interconexión de hojas para propagación de nets."
+	(text "NO FABRICAR: esta jerarquía no representa un circuito eléctrico liberado."
 		(exclude_from_sim no)
 		(at -19.558 -9.398 0)
 		(effects

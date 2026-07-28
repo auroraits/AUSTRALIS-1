@@ -1,143 +1,125 @@
-# Compliance Matrix — AUSTRALIS-1 / DIY Nanosat MVP
+# Compliance Matrix — AUSTRALIS-1
 
-**Revisión:** 2026-07-10
-**Estado:** Active
-**Trazabilidad:** `08_Decisions/ADR-20260313-compliance-matrix-artefacto-sistema.md`, `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
+**Revisión:** 2026-07-27
+**Estado:** Active — pre-SRR
 
-Este es un artefacto vivo del sistema. Debe actualizarse cuando cambian requisitos, se obtiene evidencia o cambia el estado de un ítem.
+Este documento cubre normas, regulación e interfaces externas. La verificación
+de requisitos internos se controla en
+`verification_cross_reference_matrix.csv`.
+La trazabilidad ejecutable de cada fila `CX-*` hacia requisito padre, método,
+procedimiento, gate, owner, riesgo, configuración y evidencia se controla en
+`compliance_cross_reference_matrix.csv`.
 
 Estados permitidos:
-- `Open` — requisito identificado; sin evidencia aún.
-- `Partial` — evidencia parcial o análisis preliminar disponible.
-- `Closed` — evidencia completa y verificada.
-- `Blocked by Integrator` — depende de ICD/documentación del integrador de lanzamiento (TBD).
 
----
+- `Open`
+- `Planned`
+- `Implemented`
+- `Verified`
+- `Waived`
+- `Blocked by Integrator`
 
-## 0) Politica de diseno y supply chain
+`Blocked by Integrator` no equivale a cierre y bloquea FRR si afecta seguridad o
+aceptación.
 
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-SYS-01 | El proyecto shall mantener diseno DIY, low cost y publicacion abierta/source-available no comercial con componentes maker/COTS disponibles en Argentina/Latinoamerica cuando sea viable. | `MIS-REQ-23`; `ADR-20260710-diy-low-cost-maker-latam-design-policy.md` | Sistema | I+A | Revision de baseline, repo publico, BOM y trade studies | Open | La licencia publica sigue siendo source-available no comercial segun `LICENSE.md`; no declarar OSI open source sin cambio de licencia. |
-| CX-SYS-02 | Cada item nuevo de BOM/trade study shall registrar clase tecnica, proveedor/region, alternativa y riesgo; excepciones por SKU unico, EOL, costo alto o baja disponibilidad regional shall quedar justificadas. | `MIS-REQ-24`; `ADR-20260710-diy-low-cost-maker-latam-design-policy.md` | Sistema/Costos | I+A | Revision de `BOM_master.csv`, `bom_overview.md` y riesgos de supply chain | Open | Aplica a nuevas decisiones y a saneamiento progresivo de BOM existente. |
+## 1. Mecánica e interfaz 1.5U
 
----
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-M-01 | Envolvente CubeSat 1.5U, incluyendo `Z=170.2 ±0.1 mm`. | CDS Rev.14.1 p.24; COMP-REQ-01 | CAD controlado + metrología | Open | Todo modelo de 150 mm debe regenerarse. |
+| CX-M-02 | Masa dentro del límite aplicable. | CDS Rev.14.1 Table 1 (referencia 1.5U 3.00 kg); ICD | mass roll-up + pesada | Blocked by Integrator | 3.00 kg es referencia CDS, no promesa del dispenser. |
+| CX-M-03 | CG e inercia dentro de límites. | CDS/ICD | CAD + ensayo de mass properties | Blocked by Integrator | Límites exactos TBD por ICD. |
+| CX-M-04 | Rails, tabs, corner radius, finish, protrusions y keep-outs conformes. | CDS drawings; ICD | drawing review + metrología | Blocked by Integrator | Diseñar contra CDS; confirmar detalles con integrador. |
+| CX-M-05 | Retención de deployables responsabilidad del CubeSat. | CDS Rev.14.1 §2.3/§2.4 | inspección + deployment tests | Open | Mecanismo de antena TBD. |
+| CX-M-06 | Fit-check físico aprobado. | ICD integrador | fit-check record | Blocked by Integrator | Obligatorio antes de FRR. |
+| CX-M-07 | Dossier mecánico completo. | ICD integrador | drawings, stack, mass/CG/inertia, fasteners, load path | Open | No existe aún CAD activo conforme. |
+| CX-M-08 | Al menos un deployment switch desconecta eléctricamente funciones powered hasta eyección. | CDS Rev.14.1 §2.3.1–2.3.2 | esquema + continuity/fault tests | Open | No limitar su alcance a RF/deployables. |
+| CX-M-09 | RBF (Remove Before Flight) o mecanismo requerido por CDS/ICD. | CDS Rev.14.1 §2.3.5 | inspección + procedimiento | Open | No es “si aplica” en el baseline CDS. |
+| CX-M-10 | Al menos tres inhibiciones para deployables. | CDS Rev.14.1 §2.3.8 | independencia + fault injection | Open | El repo anterior indicaba dos; queda corregido. |
+| CX-M-11 | Deployables esperan al menos 30 min post-eyección o el valor más restrictivo del ICD. | CDS Rev.14.1 §2.4.4; ICD | timer/reset/brownout tests | Blocked by Integrator | Implementar mínimo CDS y confirmar ICD. |
+| CX-M-12 | Ningún volumen sellado sin análisis de venting. | CDS/ICD | CAD vent analysis | Open | Incluye batería/enclosures/conectores. |
+| CX-M-13 | Materiales cumplen outgassing/compatibilidad aplicable. | ICD; ASTM E595 si se invoca | material declaration + datasheet/lot test | Blocked by Integrator | Límite/fuente exactos deben registrarse. |
+| CX-M-14 | Entrega incluye esquemas, harness, drawings y mass properties. | ICD integrador | dossier/configuration index | Open | Contenido final condicionado al ICD. |
 
-## 1) Mecánica y compatibilidad de dispenser
+## 2. Seguridad eléctrica y lanzamiento
 
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-M-01 | El satélite shall operar en form factor 1.5U (100×100×150 mm). | `MIS-REQ-01`, CDS Rev 14.1 | Estructura | I (Inspection) | Modelo CAD / medición física | Open | Modelo estructural TBD. |
-| CX-M-02 | La masa total del satélite shall cumplir el límite del dispenser (típico ≤2 kg para 1.5U; confirmar con integrador). | CDS Rev 14.1; ICD integrador | Estructura | I | Pesada en banco | Blocked by Integrator | Límite exacto depende del integrador. |
-| CX-M-03 | El centro de gravedad (CG) shall estar dentro de los límites del dispenser. | CDS Rev 14.1; ICD integrador | Estructura | A+I | Cálculo + medición | Blocked by Integrator | Depende de ICD integrador. |
-| CX-M-04 | Los rails, protrusiones, radio de esquinas y roughness superficial shall cumplir CDS Rev 14.1. | CDS Rev 14.1; ICD integrador | Estructura | I | Inspección física | Blocked by Integrator | Depende de ICD integrador. |
-| CX-M-05 | Los deployables (antenas) deben ser retenidos por el **CubeSat mismo** antes del deployment. La retención primaria es responsabilidad del CubeSat, no del dispenser/deployer. | CDS Rev 14.1 §3.3.4; ICD integrador | COMMS/Estructura | I+D | Prueba de despliegue | Open | Mecanismo de retención de antenas TBD. |
-| CX-M-06 | El fit-check (CIFP — CubeSat Interface and Form-factor Package) shall completarse antes de integración con el dispenser. | ICD integrador | Estructura | D | Evidencia fit-check | Blocked by Integrator | Requiere dispenser del integrador. |
-| CX-M-07 | El dossier de ICD, drawings, mass properties y owners shall completarse antes del PDR (Preliminary Design Review) del integrador. | ICD integrador | Sistema | I | Dossier entregado | Open | TBD con integrador. |
-| CX-M-08 | El CubeSat shall incluir al menos un deployment switch que interfiera con el deployer/P-POD para inhibir RF y/o deployables durante el lanzamiento. | CDS Rev 14.1 §3.3.2; ICD integrador | COMMS/Estructura | I+T | Prueba de continuidad y función en banco | Blocked by Integrator | Interfaz mecánica y eléctrica depende del deployer ICD. |
-| CX-M-09 | RBF (Remove Before Flight) pin o mecanismo equivalente: permite acceder de forma segura a las baterías del CubeSat antes del lanzamiento. | ICD integrador (si aplica) | EPS/Estructura | I | Inspección física | Blocked by Integrator | Requerimiento y forma dependen del integrador. |
-| CX-M-10 | Los deployables (antenas) deben tener al menos **dos inhibiciones mecánicas independientes**, ambas controladas por el CubeSat. | CDS Rev 14.1 §3.3.4 | COMMS/Estructura | I+D | Prueba de retención y despliegue | Open | Diseño de mecanismo de retención TBD. |
-| CX-M-11 | El CubeSat shall implementar un tiempo mínimo de espera post-eyección antes de activar cualquier deployable. | CDS Rev 14.1; ICD integrador | FSW/Estructura | T | Prueba de secuencia de boot y activación | Blocked by Integrator | Duración exacta depende del integrador. |
-| CX-M-12 | Análisis de venteo (venting): el CubeSat no debe contener volúmenes sellados que puedan causar presurización diferencial durante el lanzamiento. | CDS Rev 14.1 §3.2.2.4 | Estructura/EPS | A | Análisis de diseño mecánico + revisión de enclosures | Open | Analizar caja/compartimentos cerrados. |
-| CX-M-13 | Los materiales de estructura, PCB, harness y otros componentes shall cumplir los requisitos de outgassing (típicamente TML ≤1% y CVCM ≤0.1%). | ICD integrador; ASTM E595 o equivalente | Estructura/EPS | I+A | Datasheets de materiales + análisis | Blocked by Integrator | Lista de materiales prohibidos del integrador TBD. |
-| CX-M-14 | El paquete de documentación de entrega al integrador shall incluir: esquemáticos, harness/cable drawing, propiedades de masa detalladas y drawings mecánicos. | ICD integrador | Sistema | I | Dossier de entrega completado | Open | Paquete de entrega TBD con integrador. |
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-LAUNCH-01 | Todas las funciones powered permanecen OFF durante integración/lanzamiento hasta eyección. | CDS Rev.14.1 §2.3.1 | power-path analysis + fault tests | Open | Incluye IA, RF, deployables y cargas. |
+| CX-LAUNCH-02 | Al menos tres inhibiciones independientes de RF TX. | CDS Rev.14.1 §2.3.7 | esquema + independencia + fault injection | Open | El ICD puede exigir más, no menos. |
+| CX-LAUNCH-03 | No transmitir antes de 45 min post-eyección o valor más restrictivo. | CDS Rev.14.1 §2.4.5; ICD | timer/reset/power-cycle tests | Blocked by Integrator | Mantener contador seguro ante reset. |
+| CX-LAUNCH-04 | El sistema protege contra desbalance de celdas. | CDS Rev.14.1 §2.3.6 | BMS design + imbalance tests | Open | KiCad actual no implementa BMS funcional. |
+| CX-LAUNCH-05 | Dossier batería aborda transporte, carga, protección y pasivación. | CDS/ICD/transport regulation TBD | dossier + qualification evidence | Blocked by Integrator | Celda y arquitectura completa TBD. |
 
----
+## 3. RF y regulación
 
-## 2) RF, comunicaciones y regulatorio
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-RF-01 | El satélite no transmite LoRa/ISM 915 MHz. | MIS-REQ-02/COMP-REQ-03 | schematic/FW inspection + spectrum test | Planned | RX-only orbital permanece decidido. |
+| CX-RF-02 | Frecuencia UHF exacta dentro de atribución y coordinación aplicables. | ENACOM/IARU/ITU | dossier + measured occupied bandwidth | Open | `435.000 MHz` no es centro congelado. |
+| CX-RF-03 | Emisiones, occupied bandwidth y espurias cumplen autorización. | ENACOM/ITU | calibrated spectrum report | Open | Hardware/waveform TBD. |
+| CX-RF-04 | Coordinación IARU documentada. | IARU Amateur Satellite Frequency Coordination | correspondence/dossier | Open | Necesaria antes de congelar bandplan. |
+| CX-RF-05 | Estación espacial y operador cumplen trámite ENACOM/UIT. | Resolución ENACOM 3635-E/2017 §9.14 | licencia, autorización, filing/notification | Open | Responsable legal nominal TBD. |
+| CX-RF-06 | Toda emisión incluye identificación/callsign con periodicidad aplicable. | ENACOM 3635-E/2017 §§1.5.8, 13.3.9 | frame/air capture + procedure | Open | Aplicar a todos los perfiles, no solo beacon. |
+| CX-RF-07 | Contenido/modulación/decodificación cumplen reglas amateur aplicables. | ENACOM 3635-E/2017 §§1.5.9, 13.4.2 | protocol/legal review | Open | Autenticación no debe convertirse en cifrado de contenido sin aprobación. |
+| CX-RF-08 | Uplink 915 MHz Tierra→espacio tiene autorización escrita antes de radiarse. | CABFRA/ENACOM; ADR-20260727 RF | respuesta administrativa que describe banda, dirección, potencia, antena y duty | Open | RX-only orbital no autoriza al transmisor terrestre. |
+| CX-RF-09 | Comandos/prompts tienen autenticación, integridad y anti-replay. | SEC-REQ-01 | threat model + negative test suite | Open | CRC/hash simple no autentica. |
+| CX-RF-10 | SatNOGS permanece receive-only y sin PTT/claves. | MIS-REQ-21 | physical/logical isolation tests | Planned | No sustituye licencia ni estación de control. |
+| CX-RF-11 | Link budgets uplink/downlink y patrón integrado están verificados. | MIS-REQ-03 | measured EIRP/G/T/sensitivity/PER + uncertainty | Open | ADRs de link/máscara anteriores superseded. |
+| CX-RF-12 | Frames de sensores tienen autenticación y anti-replay; CRC/node ID no prueban origen. | COMMS-UL-07 | spoof/replay/reset/wrap negative tests + provisioning record | Open | La procedencia física requiere ground log controlado además de la credencial. |
 
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-RF-01 | El satélite shall NO transmitir en ISM desde órbita. El uplink LoRa orbital es RX-only en el MVP. | `MIS-REQ-02`, `COMP-REQ-03`, `00_MVP/MVP v2.2.md` | COMMS | T | Test de banco (no TX en modo RX-only) | Open | Verificar que el FW no activa TX LoRa en modo orbital. |
-| CX-RF-02 | Los RF inhibits del TX UHF shall ser ≥3 inhibiciones independientes según requerimiento típico de integrador CubeSat. | CDS Rev 14.1; ICD integrador | COMMS/EPS | I+T | Prueba de inhibición en banco | Blocked by Integrator | Número y tipo exacto depende del ICD. |
-| CX-RF-03 | Las emisiones espurias y armónicos del TX UHF shall cumplir límites regulatorios aplicables. | ENACOM/ITU; ICD integrador | COMMS | T+A | Medición de espectro en banco | Open | Requiere medición con analizador de espectro cuando se tenga hardware TX. |
-| CX-RF-04 | Shall existir evidencia de coordinación IARU para la banda amateur-sat antes de cerrar el bandplan. | ITU/IARU; `04_Communications/RF_ANALISYS_OPENLST.md` | Operaciones | D | Documentación IARU | Open | TBD. |
-| CX-RF-05 | La operación de la estación terrena shall cumplir el camino regulatorio ENACOM aplicable. | ENACOM; `04_Communications/RF_ANALISYS_OPENLST.md` §4.1 | Operaciones | D | Documentación ENACOM | Open | TBD. |
-| CX-RF-06 | El CubeSat shall NO transmitir RF dentro de un tiempo mínimo post-eyección (wait time). | CDS Rev 14.1 §3.3.2; ICD integrador | COMMS/FSW | T | Prueba de secuencia de boot + inhibición RF | Blocked by Integrator | Duración exacta depende del ICD. |
-| CX-RF-07 | La estacion terrena dual-use shall mantener SatNOGS en modo receive-only sin acceso al transmisor/PTT y shall verificar switch T/R digital fail-safe antes de uplink radiado. | `MIS-REQ-21`; `04_Communications/ground_station_dual_use_satnogs_australis.md` | Ground/COMMS | T+D+I | Prueba de interlocks, logs de T/R switch y revision de permisos SatNOGS | Open | Requiere hardware de estacion, secuenciador y procedimiento de uplink. |
-| CX-GND-01 | La estacion terrena shall registrar clima local y ambiente interior de gabinete, y usar viento/lluvia/humedad como entradas de inhibicion y park automatico. | `MIS-REQ-22`; `04_Communications/ground_station_dual_use_satnogs_australis.md` | Ground | T+D+I | Logs de clima por pasada, prueba de park por viento/lluvia y alarma de humedad interior | Open | Requiere estacion meteorologica local, sensores interiores y conexion al scheduler/rotator. |
+## 4. Órbita, debris y reentry
 
----
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-ORB-01 | Órbita, vida, mitigación de debris, fin de vida y reentry cumplen los requisitos aplicables. | ORB-REQ-01; jurisdicción/ICD TBD | validated propagation + uncertainty + compliance/reentry disposition | Open | No congelar órbita ni prometer deorbit hasta identificar autoridad, estándar e inputs as-built. |
 
-## 3) EPS, batería y energía
+## 5. EPS, térmico, radiación y ambiente
 
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-EPS-01 | La topología de batería de vuelo shall ser 2S Li-ion. | `MIS-REQ-06`, `ADR-20260218-battery-topology-2s-flight` | EPS | I | Diseño PCB flight-like | Partial | Banco 1S activo; PCB 2S en KiCad. |
-| CX-EPS-02 | Shall existir dossier de batería y carga para topología 2S + MPPT: quimismo, capacidad, curvas de carga/descarga, certificaciones si aplica. | `COMP-REQ-06`; ICD integrador | EPS | I | Dossier batería | Open | Dossier TBD. |
-| CX-EPS-03 | El EPS shall soportar pico de ~3 W sin brownout en el escenario sin IA activa. El cierre de pico total con payload IA permanece abierto bajo `CONF-01`. | `00_MVP/MVP v2.2.md` §8 | EPS/COMMS | T+A | Medición banco + `T20` en `EPS_Bench1_1S` extendido | Open | El bench extendido usa `5V_AI_EXT` para medir el CM5 real, pero no cierra el rail IA de vuelo ni el target solar con IA activa. |
-| CX-EPS-04 | Los materiales de PCB y estructura shall cumplir requisitos de venting, outgassing y compatibilidad de vacío del integrador. | `COMP-REQ-05`; ICD integrador | Estructura/EPS | I | Datasheet de materiales + análisis | Blocked by Integrator | Requiere lista de materiales prohibidos del integrador. |
-| CX-EPS-05 | Pasivación y mitigación de debris: para misiones LEO, shall evaluarse si aplican requisitos de pasivación de batería y/o venting de gases post-misión. | ICD integrador; IADC Guidelines | EPS/Sistema | A | Análisis de pasivación documentado | Open | Depende del integrador y regulación aplicable. |
-| CX-EPS-06 | La telemetría EPS shall exponer `EPS_STATE` en la taxonomía canónica `CRIT / LOW / NOMINAL / HIGH`. | `MIS-REQ-10`, `MIS-REQ-12`, `ADR-20260314-eps-state-4-levels.md` | EPS/FSW | T | Test de telemetría y transición de estados | Open | `EPS_Bench1_1S` extendido agrega `5V_AI_SENSE` y señales IA en `JP1` control-only, pero `EPS_STATE` canónico sigue pendiente de implementación/verificación. |
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-EPS-01 | Arquitectura de referencia 2S; protección/carga completas. | MIS-REQ-06/COMP-REQ-06 | reviewed schematic + battery tests | Open | No fabricar el diseño placeholder. |
+| CX-EPS-02 | Límites de carga/descarga/supervivencia de celda final implementados. | THR-REQ-03 | datasheet allocation + TVAC/fault tests | Open | Incluir no-charge cold/hot interlock. |
+| CX-EPS-03 | Power/energy budget BOL/EOL cerrado. | PWR-REQ-01 | ledger + measurements + uncertainty | Open | No existe margen confirmado. |
+| CX-THR-01 | Thermal model correlacionado y límites verificados. | THR-REQ-01..04 | thermal balance/TVAC + model correlation | Open | Radiador/heater/coating TBD. |
+| CX-RAD-01 | TID/DDD/SEE/SEL analizados y mitigados. | RAD-REQ-01 | environment/parts/mitigation/test report | Open | Watchdog no mitiga SEL/TID por sí solo. |
+| CX-ENV-01 | Programa ambiental ejecutado sobre artículo/configuración controlados. | ENV-REQ-01; ICD | vibration/TVAC/EMC/deployment/pre-post | Blocked by Integrator | Niveles finales dependen del ICD; programa no es opcional. |
 
----
+## 6. Evidencia, reviews y readiness
 
-## 4) Software y operaciones
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-EP-01 | Evidence pack liga ReqID→ProcedureID→ConfigurationID→EvidenceID/hash. | MIS-REQ-15/SYS-REQ-04 | VCRM audit | Implemented | Estructura creada; evidencia de ensayo sigue abierta. |
+| CX-EP-02 | Reviews siguen SRR→PDR→CDR→TRR→QAR→FRR. | SYS-REQ-03 | signed review records | Implemented | Gate A permanece Open. |
+| CX-EP-03 | Ningún `Blocked by Integrator` crítico permanece en FRR. | ADR-20260727 verification governance | FRR checklist | Open | Bloquea readiness. |
+| CX-EP-04 | Waivers registran autoridad y riesgo residual. | SYS-REQ-07 | waiver/NCR register | Planned | No existen waivers aprobados. |
+| CX-AI-01 | Experimento IA tiene protocolo, manifest y benchmark limpio. | SYS-REQ-01/IA-REQ-10 | preregistration + digests + results | Open | `gemma4:e2b` es candidato no validado. |
 
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-SW-01 | El sistema shall boot determinista en `MISSION_MODE = SAFE`. | `MIS-REQ-08`, `00_MVP/MVP v2.2.md` §9 | FSW | T | Test de boot en banco | Open | Verificar en banco con firmware de vuelo. |
-| CX-SW-02 | El arbitraje de downlink shall implementar prioridad estricta `HOUSEKEEPING` + `COMMAND_ACK` y `AI_BEHAVIOR_LOG` como cola best-effort de mayor prioridad científica. | `MIS-REQ-09`, ADR downlink, ADR misión primaria | FSW/COMMS | T | Test de saturación de colas | Open | TBD en banco. |
-| CX-SW-03 | Shall existir persistencia de logs: raw append-only por sesión, muestras parseadas, metadata, replay y export. | `05_Software/ground_data_architecture.md` | Ground SW | T | Test de persistencia/replay | Open | Arquitectura documentada; implementación TBD. |
+## 7. Fuentes primarias
 
----
+- CDS Rev.14.1:
+  <https://static1.squarespace.com/static/5418c831e4b0fa4ecac1bacd/t/62193b7fc9e72e0053f00910/1645820809779/CDS+REV14_1+2022-02-09.pdf>
+  SHA-256 de la copia consultada:
+  `221fbbbd4f632b16f3e219d1a5e2c2b04e1998c12025b793e6dfc6181af66b5d`.
+- ENACOM Resolución 3635-E/2017:
+  <https://www.enacom.gob.ar/multimedia/noticias/archivos/201711/archivo_20171107072645_3234.pdf>
+  SHA-256 de la copia consultada:
+  `53067093cd8cb9b9792a44ca5c5a8890a4d4e44b865c389a4758448ab7ae239a`.
+- Modificación ENACOM 1186/2024:
+  <https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-1186-2024-406719/texto>
+- CABFRA edición 2024, actualización 21-10-2025, pp. 151, 159 y
+  182–188:
+  <https://www.enacom.gob.ar/multimedia/noticias/archivos/202511/archivo_20251104082327_1428.pdf>
+  SHA-256 de la copia consultada:
+  `5240087c31abb8563e04bc5a32f4d600d0925ee0cba94559afe4255a952aa597`.
+- IARU:
+  <https://www.iaru.org/wp-content/uploads/2019/12/short_info_paper.pdf>
+  SHA-256 de la copia consultada:
+  `791a9c681c99ac1bbc9d5e2d5ee16e90d1c2a00ca57de375d81a85b270392e74`.
+- ITU-R small satellite support:
+  <https://www.itu.int/en/ITU-R/space/support/smallsat/Pages/default.aspx>
 
-## 5) PHOTO_DEMO (payload opcional)
-
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-PH-01 | [PHOTO_DEMO] shall iniciar OFF al boot. | `MIS-REQ-PH-01`, ADR-20260313-photo-demo | FSW | T | Test de boot | Open | Off-by-default. |
-| CX-PH-02 | [PHOTO_DEMO] shall ser best-effort; su falla shall no degradar cadena principal. | `MIS-REQ-PH-04`, ADR-20260313-photo-demo | FSW | T | Test de falla inducida | Open | Aislamiento verificable en banco. |
-
----
-
-## 6) Payload IA experimental
-
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-AI-01 | El payload IA shall estar separado del OBC determinístico; el OBC conserva autoridad de vuelo. | `IA-REQ-04`, `IA-REQ-05`, `ADR-20260314` | FSW/SYS | T+I | Test de supervisor + inspección de arquitectura | Open | Gate IA-2 pendiente (integración física). |
-| CX-AI-02 | El payload IA shall ser power-gated en un rail dedicado, independiente de cargas críticas. | `IA-REQ-01`, `ADR-20260314` | EPS | T+I | Inspección de arquitectura `J_AI_PWR -> F_AI -> SW_AI -> 5V_AI_SW` + ensayos `T11-T12` | Partial | `EPS_Bench1_1S` extendido documenta el rail IA bench-only con `5V_AI_EXT`; falta evidencia de ejecución y no aplica extrapolación automática a vuelo. |
-| CX-AI-03 | Shall existir kill switch software y hardware del payload IA. | `IA-REQ-08`, `ADR-20260314` | EPS/FSW | T | `AI_KILL_N` + `SW_AI` documentados; prueba de kill en `T15` / `T21` | Partial | Kill switch bench documentado en el FPM del banco. Falta evidencia de prueba integrada y no cierra hardware de vuelo. |
-| CX-AI-04 | El sistema shall soportar uplink de prompts versionados para el payload IA. | `IA-REQ-06`, `MIS-REQ-18`, `ADR-20260314` | COMMS/FSW | T | Test de uplink de prompt simulado | Open | Gate IA-2 pendiente. |
-| CX-AI-05 | Shall existir Behavior Logger del payload IA con campos mínimos (timestamp, model_version, prompt_version, decision_id, recommended_action, confidence, supervisor_result, MISSION_MODE, EPS_STATE). | `IA-REQ-07`, `MIS-REQ-17`, `ADR-20260314` | FSW | T | Test de logging persistente | Open | `EPS_STATE` debe seguir la taxonomía de 4 niveles. Pendiente de integración con hardware. |
-| CX-AI-06 | El consumo eléctrico del payload IA shall ser medido en banco (idle / active / inference) antes de declarar presupuesto energético cerrado. | `ADR-20260314` §H, `CONF-01` | EPS | T | `T20` sobre `EPS_Bench1_1S` extendido + metrología externa si el `INA219` inline no cierra | Open | Ningún valor queda cerrado hasta medir CM5 real en Gate IA-2; `5V_AI_EXT` bench-only no valida el rail IA de vuelo. |
-| CX-AI-07 | Shall existir monitoreo de salud del payload IA: `EN_AI`, `PGOOD_AI`, `FAULT_AI`, `HB_AI`, `reset_count_AI`, `fault_count_AI`. | `ADR-20260314` §G | FSW/EPS | T | Señales bench documentadas + ensayos `T14-T15` / `T17` | Partial | `EPS_Bench1_1S` extendido y `ai_payload_architecture.md` documentan señales y contadores mínimos; falta evidencia de ejecución. |
-| CX-AI-08 | La política de mutua exclusión IA ↔ TX UHF shall implementarse en el Runtime Safety Supervisor. | `ADR-20260314` §D | FSW | T | `T19` en banco integrado | Open | Gate IA-2 pendiente; el bench extendido define la evidencia esperada pero no hay prueba cargada aún. |
-| CX-AI-09 | Propiedades térmicas del payload IA shall evaluarse antes de declarar viabilidad térmica en órbita. | `ADR-20260314` §H | EPS/SYS | A+T | `AI_THERM` + `T21` + análisis térmico correlativo | Open | El bench extendido agrega telemetría térmica básica del CM5. No existe todavía evidencia suficiente para declarar viabilidad térmica orbital. |
-| CX-AI-10 | Propiedades de masa del payload IA shall documentarse cuando estén disponibles los diseños mecánicos. | `ADR-20260314` | Estructura/SYS | I | Medición masa | Open | TBD — sin diseño mecánico aún. |
-| CX-AI-11 | El sistema shall demostrar en órbita al menos 5 ciclos de inferencia del payload IA con logging completo descargado a tierra. | `MIS-REQ-16`, `ADR-20260314-mission-redef-ai-primary.md` | FSW/Ground | D | Dataset orbital + logs correlacionados | Open | Criterio de éxito primario. |
-| CX-AI-12 | El sistema shall descargar al menos 100 registros `AI_BEHAVIOR_LOG` válidos. | `MIS-REQ-17`, `ADR-20260314-mission-redef-ai-primary.md` | Ground/FSW | D | Export de logs + verificación de campos | Open | Criterio de éxito primario. |
-| CX-AI-13 | El sistema shall demostrar recepción, activación y uso en inferencia de al menos 1 prompt versionado subido por uplink. | `MIS-REQ-18`, `ADR-20260314-mission-redef-ai-primary.md` | COMMS/FSW | D | Evidencia uplink + log de inferencia | Open | Criterio de éxito primario. |
-| CX-AI-14 | El modelo baseline funcional del payload IA shall ser IBM Granite 350M fine-tuned hasta que una nueva ADR `Accepted` lo reemplace. El modelo shall seleccionarse con criterios explícitos de licencia y origen. | `IA-REQ-10`, `IA-REQ-11`, `ADR-20260316` | FSW/SYS | I | Verificación de ADR vigente + modelo cargado | Partial | Evidencia de banco completada (benchmark corrected + holdout 2026-03-16). Pendiente validación en CM5 real. |
-| CX-AI-15 | Shall existir benchmark funcional del modelo baseline del payload IA como evidencia de banco antes de Gate IA-2. | `ADR-20260316`, `IA-REQ-10` | FSW/SYS | T | Resultados de benchmark + holdout documentados | Partial | Completado para Granite 350M fine-tuned (2026-03-16): pass_rate 57.14 %, avg_score_ratio 0.83. Pendiente validación en hardware CM5 real. |
-
----
-
-## 7) Evidence Pack y documentación de entrega
-
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-EP-01 | Shall existir un evidence pack con resultados de ensayos de banco, campo, FlatSat y ambiental antes de PDR/CDR del integrador. | `01_Mission/validation_plan_and_stage_gates.md` | Sistema | I+D | Evidence pack documentado | Open | Plan en `validation_plan_and_stage_gates.md`. |
-| CX-EP-02 | La compliance matrix (este documento) shall estar actualizada al cierre de cada stage-gate. | ADR-20260313-compliance-matrix-artefacto-sistema | Sistema | I | Revisión de matriz | Partial | Matriz inicial creada; en proceso de completar evidencias. |
-
----
-
-## 8) Estructura, layout solar y térmico (2026-03-20)
-
-| ID | Requirement | Source | Owner | Verification | Evidence | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| CX-STR-01 | Layout de caras: paneles solares a +Y, ±X, −Z; radiador a −Y (LTAN 10h). | `STR-REQ-01`, `ADR-20260320-orbit-attitude-solar-layout-baseline.md` | Structure | A / I | Layout mecánico + análisis orbital | Pending | A/I — verificar en diseño mecánico final. |
-| CX-STR-02 | Actitud nominal 10×10 nadir (+Z Tierra, +X ram). | `STR-REQ-02`, `ADR-20260320-orbit-attitude-solar-layout-baseline.md` | Mission/ADCS | A | Análisis ADCS + validación orbital | Pending | A — verificar con ADCS seleccionado. |
-| CX-THR-01 | Recubrimiento del radiador: α_solar ≤ 0.20, ε_IR ≥ 0.88 (AZ-93 o Al anodizado blanco). | `THR-REQ-01`, `ADR-20260320-thermal-design-radiator-cm5-coupling.md` | Structure/Thermal | T / A | Medición α/ε post-aplicación de recubrimiento | Pending | T — medir propiedades ópticas en muestra tratada antes de vuelo. |
-| CX-THR-02 | Conductancia térmica CM5 → radiador: G ≥ 0.60 W/K. | `THR-REQ-02`, `ADR-20260320-thermal-design-radiator-cm5-coupling.md` | Structure/Thermal | T | Medición ΔT en banco con prototipo mecánico | Pending | T — medir ΔT en banco con prototipo integrado (Gate IA-1). |
-| CX-THR-03 | Temperatura mínima de batería en eclipse ≥ −10°C. | `THR-REQ-03`, `ADR-20260320-thermal-design-radiator-cm5-coupling.md` | EPS/Thermal | A + T | Simulación térmica + TVAC si disponible | Pending | Evidencia preliminar: simulador v9.2 muestra Tmin ≥ 20°C. Requiere validación en banco integrado. |
-| CX-THR-04 | Recubrimiento del radiador: TML ≤ 1.0% y CVCM ≤ 0.1% (outgassing). | `THR-REQ-04`, CDS Rev. 14.1 §2.1.7 | Structure/Thermal | I | Datasheet del material (AZ-93 o anodizado) | Pending | I — verificar hoja de datos del fabricante antes de aplicar. |
-
----
-
-## Notas generales
-
-- Los ítems marcados `Blocked by Integrator` quedan como placeholder de diseño hasta disponer del ICD del integrador de lanzamiento.
-- Los ítems `Open` sin ICD de integrador se documentan con la referencia al estándar más aplicable (típicamente CDS Rev 14.1).
-- No se inventan requisitos específicos del launch provider; se usa `TBD` o `Blocked by Integrator`.
-- Al recibir ICD del integrador: actualizar todos los ítems correspondientes y crear ADR si hay impacto de arquitectura.
+Las copias se consultaron el 2026-07-27. Las citas deberán reconfirmarse contra
+la revisión vigente y con especialista/autoridad antes de SRR o filing; esta
+matriz no es asesoramiento legal. El ICD del integrador prevalecerá cuando sea
+más restrictivo.

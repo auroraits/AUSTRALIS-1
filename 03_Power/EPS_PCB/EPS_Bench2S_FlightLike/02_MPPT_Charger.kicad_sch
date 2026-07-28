@@ -8,7 +8,7 @@
 		(title "02_MPPT_Charger")
 	)
 	(lib_symbols)
-	(text "MPPT (Maximum Power Point Tracking) con módulo COTS (Commercial Off-The-Shelf) de banco."
+	(text "NO FABRICAR: marcador de interfaz; no contiene MPPT ni cargador CC/CV."
 		(exclude_from_sim no)
 		(at 20 15 0)
 		(effects
@@ -18,7 +18,7 @@
 		)
 		(uuid "1e9fa548-4172-4663-8ea3-36a8950d33ec")
 	)
-	(text "Interfaz funcional: entrada PV y salida a BMS (Battery Management System)."
+	(text "Entradas y salidas deliberadamente desconectadas hasta diseñar y revisar el circuito."
 		(exclude_from_sim no)
 		(at 20 20 0)
 		(effects
@@ -27,46 +27,6 @@
 			)
 		)
 		(uuid "7ae9698a-15ee-4f5f-b6ff-05016867b25a")
-	)
-	(wire
-		(pts
-			(xy 120 56) (xy 170 56)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "07622ab2-e584-4daf-926e-5e96a058f0bd")
-	)
-	(wire
-		(pts
-			(xy 20 64) (xy 60 64)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "11cd0818-a5c6-4e53-ac5e-cea33f7d6b4d")
-	)
-	(wire
-		(pts
-			(xy 120 64) (xy 170 64)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "bea95a67-9ce3-4920-aca7-e4a629bd19e5")
-	)
-	(wire
-		(pts
-			(xy 20 56) (xy 60 56)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "f247973e-8c66-4eb5-9f25-37d4ea601dfd")
 	)
 	(hierarchical_label "BMS_N"
 		(shape output)

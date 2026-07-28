@@ -1,199 +1,111 @@
-# Top Risks — AUSTRALIS-1 / DIY Nanosat MVP
+# Risk Register — AUSTRALIS-1
 
-**Revisión:** 2026-07-10
-**Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, `01_Mission/compliance_matrix.md`, `ADR-20260710-diy-low-cost-maker-latam-design-policy.md`
+**Revisión:** 2026-07-27
+**Estado:** Active — pre-SRR
 
-Top riesgos consolidados (técnicos y operativos). Este documento referencia matrices específicas por tema.
+## 1. Escala y reglas
 
-## Top risks base (con links)
+Probabilidad:
 
-1) **Uplink LoRa no cierra con nodos típicos** (margen insuficiente, elevación baja)
-- Ver: `07_Risk/comms_lora_uplink_feasibility_risk.md`
+- `1` improbable;
+- `2` baja;
+- `3` media;
+- `4` alta;
+- `5` casi cierta.
 
-2) **CFO/Doppler impiden demodulación estable en BW125**
-- Ver: `07_Risk/comms_lora_cfo_doppler_risk.md`
+Impacto:
 
-3) **Slots desalineados por hora/deriva** → colisiones
-- Ver: `07_Risk/comms_uplink_slotting_time_sync_risk.md`
+- `1` menor;
+- `2` bajo;
+- `3` medio;
+- `4` alto;
+- `5` crítico para seguridad/misión/legalidad.
 
-4) **TLE desactualizado** desplaza ventanas y baja recepción
-- Ver: `07_Risk/comms_tle_update_risk.md`
+`Score=P×I`: 1–5 bajo, 6–10 medio, 11–15 alto, 16–25 crítico.
 
-5) **Integración de LoRa concentrator** (potencia/EMI/thermal/complexidad)
-- Ver: `07_Risk/comms_concentrator_integration_risk.md`
+Un riesgo solo puede cerrarse con `EvidenceID`, review y riesgo residual
+aceptado. Todos los owners son **roles** hasta asignación nominal en la review.
+No hay riesgos cerrados en esta revisión. Los scores de la tabla son
+exposición inicial; la exposición residual y la fecha calendario permanecen
+`TBD`. La columna `Due gate` es el hito máximo y en SRR se asignarán nombre y
+fecha sin inventarlos en esta revisión.
 
-6) **Downlink UHF con margen bajo en elevaciones bajas** (margen “de papel”)
-- El enlace a 10° muestra solo **+1 dB teórico**; en la práctica puede ser negativo con pérdidas reales de polarización, body loss y detuning.
-- **Máscara operativa provisional:** validación nominal solo para elevaciones ≥20°; operación a <20° es experimental/oportunista.
-- Ver: `04_Communications/link_budget_uhf_preliminary.md` §6.2, `ADR-20260313-uhf-downlink-operational-mask.md`
+## 2. Registro consolidado
 
-7) **Déficit energético / brownouts** por picos y condiciones térmicas
-- Ver: `03_Power/Power Budget.md`, `03_Power/EPS Sizing.md`, `07_Risk/eps_bench1_1s_risks.md`
+| ID | Causa → evento → impacto | P | I | Score | Owner role | Trigger | Mitigación / evidencia de cierre | Due gate | Estado |
+|---|---|---:|---:|---:|---|---|---|---|---|
+| RSK-CONF-01 | Fuentes activas incompatibles → configuración equivocada → decisiones/test inválidos | 4 | 5 | 20 | Systems/QA | parámetro/estado con dos valores activos | Gate A, checks automáticos, ADR disposition, VCRM 1:1 | Gate A | Open |
+| RSK-MECH-01 | Geometría 150 mm propagada/CAD o masa ausentes → no conformidad/fit failure | 5 | 5 | 25 | Structure | modelo activo usa 150 mm, supera referencia CDS 3.00 kg/límite ICD o no existe fit CAD | regenerar CAD/budgets con CDS 170.2 mm; mass roll-up, metrología/fit-check | PDR/FRR | Open |
+| RSK-LAUNCH-01 | Inhibits/RBF/deployment incompletos → activación en launcher | 4 | 5 | 20 | EPS/Structure/COMMS | diseño sin switch/RBF/3 RF/3 deployable inhibits | diseño CDS+ICD, fault injection, timers y integrator acceptance | CDR/FRR | Open |
+| RSK-EPS-01 | Esquema EPS placeholder con cortos/sin BMS/charger → daño o batería insegura | 5 | 5 | 25 | EPS/QA | fabricación o sourcing antes de design review/ERC | bloquear fabricación; reconstruir esquema, ERC/BOM/DRC/tests | Gate D | Open |
+| RSK-EPS-02 | Celda/BMS/temperatura no definidos → plating, runaway o pérdida de energía | 4 | 5 | 20 | EPS/Safety | carga fuera de datasheet o sin sensor/interlock | celda/lote, full BMS, charge inhibit, TVAC/fault tests | CDR/QAR | Open |
+| RSK-EPS-03 | State machine sin thresholds/histéresis → chatter/mode unsafe | 4 | 4 | 16 | EPS/FSW | transición no determinista en límites/sensor inválido | spec completa y boundary/noise/fault tests | CDR/TRR | Open |
+| RSK-PWR-01 | Ledger incompleto o margen nominal falso → brownout/pérdida de misión | 5 | 5 | 25 | EPS/Systems | falta carga/pérdida/BOL-EOL/simultaneidad/incertidumbre o input medido | ledger por modo con medición exacta y worst-case/Monte Carlo | PDR/CDR | Open |
+| RSK-ORB-01 | Barrido no heliosincrónico y artefactos incoherentes → órbita/budgets erróneos | 5 | 4 | 20 | Mission/Analysis | drift LTAN o resultado no reproducible | derivar SSO, manifest, validación Orekit/GMAT equivalente | PDR | Open |
+| RSK-DEBRIS-01 | Lifetime/debris/reentry sin demostrar → rechazo regulatorio/integrador o fin de vida inseguro | 4 | 5 | 20 | Mission/Regulatory | candidato orbital carece de evaluación aprobada | matriz normativa aplicable, propagación con incertidumbre, disposición/reentry y review de autoridad/integrador | PDR/FRR | Open |
+| RSK-ADCS-01 | Actitud perfecta asumida sin ADCS → energía/térmica/RF no alcanzables | 5 | 5 | 25 | ADCS/Systems | budget depende de LVLH perfecto | CONOPS, detumble, hardware, HIL/Monte Carlo y degraded cases | Gate G/TRR | Open |
+| RSK-THR-01 | Modelo viola balance físico/geometría → temperaturas/radiador falsos | 5 | 5 | 25 | Thermal | energy residual/test de regresión falla | modelo conservativo, CAD/BOM provenance y correlation | CDR/QAR | Open |
+| RSK-THR-02 | Conductancia/interfaces no caracterizadas → sobretemperatura IA | 4 | 4 | 16 | Thermal/Structure | ΔT/G medidos fuera de allocation | stack térmico real + calorimetría/TVAC | QAR | Open |
+| RSK-RAD-01 | COTS sin TID/SEE/SEL → corrupción, latch-up o falla destructiva | 4 | 5 | 20 | Radiation/Systems | ausencia de environment/parts analysis | shielding/derating/current limit/EDAC/test/heritage | PDR/CDR | Open |
+| RSK-ENV-01 | Sin qualification/acceptance ambiental → falla en lanzamiento/órbita | 4 | 5 | 20 | AIT/QA | FRR sin vibration/TVAC/EMC/deployment | programa ICD, pre/post y QAR | QAR/FRR | Open |
+| RSK-MAT-01 | Materiales/venting no conformes → contaminación/daño/rechazo | 3 | 5 | 15 | Materials/Structure | material sin declaration o volumen sellado | material declaration, vent analysis, datasheet/lot test | CDR/FRR | Open |
+| RSK-AI-01 | Candidato/dataset/benchmark no reproducibles → hipótesis científica inválida | 5 | 5 | 25 | AI/Science | digest/split/oráculo/threshold ausente | preregistration, clean blind split, external oracle, statistics | IA-1/SRR | Open |
+| RSK-AI-02 | IA/CM5 excede energía/térmica o no recupera → bus degradado | 4 | 4 | 16 | AI/EPS/FSW | boot/power/temp/kill fuera de allocation | medición exacta, power-gate, watchdog, lockout y fallback | IA-2 | Open |
+| RSK-AI-03 | Supervisor acepta tool inválida/unsafe → acción peligrosa | 4 | 5 | 20 | FSW/Safety | malformed/no-action/unsafe obtiene pass | strict schema, OBC-owned class, state simulator, negative tests | IA-2/TRR | Open |
+| RSK-FSW-01 | Reset/state machine no idempotente → modo/carga insegura | 3 | 5 | 15 | FSW/EPS | reset/brownout no vuelve SAFE | watchdog, transactional state, boot/boundary fault tests | TRR | Open |
+| RSK-FSW-02 | Health/session counters ambiguos → diagnóstico incorrecto | 3 | 3 | 9 | FSW | reboot/wrap no distinguible | session/boot IDs, monotonic counters, schema/tests | TRR | Open |
+| RSK-DATA-01 | Ground solo RAM/sin raw replay → evidencia científica perdida | 5 | 5 | 25 | Ground SW | restart/power loss pierde sesión | append-only raw, metadata, digests, replay/export | Gate E/TRR | Open |
+| RSK-DATA-02 | Colas/data budget sin cuotas → starvation de logs científicos | 4 | 4 | 16 | FSW/COMMS | backlog/age supera retention | production/contact budget, quotas, aging, worst-case test | PDR/TRR | Open |
+| RSK-DATA-03 | PER por gaps confunde boot/wrap/reorder → claim RF falso | 4 | 3 | 12 | Ground SW | fixtures producen pérdidas artificiales | modular/session-aware statistics + unit tests | TRR | Open |
+| RSK-REG-01 | 915 MHz Tierra→espacio no autorizable → objetivo secundario ilegal | 4 | 5 | 20 | Regulatory/COMMS | no hay respuesta ENACOM escrita | consulta formal; migrar banda/servicio o redefinir objetivo | SRR/Gate B | Open |
+| RSK-REG-02 | UHF/IARU/ITU/ENACOM incompletos → no operar/aceptar misión | 4 | 5 | 20 | Operations/Regulatory | bandplan congelado sin dossier | responsable habilitado, coordination/filing/licensing | PDR/FRR | Open |
+| RSK-SEC-01 | TTC/prompts sin auth/replay → spoofing/DoS/ciencia corrupta | 5 | 5 | 25 | Security/FSW | CRC/hash simple o contador no persistente | MAC/signature TBD, counter/key epoch/roles/recovery tests | CDR/TRR | Open |
+| RSK-SEC-02 | Threat model/key lifecycle incompletos → mitigación ineficaz | 4 | 4 | 16 | Security | key compromise/reset/recovery no cubierto | threat model review, provisioning/rotation/revocation | CDR | Open |
+| RSK-SEC-03 | CRC/node ID se acepta como origen de sensor → spoof/replay y evidencia científica falsa | 4 | 4 | 16 | Security/Node/Science | frame suplantado o repetido entra al dataset | identidad/versiones, MIC, key/boot epoch, anti-replay y ground provenance test | Gate B/TRR | Open |
+| RSK-COMMS-01 | Link LoRa sin margen robusto → cero paquetes orbitales | 4 | 4 | 16 | COMMS | calibrated worst-case margin/PDR bajo threshold | link budget + OTA/PDR + fallback mission | Gate B | Open |
+| RSK-COMMS-02 | CFO/Doppler/ToA/slots mal modelados → colisiones/demod failure | 4 | 4 | 16 | COMMS/Node | ramp/collision test bajo threshold | correct ToA, Doppler ramp, Monte Carlo, measured clocks | Gate B | Open |
+| RSK-COMMS-03 | TLE/time source falso/viejo → ventanas erróneas | 3 | 4 | 12 | Node FW/Ground | age/error excede budget o rollback aceptado | signed source, object ID, expiry, error-based fallback | Gate B | Open |
+| RSK-RF-01 | UHF link/pattern/waveform no cierra → pérdida TTC | 4 | 5 | 20 | COMMS | measured PER/EIRP/G/T no cumple | bidirectional budgets, integrated pattern/Doppler/OTA | Gate C | Open |
+| RSK-RF-02 | EMI/desense entre EPS/CM5/UHF/LoRa → enlaces degradados | 4 | 4 | 16 | COMMS/EMC | noise floor/PER cambia por modo | mode matrix, isolation/filtering/blocker/EMC tests | Gate C/QAR | Open |
+| RSK-GND-01 | SatNOGS accede a TX/control → emisión accidental | 3 | 5 | 15 | Ground/COMMS | proceso RX puede abrir PTT/IPC/credentials | physical TX gate, privilege isolation, failure tests | Gate C/TRR | Open |
+| RSK-GND-02 | Viento/clima/torre sin control → daño/indisponibilidad | 3 | 5 | 15 | Ground/Structure | hazard threshold sin park/inhibit | structural/weather analysis, calibrated sensors, E-stop | TRR | Open |
+| RSK-COST-01 | BOM/LCC sin totales/fuentes → proyecto inviable tardíamente | 4 | 4 | 16 | Cost/PM | review sin low/likely/high y reserves | WBS/LCC, BOE, FX/date, NRE, launch/tests/spares | PDR/CDR | Open |
+| RSK-SUP-01 | EOL/import-only/single source → rediseño/schedule slip | 4 | 3 | 12 | Procurement | no alternativa/lead/lifecycle | regional alternatives, quotes, lifecycle and spares | PDR/CDR | Open |
+| RSK-LEGAL-01 | Titularidad/licencias/provenance ambiguas → distribución o licencia no autorizada | 4 | 5 | 20 | Legal/Configuration | release sin chain of title, textos exactos, SPDX/manifest o contacto autorizado | revisión profesional, manifest de provenance/licencias y sign-off de release | Before release | Open |
+| RSK-PROG-01 | Owner/authority/schedule indefinidos → acciones nunca cierran | 4 | 4 | 16 | PM/QA | review sin responsable nominal/due date | assign names at SRR, action register and reserves | SRR/each review | Open |
+| RSK-PH-01 | PHOTO_DEMO deriva a EO/legal/privacy scope → compliance/schedule impact | 2 | 4 | 8 | Payload/Legal | targeting, products, tasking or commercialization | keep optional/off; capability review with specialist/authority | PDR if included | Open |
+| RSK-SCI-01 | Sensor Science Pack sin propósito/calibración → datos no interpretables | 3 | 4 | 12 | Science/Systems | componente entra a BOM sin range/accuracy/calibration/product definition | trade y calibration chain por sensor exacto | PDR/TRR | Open |
 
-8) **EMI interna (EPS switching vs RF/UHF)** degrada enlaces
-- Ver: `04_Communications/rf_subsystem_overview.md`
+## 3. Disposiciones específicas
 
-9) **Fallas por reset / software no idempotente** (log corruption, modo inseguro)
-- Mitigación: watchdog + boot SAFE + logs robustos.
+### IA
 
-10) **Regulatorio / coordinación de frecuencias** (amateur-sat + operación estación)
-- Ver baseline y referencias en `00_MVP/MVP v2.2.md` y `99_References/`
+La evidencia histórica atribuida a Granite 350M queda invalidada para cierre.
+No existe mitigación parcial demostrada del riesgo `RSK-AI-01/03`. El candidato
+actual es `gemma4:e2b` y empieza en estado de evidencia `Open`.
 
-11) **Supply chain TTC UHF** — RFFM6403 (FEM OpenLST original) está EOL; alternativa de PA discreto agrega complejidad de RF layout
-- Mitigación: no depender de RFFM6403; definir front-end PA modular.
+### Órbita, energía y térmica
 
-12) **Compliance con integrador de lanzamiento desconocida** — ICD, inhibiciones RF, fit-check, masa, materiales pendientes de dispenser
-- Ver: `01_Mission/compliance_matrix.md`, ítems `Blocked by Integrator`
+`RSK-ORB-01` se reabre. No se usa el barrido anual histórico para cerrar
+variación estacional, margen energético, radiador o heater.
 
-13) **Regulatorio / IARU sin coordinación cerrada**
-- Ver: `01_Mission/compliance_matrix.md` CX-RF-04.
+### Hardware
 
-14) **Pico EPS vs consumo TX real desconocido** — estimación ~3 W del baseline vs posibles ~5 W con PA UHF real
-- Ver: `architecture.md` CONF-01, `03_Power/Power Budget.md`
-- Mitigación: no resolver sin medición real con hardware TX definitivo.
+Fabricación EPS queda bloqueada. Los proyectos EPS/RF actuales son placeholders;
+no constituyen evidencia de implementación.
 
-15) **Persistencia de datos de tierra ausente** — estado en memoria como única fuente de verdad impide evidencia reproducible
-- Ver: `05_Software/ground_data_architecture.md`
-- Mitigación: implementar arquitectura de datos de tierra documentada.
+### Riesgo legal PHOTO_DEMO
 
-16) **Inmadurez real del hardware RF** — brecha entre madurez documental y hardware real
-- El diseño de hardware RF orbital es esencialmente **placeholder**.
-- Toda la documentación COMMS describe el diseño objetivo; la implementación real no existe todavía.
-- Gate de cierre: Gate C.
+Las cifras heurísticas de GSD/cadencia en el análisis histórico no son umbrales
+legales. Cualquier inclusión requiere revisión profesional y con las autoridades
+o partners aplicables.
 
-31) **SatNOGS / separacion publico-privado mal definida**
-- Riesgo: publicar demasiado en el beacon, asumir privacidad por framing cerrado, o introducir cifrado/contenido restringido sin cerrar compatibilidad regulatoria.
-- Impacto: exposicion de datos de payload/operacion, rechazo regulatorio o dependencia indebida de una red receive-only para funciones de control.
-- Mitigacion: `PUBLIC_BEACON` limitado a telemetria minima no sensible; `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK` solo por estacion/es propia/s o autorizada/s; revision regulatoria antes de fijar cifrado/confidencialidad.
-- Ver: `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md`.
-- Gate de cierre: Gate C para beacon/decoder; Gate E/F para operacion segura end-to-end.
+## 4. Revisión
 
-32) **Estacion terrena dual-use mal aislada o mal instalada**
-- Riesgo: una estacion construida para SatNOGS receive-only se extiende a uplink privado sin interlocks, conmutacion T/R fail-safe, control de TX, puesta a tierra o calculo estructural adecuados.
-- Impacto: TX accidental/no autorizado, dano de LNA/SDR/PA, evidencia de pruebas no confiable, riesgo fisico por torre/antena y baja disponibilidad operacional.
-- Mitigacion: diseno dual-use desde fase 1; SatNOGS sin acceso al transmisor; switch T/R digital fail-safe; secuenciador con interlocks; pruebas por dummy load/coax antes de TX radiado; calculo estructural de torre/anclajes; puesta a tierra y proteccion de linea.
-- Ver: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
-- Gate de cierre: Gate C para RX/beacon y T/R bench; Gate E/F para operacion end-to-end con uplink autorizado.
+En cada review se actualizarán:
 
-33) **Perdida de reproducibilidad DIY por supply chain no LATAM**
-- Riesgo: el diseno se apoya en SKUs caros, exoticos, EOL, import-only o de un unico proveedor, volviendo dificil reproducir el sistema en Argentina/Latinoamerica.
-- Impacto: sube costo, demora bancos, dificulta colaboracion abierta, rompe la ruta maker -> flight-like -> flight y puede forzar redisenos tardios.
-- Mitigacion: aplicar `ADR-20260710-diy-low-cost-maker-latam-design-policy`; definir componentes por clase tecnica; registrar proveedor/region/alternativa/riesgo en BOM; marcar excepciones; mantener alternativas COTS maker para banco y EGSE.
-- Ver: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`, `06_Costs/bom_overview.md`.
-- Gate de cierre: revision de BOM/trade studies en Gate B y antes de congelar hardware flight-like.
-
----
-
-## Riesgos de diseño orbital y térmico (ADR-20260320)
-
-| ID | Descripción | Probabilidad | Impacto | Consecuencia | Mitigación | ADR fuente |
-|---|---|---|---|---|---|---|
-| RSK-THR-01 | CM5 consume >6 W pico en Gate IA-2 | Media | Alto | Pad térmico insuficiente, requiere heat strap o reducción de duty-cycle. | Medir consumo real CM5 en Gate IA-2. Preparar heat strap de Cu flexible (sección ≥10 mm², largo ≤40 mm) como contingencia documentada. | `ADR-20260320-thermal-design-radiator-cm5-coupling.md` |
-| RSK-THR-02 | AZ-93 no disponible en Argentina | Baja | Bajo | Usar Al anodizado blanco (menor performance, cierra modelo térmico con ~7°C adicionales en caso peor). | Cotizar AZ-93 importación USA (distribuidor AZ Technology). Evaluar anodizado local como fallback antes de PDR mecánico. | `ADR-20260320-thermal-design-radiator-cm5-coupling.md` |
-| RSK-SOL-01 | Celda solar final tiene η < 20% | Baja | Medio | Margen energético baja de 3.4× a <2.5×. Puede requerir deployables o reducción de duty-cycle IA. | No cerrar selección de celda sin validar η real. Evaluar alternativas IBC antes de Gate IA-1. | `ADR-20260320-orbit-attitude-solar-layout-baseline.md` |
-| RSK-ORB-01 | Variación estacional β reduce energía >15% | Cerrado | — | — | **Cerrado (2026-03-21).** Barrido anual (8760h, v9.3) ejecutado. La variación estacional real es < 5% en energía y < 7°C en temperaturas respecto al barrido de 24h. Margen 3.6× confirmado para ciclo completo. Peor caso térmico global: Tcm5 59°C (margen 21°C), Tbat 8.5°C (margen 18°C). | `ADR-20260320-orbit-attitude-solar-layout-baseline.md` |
-
----
-
-## Riesgos del payload IA experimental (impactan el criterio de éxito primario)
-
-17) **Sobreconsumo del payload IA no previsto** — consumo real del CM5 en inferencia desconocido hasta banco
-- Riesgo: el pico real puede exceder el objetivo 6–7 W, comprometer el EPS o violar el power budget.
-- Mitigación: no declarar consumo cerrado sin medición (Gate IA-2); duty-cycle corto; power-gating; fallback a sistema sin IA.
-- Gate de cierre: Gate IA-2.
-
-18) **Fallo de Linux / boot del CM5**
-- Riesgo: el CM5 no bootea o no carga el modelo, dejando el payload IA inoperativo.
-- Mitigación: watchdog supervisado por OBC (HB_AI); kill switch; AIHealthMonitor; misión continúa sin IA.
-- Gate de cierre: Gate IA-2.
-
-19) **Corrupción del PromptStore**
-- Riesgo: el modelo usa un prompt inválido o desconocido, generando recomendaciones no deseadas.
-- Mitigación: prompt seguro por defecto siempre disponible; hash de integridad en uplink; revertir con `AI_PROMPT_RESET_SAFE`.
-- Gate de cierre: Gate IA-2.
-
-20) **Recomendaciones erróneas del modelo**
-- Riesgo: el modelo propone acciones peligrosas o incoherentes con el estado real del satélite.
-- Mitigación: RuntimeSafetySupervisor rechaza propuestas que violen reglas determinísticas de misión; ninguna acción se ejecuta sin validación.
-- **Mitigación parcial de banco alcanzada (2026-03-16):** el modelo Granite 350M fine-tuned mostró comportamiento útil y no trivial en holdout funcional, incluyendo regulatory refusal, SAFE fallback y RF fault isolation. pass_rate 57.14 %, avg_score_ratio 0.83. Defectos residuales menores en `ai_payload_state` contextual y `policy override` total — no invalidan el baseline funcional. El riesgo de recomendaciones erróneas en hardware real sigue abierto hasta Gate IA-2 (integración con RuntimeSafetySupervisor en CM5 real).
-- Gate de cierre: IA-1 (parcial, evidencia de banco alcanzada) / IA-2 (cierre con hardware real).
-
-21) **Deriva térmica del payload IA**
-- Riesgo: el CM5 en operación activa genera calor; en órbita sin convección puede saturar límite térmico.
-- Mitigación: análisis térmico pendiente (TBD); límites de tiempo de operación por ventana; power-gating para ciclos de enfriamiento. **No operar sin análisis térmico básico.**
-- Gate de cierre: Gate IA-2 / E.
-
-22) **Acoplamiento EMI / switching / ruido digital**
-- Riesgo: ruido digital del CM5 se acopla en la banda UHF o LoRa, degradando sensibilidad del receptor.
-- Mitigación: mutua exclusión IA ↔ TX UHF; evaluación de EMC en banco integrado; apantallamiento si corresponde.
-- Gate de cierre: Gate IA-2 / E.
-
-23) **Dependencia indebida del CONOPS en la IA**
-- Riesgo: decisiones de diseño u operación se construyen asumiendo que la IA siempre estará disponible, invalidando el fallback determinístico.
-- Mitigación: documentar explícitamente que el sistema siempre opera en modo determinístico sin el CM5; verificar operación normal del OBC con CM5 apagado en Gate IA-2.
-- Gate de cierre: Gate IA-2.
-
-24) **Extrapolación indebida del bench 1S al rail IA de vuelo**
-- Riesgo: asumir que la rama `5V_AI_EXT` bench-only representa el rail IA final y contaminar decisiones de `EPS_Flight_Like_2S_MPPT` o `EPS_Flight_2S_MPPT`.
-- Mitigación: documentar explícitamente que `EPS_Bench1_1S` usa inyección externa de 5V solo para Gate IA-2 y no valida el rail de vuelo 2S + MPPT.
-- Gate de cierre: Gate IA-2 / D.
-
-25) **Backfeed entre `5V_AI_EXT` y rails del bench**
-- Riesgo: la inyección externa del CM5 retroalimenta `5V_AUX`, `3V3_OBC` o la cadena 1S bench, invalidando mediciones y creando fallas de seguridad.
-- Mitigación: `J_AI_PWR` dedicado, `F_AI`, `SW_AI`, verificación explícita de no backfeed en `T11`.
-- Gate de cierre: Gate IA-2.
-
-26) **Potencia principal IA rutada por `JP1`**
-- Riesgo: usar `JP1` como camino de potencia del CM5, sobrecargando el header y mezclando control con distribución principal.
-- Mitigación: `JP1` definido como control/sense only y `J_AI_PWR` como entrada principal del rail IA.
-- Gate de cierre: Gate IA-2.
-
-27) **Switch IA insuficiente para la corriente de arranque del CM5**
-- Riesgo: `SW_AI` entra en protección, colapsa tensión o no permite boot reproducible.
-- Mitigación: no congelar MPN final antes de medir corriente real; usar `T12`, `T13` y `T20` para seleccionar margen.
-- Gate de cierre: Gate IA-2.
-
-28) **Caída excesiva si se usa `INA219` inline en el rail principal**
-- Riesgo: el shunt degrada el arranque del CM5 o falsea la representatividad de las mediciones.
-- Mitigación: tratar `INA219` inline como bench option y permitir metrología externa de banco como alternativa válida.
-- Gate de cierre: Gate IA-2.
-
-29) **Secuenciamiento incorrecto del CM5**
-- Riesgo: habilitar interfaces o cortar energía fuera de orden genera boot incompleto, fallos espurios o lockouts falsos.
-- Mitigación: secuencia explícita de encendido/apagado/kill (`T12`–`T15`) y monitoreo de `PGOOD_AI`, `AI_BOOT_OK` y `HB_AI`.
-- Gate de cierre: Gate IA-2.
-
-30) **Corrupción por apagado brusco del CM5**
-- Riesgo: pérdida de integridad en logs, PromptStore o filesystem al cortar el rail IA sin shutdown lógico.
-- Mitigación: apagado normal documentado, `AI_KILL_N` con timeout corto para emergencia y verificación de fallback determinístico en `T21`.
-- Gate de cierre: Gate IA-2.
-
----
-
-## Estado de mitigación de riesgos del payload IA (actualización 2026-04-03)
-
-| Riesgo | Mitigación parcial alcanzada en banco | Pendiente |
-|---|---|---|
-| 17 — Sobreconsumo CM5 | No. Sin medición en CM5 real. | Gate IA-2 |
-| 18 — Fallo Linux / boot | No. Sin prueba en CM5 real. | Gate IA-2 |
-| 19 — Corrupción PromptStore | No. Sin prueba en CM5 real. | Gate IA-2 |
-| 20 — Recomendaciones erróneas | **Sí, parcial.** Holdout funcional en banco mostró comportamiento útil y no trivial (pass_rate 57 %, avg_score_ratio 0.83). Defectos residuales menores documentados. | Gate IA-2 (integración supervisor real) |
-| 21 — Deriva térmica | No. Sin análisis térmico en CM5 real. | Gate IA-2 / E |
-| 22 — Acoplamiento EMI | No. Sin medición integrada. | Gate IA-2 / E |
-| 23 — Dependencia CONOPS en IA | No. Sin prueba en hardware integrado. | Gate IA-2 |
-| 24 — Extrapolación bench 1S -> rail IA de vuelo | No. Sin evidencia de T11–T21 ni transición a flight-like. | Gate IA-2 / D |
-| 25 — Backfeed `5V_AI_EXT` -> rails bench | No. Falta ensayo T11. | Gate IA-2 |
-| 26 — Potencia IA por `JP1` | Parcial documental. `JP1` quedó definido como control/sense only, falta inspección de wiring real. | Gate IA-2 |
-| 27 — `SW_AI` insuficiente | No. Corriente de arranque CM5 no medida. | Gate IA-2 |
-| 28 — `INA219` inline introduce caída excesiva | No. Falta decidir entre inline y metrología externa según T20. | Gate IA-2 |
-| 29 — Secuenciamiento incorrecto CM5 | No. Falta ejecutar T12–T15. | Gate IA-2 |
-| 30 — Corrupción por apagado brusco | No. Falta ejecutar apagado normal/emergencia y verificar logs. | Gate IA-2 |
-
-## Próximos pasos
-- Cada riesgo debe tener owner + evidencia de mitigación en planes de prueba.
-- Verificar explícitamente T11–T21 sobre `EPS_Bench1_1S` extendido antes de cerrar riesgos 24–30.
-- Ver plan de validación y stage-gates: `01_Mission/validation_plan_and_stage_gates.md`.
-- Ver compliance matrix: `01_Mission/compliance_matrix.md`.
-- Ver arquitectura detallada del payload IA: `05_Software/ai_payload_architecture.md`.
-- Ver evidencia técnica de banco: `05_Software/AI PAYLOAD/ai_payload_bench_evidence_2026-03-16.md`.
+- P/I inicial y residual con base documentada;
+- owner nominal y due date;
+- trigger y leading indicator;
+- acciones, ProcedureID/EvidenceID;
+- riesgo aceptado/waiver y autoridad.

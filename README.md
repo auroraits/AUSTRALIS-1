@@ -1,209 +1,110 @@
 # AUSTRALIS-1 — DIY Nanosat
 
-**Revisión:** 2026-07-10
+**Revisión:** 2026-07-27
+**Estado:** Active — desarrollo pre-SRR; Gate A abierto
+**Release público:** `public-v0.2` es el último snapshot publicado y no contiene
+necesariamente las correcciones de esta rama.
 
-**Estado público:** mirror limpio publicado (`public-v0.2` vigente; `public-v0.1` inicial)
+Sitio oficial: <https://australis.aurora.ar/>
 
-Sitio oficial: https://australis.aurora.ar/
+## Propósito
 
-Release público vigente: https://github.com/auroraits/AUSTRALIS-1/releases/tag/public-v0.2
+AUSTRALIS-1 es un proyecto CubeSat 1.5U experimental cuyo objetivo científico
+primario es evaluar un payload de inteligencia artificial como **asesor** de
+vuelo bajo supervisión determinística. El OBC (On-Board Computer) conserva toda
+la autoridad; el modelo no acciona cargas ni actuadores directamente.
 
-Release público inicial: https://github.com/auroraits/AUSTRALIS-1/releases/tag/public-v0.1
+Objetivos secundarios:
+
+1. evaluar una cadena store-and-forward Tierra→órbita→tierra, sujeta a cierre
+   regulatorio;
+2. operar un paquete de sensores ambientales;
+3. mantener `PHOTO_DEMO` como demostración opcional, OFF por defecto y fuera del
+   éxito mínimo.
+
+## Dictamen de madurez vigente
+
+El proyecto es **experimental/pre-SRR**. La documentación ya no declara como
+confirmados resultados que la evidencia disponible no reproduce.
+
+- **Modelo IA candidato:** `gemma4:e2b`, pendiente de identificación inmutable,
+  licencia, benchmark limpio y mediciones en hardware. No está validado ni
+  seleccionado para vuelo.
+- **Granite 350M/2B y SmolLM2:** históricos/diferidos, sin claim vigente de
+  validación. La evidencia rotulada Granite 350M fue ejecutada con Granite 2B.
+- **Plataforma:** CubeSat 1.5U; longitud externa de referencia CDS Rev. 14.1
+  `170.2 ± 0.1 mm`. La envolvente completa y el fit-check dependen del CDS y del
+  ICD del integrador.
+- **Órbita, LTAN, actitud, ADCS, layout solar y radiador:** abiertos. `600 km /
+  LTAN 10:00` es solamente un caso de análisis.
+- **Energía y térmica:** abiertos. No existe margen `3.4×–3.6×` confirmado ni
+  conclusión válida de “sin heater”.
+- **EPS y RF flight-like:** los proyectos KiCad actuales son placeholders y no
+  son fabricables/liberables.
+- **COMMS:** frecuencia UHF coordinada, waveform, potencia y máscara son TBD.
+  El experimento LoRa Tierra→espacio en 915 MHz depende de autorización escrita.
+- **Readiness:** no puede declararse con requisitos de seguridad, regulación,
+  ambiente o integrador abiertos/bloqueados.
+
+## Decisiones correctivas principales
+
+- `08_Decisions/ADR-20260727-cubesat-1p5u-cds-envelope.md`
+- `08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
+- `08_Decisions/ADR-20260727-mission-scientific-experiment-baseline.md`
+- `08_Decisions/ADR-20260727-orbit-attitude-analysis-reopened.md`
+- `08_Decisions/ADR-20260727-thermal-power-baselines-reopened.md`
+- `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`
+- `08_Decisions/ADR-20260727-verification-and-review-governance.md`
+
+## Fuentes de verdad
+
+1. ADRs `Accepted` más recientes en `08_Decisions/`.
+2. `00_MVP/MVP v2.2.md`, baseline consolidado.
+3. `SYSTEM_BASELINE.md`, resumen del estado.
+4. `01_Mission/requirements_matrix.md` y
+   `01_Mission/verification_cross_reference_matrix.csv`.
+5. Documentos de subsistema.
+
+`Baseline` significa configuración de referencia, no evidencia de verificación.
+Un análisis `Preliminary`, un prototipo `Bench` o un esquema placeholder nunca
+se interpretan como hardware flight-like verificado.
+
+## Mapa del repositorio
+
+| Ruta | Contenido |
+|---|---|
+| `00_MVP/` | Baseline maestro e historia |
+| `01_Mission/` | Misión, requisitos, VCRM, compliance y reviews |
+| `02_Structure/` | Estructura, CAD y mecánica |
+| `03_Power/` | EPS, batería, solar y budgets |
+| `04_Communications/` | RF, enlaces y ground segment |
+| `05_Software/` | FSW, simulación, IA, firmware y ground software |
+| `06_Costs/` | BOM y Life-Cycle Cost (LCC) |
+| `07_Risk/` | Risk register y análisis específicos |
+| `08_Decisions/` | Architecture Decision Records (ADR) |
+| `99_References/` | Normas y referencias |
+| `docs/` | Planes de prueba y notas operativas |
+
+## Flujo de madurez
+
+`SRR → PDR → CDR → TRR → Qualification/Acceptance Review → FRR`
+
+Cada cierre requiere requisito, criterio, procedimiento, configuración del
+artículo y evidencia identificada/hash. Un waiver debe conservar justificación,
+autoridad y riesgo residual.
 
 ## Publicación y licencia
 
-Este repositorio es una publicación técnica **source-available no comercial**.
-Se comparte para estudio, experimentación personal, educación, investigación no
-comercial y colaboración abierta no comercial.
+El repositorio es **source-available no comercial**, no “open source” OSI:
 
-- Código, scripts, firmware y software: **PolyForm Noncommercial 1.0.0**.
-- Documentación, diseños, datasets, CAD/PCB y material de arquitectura:
-  **CC BY-NC-SA 4.0**.
-- Nombre, identidad del proyecto, marcas, descubrimientos patentables y uso
-  comercial: **derechos reservados**; requieren permiso o licencia escrita.
+- software/código: PolyForm Noncommercial 1.0.0;
+- documentación/diseños/datasets: CC BY-NC-SA 4.0;
+- terceros: rigen sus licencias y notices.
 
-Ver:
+Ver `LICENSE.md`, `THIRD_PARTY_NOTICES.md`, `COMMERCIAL_USE.md` y
+`CONTRIBUTING.md`. Modelo, dataset y artefactos deberán registrar provenance,
+licencia y digest antes de distribuirse o usarse como evidencia.
 
-- `LICENSE.md`
-- `COMMERCIAL_USE.md`
-- `THIRD_PARTY_NOTICES.md`
-- `PUBLICATION_AUDIT.md`
-- `PUBLIC_RELEASE_PROCESS.md`
-- `LEGAL_ENFORCEMENT_REVIEW.md`
-- `CONTRIBUTING.md`
-
-Nota importante: este modelo permite colaboración pública no comercial, pero no
-es "open source" OSI porque restringe uso comercial.
-
-Este repositorio público fue publicado como **mirror/export limpio**, con
-historial público nuevo, sin arrastrar el historial privado de trabajo. El repo
-privado canónico no debe hacerse público directamente.
-
-## Objetivo (MVP)
-AUSTRALIS-1 busca poner un payload de inteligencia artificial en órbita LEO, operarlo como asistente de vuelo autónomo bajo supervisión determinística y descargar a tierra datos de comportamiento útiles para entrenamiento futuro.
-
-Objetivos secundarios vigentes:
-1. Validar cadena end-to-end IoT: nodo LoRa (Buenos Aires) → satélite (RX-only) → estación terrena (UHF 435 MHz) → backend.
-2. Store and forward por pasadas LEO.
-3. Science Pack (UV, ALS, magnetómetro, temperatura).
-4. `PHOTO_DEMO` opcional, no crítico, best-effort.
-
-- CONOPS: **store and forward** por pasadas LEO.
-- Política RF MVP: **no transmitir ISM desde órbita** (LoRa en satélite es RX-only).
-
-## Directrices de diseño
-
-AUSTRALIS-1 es un proyecto DIY, low cost y de publicacion abierta/source-available no comercial. El diseno prioriza componentes maker/COTS disponibles en Argentina y Latinoamerica para banco, FlatSat, EGSE y prototipos, manteniendo una ruta trazable hacia hardware flight-like y flight.
-
-Reglas practicas:
-
-- definir requisitos por clase tecnica antes que por SKU unico;
-- registrar proveedor, region, alternativa y riesgo en la BOM;
-- justificar componentes caros, exoticos, EOL, import-only o con baja disponibilidad regional;
-- publicar codigo, firmware, scripts, documentacion publicable, CAD/PCB publicables y procedimientos cuando no haya restricciones de seguridad, privacidad o terceros;
-- no declarar flight-ready a hardware maker/de banco sin evidencia y ADR correspondiente.
-
-Fuente: `08_Decisions/ADR-20260710-diy-low-cost-maker-latam-design-policy.md`.
-
-## Baseline y mapa del repositorio
-
-| Documento | Rol |
-|---|---|
-| `00_MVP/MVP v2.2.md` | Fuente de verdad del baseline (documento maestro) |
-| `SYSTEM_BASELINE.md` | Resumen rápido del baseline |
-| `architecture.md` | Mapa del repo + snapshot arquitectónico |
-| `AGENTS.md` | Política documental global (raíz) |
-| `01_Mission/mission_definition.md` | Definición de misión y CONOPS |
-| `01_Mission/requirements_matrix.md` | Requisitos verificables |
-| `01_Mission/compliance_matrix.md` | Compliance matrix viva |
-| `01_Mission/validation_plan_and_stage_gates.md` | Plan de validación y stage-gates |
-| `08_Decisions/` | ADRs (Architecture Decision Records) |
-
-## Decisiones bloqueadas (resumen)
-
-- **Plataforma:** 1.5U (100 × 100 × 150 mm).
-- **Politica DIY/low cost:** componentes maker/COTS disponibles en Argentina/Latinoamerica para banco/prototipos, BOM con proveedor/region/alternativa/riesgo y excepciones trazadas.
-- **EPS vuelo:** topología de batería **2S + MPPT**, referencia **2S1P con 18650 de 3.0 Ah (~22 Wh nominal)**. Ruta de mitigación `2S2P (~44 Wh)` abierta si el power budget con IA lo exige tras Gate IA-1.
-- **Solar:** el target **≥1.2 W netos en sol** sigue vigente para el escenario **sin payload IA activo**. Con payload IA activo, el target solar queda **TBD** hasta medición real del CM5 y cierre del duty-cycle orbital.
-- **COMMS:**
-  - uplink usuario **LoRa 915 RX-only** en órbita,
-  - downlink/TTC **UHF 435 MHz FSK 1200 bps**,
-  - `PUBLIC_BEACON` UHF compatible con SatNOGS para telemetria publica minima,
-  - payload downlink y uplink de comandos en perfiles privados/controlados por estacion/es propia/s o autorizada/s,
-  - objetivo inicial UHF TX RF: **500 mW** (preliminar).
-- **Modelo operativo:**
-  - `MISSION_MODE = SAFE | NOMINAL | DOWNLINK_WINDOW`
-  - `EPS_STATE = CRIT | LOW | NOMINAL | HIGH`
-  - boot siempre en **SAFE**,
-  - si `EPS_STATE = CRIT` → degrada a `MISSION_MODE = SAFE`,
-  - `LOW` mantiene `SAFE` por defecto; `NOMINAL` solo para housekeeping esencial,
-  - ciencia como actividad dentro de `NOMINAL` (no modo independiente),
-  - payload IA solo en `MISSION_MODE = NOMINAL`, fase de sol y `EPS_STATE >= NOMINAL`.
-- **Operación/FSW:** arbitraje de downlink por colas con prioridad estricta `HOUSEKEEPING` + `COMMAND_ACK`, y con `AI_BEHAVIOR_LOG` como cola best-effort de mayor prioridad científica.
-- **Science MVP:** sin Geiger/HV.
-- **PHOTO_DEMO:** opcional, no crítico, off-by-default, best-effort, fuera del criterio mínimo MVP.
-- **Payload IA:** payload científico primario de misión (familia CM5, IBM Granite 350M como candidato de vuelo / flight candidate, Apache 2.0, supervisor determinístico); Granite 3.1 2B queda reservado para experimentación de banco y ground experimentation. OBC conserva autoridad de vuelo; fallo del payload no mata el bus, pero sí impacta el éxito primario. No declarado flight-ready.
-
-Fuente de decisiones: `08_Decisions/` (ADRs).
-
-## Separación EPS: bench / flight-like / flight
-
-| Capa | Nombre | Propósito |
-|---|---|---|
-| Bench | `EPS_Bench1_1S` | Validación funcional COTS, 1S. No es hardware de vuelo. |
-| Flight-Like | `EPS_Flight_Like_2S_MPPT` | PCB custom KiCad, 2S + MPPT. No calificado. |
-| Flight | `EPS_Flight_2S_MPPT` | Hardware de vuelo definitivo. TBD. |
-
-## Nodo típico LoRa (clase, no SKU)
-
-Radio clase SX1262/SX1276, MCU clase ESP32-S3, +20–21 dBm, antena 0–2 dBi, sin PA/LNA externo, sin TCXO. Banda: 915–928 MHz. Ejemplos de clase: Heltec, RFM95W y similares.
-
-## Estado TTC UHF (OpenLST)
-
-Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**.
-OpenLST: candidato en análisis, no baseline final. Hardware TTC UHF final: **TBD**.
-La arquitectura UHF debe permitir beacon publico SatNOGS-friendly y separar payload/uplink en perfiles privados/controlados. Ver `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
-
-## Estado documental actual (2026-07-10)
-
-- El proyecto está publicado como mirror limpio `AUSTRALIS-1`, con licencia no comercial PolyForm NC + CC BY-NC-SA.
-- La web oficial `https://australis.aurora.ar/` enlaza este repositorio público.
-- El proyecto incluye un payload IA experimental con **IBM Granite 350M como candidato de vuelo / flight candidate** y línea compacta de banco (sesión 2026-03-16). Licencia Apache 2.0. No declarado flight-ready.
-- Granite 3.1 2B queda como modelo de experimentación de banco, comparativas y ground experimentation; no es candidato primario de vuelo bajo el presupuesto actual.
-- Benchmark corrected: pass_rate BASE 14 % → FINE_TUNED 57 %; avg_score_ratio 0.32 → 0.83. Holdout funcional completado.
-- SmolLM2-360M-Instruct INT4 pasa a baseline histórico/superseded para la función de modelo IA.
-- Registro ADR: 27 archivos en `08_Decisions/`; 22 decisiones `Accepted` o `Accepted (preliminar)`, 1 `Superseded` y 4 pendientes de normalizar metadata de estado. No usar el total de archivos como conteo de ADRs `Accepted`.
-- Misión redefinida como **AUSTRALIS-1 — Experimental Autonomic Flight AI-Assisted CubeSat** (desde 2026-03-14).
-- Payload IA es el objetivo científico primario; IoT store-and-forward es objetivo secundario.
-- `EPS_STATE` en cuatro niveles: `CRIT | LOW | NOMINAL | HIGH`.
-- `AI_BEHAVIOR_LOG` es la mayor prioridad best-effort del Downlink Manager.
-
-## Sitio web y sincronización
-
-La web pública resume el estado del proyecto y debe mantenerse alineada con este
-repositorio. El flujo operativo vigente es:
-
-- el repositorio público es fuente de verdad técnica para contenido público;
-- `cubesat-pm` valida cambios técnicos/narrativos;
-- `web-developer` actualiza WordPress cuando corresponde;
-- un job diario revisa repo, documentación y web, y reporta al grupo CubeSat.
-
-## Documentos clave por subsistema
-
-**Mission:**
-- `01_Mission/mission_definition.md`
-- `01_Mission/requirements_matrix.md`
-- `01_Mission/compliance_matrix.md`
-- `01_Mission/validation_plan_and_stage_gates.md`
-
-**Structure:** `02_Structure/Block Diagram.md`
-
-**Power/EPS:**
-- `03_Power/Power Budget.md`
-- `03_Power/EPS Sizing.md`
-- `03_Power/EPS_Bench1_1S.md` (bench)
-- `03_Power/EPS_PCB/EPS_Bench2S_FlightLike/` (flight-like KiCad)
-- `03_Power/EPS_DESIGN_RULES.md` (draft, no normativo)
-
-**Communications:**
-- `04_Communications/rf_subsystem_overview.md`
-- `04_Communications/link_budget_uhf_preliminary.md`
-- `04_Communications/link_budget_lora_uplink_preliminary.md`
-- `04_Communications/uplink_lora_slotted_protocol.md`
-- `04_Communications/uplink_data_products_and_downlink_policy.md`
-- `04_Communications/satnogs_public_beacon_architecture.md`
-- `04_Communications/ground_station_dual_use_satnogs_australis.md`
-- `04_Communications/RF_ANALISYS_OPENLST.md` (análisis/candidato, no baseline final)
-
-**Software:**
-- `05_Software/software_framework_mvp22.md`
-- `05_Software/node_uplink_scheduler_pass_prediction.md`
-- `05_Software/node_tle_update_mechanism.md`
-- `05_Software/ground_data_architecture.md`
-- `05_Software/ai_payload_architecture.md`
-- `05_Software/GroundTelemetryDashboard/`
-
-**Costos:** `06_Costs/BOM_master.csv`, `06_Costs/bom_overview.md`, `06_Costs/cost_overview.md`
-
-**Riesgos:** `07_Risk/top_risks.md`
-
-**Decisiones:** `08_Decisions/`
-
-## Pendientes de cierre (TBD)
-
-1. Selección de módulo UHF final y eficiencia PA medida.
-2. Cierre de factibilidad uplink LoRa con nodos típicos (CFO/Doppler).
-3. Parámetros finos uplink LoRa: elevación mínima, canalización exacta, BW definitivo.
-4. Cierre del power budget del payload IA con consumo real del CM5 y definición de duty-cycle orbital.
-5. Cierre del target solar con payload IA activo; evaluar deployables o celdas más eficientes si hace falta.
-6. Confirmar si la batería de referencia `2S1P` alcanza o si debe escalarse a `2S2P` tras Gate IA-1.
-7. Completar BOM con valores trazables y cotizaciones.
-8. Coordinación IARU y camino regulatorio ENACOM.
-9. ICD completo con integrador (inhibición RF, fit-check, masa, etc.).
-
-## Notas de consistencia
-
-- Si hay conflicto documental, prevalece ADR `Accepted` más reciente.
-- `Draft`, `Proposed` o `Preliminary` no reemplazan decisiones bloqueadas hasta tener ADR.
-- El repo técnico sigue llamándose **DIY Nanosat**; **AUSTRALIS-1** es el nombre vigente de misión/proyecto.
-- Ver política completa en `AGENTS.md`.
+La autoridad entre ramas, tags y otros repositorios se define en
+`REPOSITORY_GOVERNANCE.md`. La trazabilidad de artefactos se define en
+`ARTIFACT_PROVENANCE.md` y la clasificación de licencia en `LICENSE_SCOPE.md`.

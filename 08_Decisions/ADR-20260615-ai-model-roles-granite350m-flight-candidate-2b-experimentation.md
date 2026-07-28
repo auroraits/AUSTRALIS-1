@@ -1,7 +1,12 @@
 # ADR-20260615-ai-model-roles-granite350m-flight-candidate-2b-experimentation
 
 - **Fecha:** 2026-06-15
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
+
+> **Corrección de evidencia (2026-07-27):** no existía evidencia ejecutada
+> sobre Granite 350M que permitiera asignarle el rol de candidato de vuelo.
+> Granite 350M/2B quedan diferidos para una revisión posterior.
 
 ---
 

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "revision": "2026-07-27",
+  "status": "Preliminary",
+  "constants": {
+    "earth_equatorial_radius_km": 6378.137,
+    "earth_mu_km3_s2": 398600.4418
+  },
+  "orbit_sensitivity_altitudes_km": [
+    600.0,
+    650.0
+  ],
+  "downlink_window_min": 10.0,
+  "loads_W": {
+    "obc_run": 0.1,
+    "obc_sleep": 0.02,
+    "spi_nor_write": 0.05,
+    "microsd_write": 0.3,
+    "lora_rx_single": 0.06,
+    "lora_rx_concentrator": 0.495,
+    "uhf_rx": 0.15,
+    "uhf_tx_dc_assumption": 1.5,
+    "gnss": 0.1,
+    "science_i2c": 0.05,
+    "legacy_unallocated_allowance": 0.022,
+    "nominal_storage_allowance": 0.08,
+    "downlink_other_allowance": 0.05
+  },
+  "mode_duties": {
+    "safe": {
+      "obc_run": 0.2,
+      "obc_sleep": 0.8,
+      "uhf_tx_dc_assumption": 0.04,
+      "uhf_rx": 0.03,
+      "gnss": 0.2,
+      "legacy_unallocated_allowance": 1.0
+    },
+    "nominal_science_single": {
+      "obc_run": 1.0,
+      "science_i2c": 1.0,
+      "lora_rx_single": 0.15,
+      "uhf_tx_dc_assumption": 0.08,
+      "gnss": 0.2,
+      "nominal_storage_allowance": 1.0
+    },
+    "nominal_science_concentrator": {
+      "obc_run": 1.0,
+      "science_i2c": 1.0,
+      "lora_rx_concentrator": 0.15,
+      "uhf_tx_dc_assumption": 0.08,
+      "gnss": 0.2,
+      "nominal_storage_allowance": 1.0
+    },
+    "downlink_half_duplex": {
+      "obc_run": 1.0,
+      "uhf_tx_dc_assumption": 0.6,
+      "uhf_rx": 0.4,
+      "downlink_other_allowance": 1.0
+    }
+  },
+  "half_duplex_groups": [
+    {
+      "mode": "downlink_half_duplex",
+      "loads": [
+        "uhf_tx_dc_assumption",
+        "uhf_rx"
+      ],
+      "max_total_duty": 1.0
+    }
+  ],
+  "required_unclosed_loads": [
+    "AI rail: CM5 + gemma4:e2b candidate, idle/inference/inrush",
+    "ADCS sensors and actuators, including detumbling",
+    "EPS controller and quiescent current of all converters",
+    "BMS/protection/balancing and measurement chain",
+    "MPPT and conversion losses versus voltage/current/temperature",
+    "eFuses, high-side switches and latch-up protection",
+    "heaters and charge-inhibit thermal control",
+    "deployment/release mechanisms and launch inhibits",
+    "RF transceiver logic, regulator and PA outside the 1.5 W legacy assumption",
+    "harness loss, leakage, battery self-discharge and EOL degradation"
+  ]
+}

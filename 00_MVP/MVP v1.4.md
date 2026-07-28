@@ -1,16 +1,20 @@
 # Documento Técnico — MVP v1.4 (CONSOLIDADO)
 
+**Estado:** Historical Snapshot — superseded por `MVP v2.2.md`
+**Nota:** no normativo. La referencia a una v1.2 no disponible y toda
+declaración de “vigencia” pertenecen al snapshot histórico.
+
 ## Nanosatélite DIY Experimental 1.5U
 **LoRa Uplink RX‑Only + UHF Downlink 1k2 + Science Pack + GNSS‑A**
 
-**Versión:** 1.4 (baseline única y vigente)
+**Versión:** 1.4 (baseline histórica)
 
 ---
 
 ## Regla de consolidación aplicada
 Esta versión **1.4** consolida **MVP v1 → v1.1 → v1.3** bajo la siguiente jerarquía obligatoria:
 
-- **v1.3 > v1.2 > v1.1 > v1**
+- **v1.3 > v1.1 > v1** (`v1.2` no está disponible en este repositorio)
 - Toda decisión explícita en una versión superior **prevalece**.
 - Ningún requisito, restricción u objetivo definido en versiones previas se pierde:
   - Si no entra en conflicto, **se incorpora**.

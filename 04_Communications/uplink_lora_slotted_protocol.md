@@ -1,183 +1,288 @@
-# Uplink LoRa (915 MHz) — Protocolo propuesto (Slotted, modo B)
+# Uplink LoRa — protocolo slotted experimental
 
-**Fecha de revisión:** 2026-02-20
-**Estado:** propuesta P1 (exploración de factibilidad con nodos típicos)
+**Revisión:** 2026-07-27
+**Estado:** Proposed / regulatory-blocked
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/regulatory_gate_rf.md`
 
-## 1) Objetivo
-Permitir uplink desde **muchos nodos baratos** (RFM95W/SX1276, +20 dBm) maximizando:
-- compatibilidad + costo bajo en nodo,
-- probabilidad de recepción (uplink muy justo),
-- capacidad (N nodos) evitando colisiones.
+## 1) Estado operacional
 
-Se asume satélite **RX-only** en LoRa (sin downlink LoRa desde órbita).
+El protocolo estudia recepción orbital desde nodos de bajo costo. No habilita
+operación radiada.
 
-## 2) Node class objetivo (clase de nodo — no SKU específico)
+Hasta cerrar `REG-LORA-915`:
 
-El nodo objetivo se define como **clase**, sin fijar SKU de mercado. Ver `08_Decisions/ADR-20260313-nodo-tipico-lora-clase.md`.
+- B1 y B2 se ejecutan solo en coax, caja apantallada o simulación;
+- no se emite de forma intencional hacia el satélite;
+- no hay canal, potencia ni duty cycle adoptados;
+- el objetivo de paquetes desde Buenos Aires permanece bloqueado.
 
-- Radio: clase **SX1262 / SX1276 o equivalente** (915 MHz).
-- MCU: clase **ESP32-S3 o equivalente**.
-- TX: +20 a +21 dBm (sin PA externo).
-- Antena: simple, 0–2 dBi (sin antena direccional).
-- Cristal: **±10 ppm** (comercial típico; sin TCXO).
-- Restricción: solo se permiten mejoras de **antena** y **firmware**.
+Que el satélite sea RX-only no autoriza al transmisor terrestre.
 
-Ejemplos de clase (referencia, no normativa): RFM95W, módulos Heltec ESP32+SX1262, SX1276-based y equivalentes.
+## 2) Clase de nodo
 
-## 3) Idea central: modo B (slotted ALOHA determinístico)
-En vez de ALOHA puro, cada nodo transmite en un **slot** determinístico calculado por firmware.
+Clase de referencia, no SKU:
 
-Beneficios:
-- reduce colisiones sin requerir hardware extra,
-- escala mejor (más nodos por pasada),
-- facilita operación “sin coordinación en vivo”.
+- radio SX1262/SX1276 o equivalente;
+- MCU ESP32-S3 o equivalente;
+- +20 a +21 dBm, sin PA externo;
+- antena simple 0–2 dBi, no direccional;
+- cristal comercial ±10 ppm; no se presupone TCXO;
+- credencial única por nodo para autenticación.
 
-## 4) Dos variantes de operación (ambas firmware-only)
+La selección final debe registrar radio, front-end, reloj, antenna, firmware,
+consumo y condiciones regulatorias exactas.
 
-### B1) Always-on slotted (sin conocimiento de pasadas)
-- El tiempo se divide en epochs fijas (ej. cada 60 s).
-- Cada nodo transmite 1 vez por epoch en su slot.
-- El satélite recibe lo que “engancha” durante la pasada.
+## 3) Modos candidatos
 
-Pros: nodos no necesitan efemérides/predicción de pasadas.
-Contras: desperdicia energía/aire en tierra; capacidad efectiva menor.
+### 3.1 B1 — slotted periódico
 
-### B2) Pass-aware slotted (recomendado — nodos calculan pasadas)
-- Los nodos transmiten **solo** dentro de ventanas asociadas a pasadas (ej. 6 min alrededor de máxima elevación).
-- Requiere que el nodo tenga **hora UTC razonable** (RTC disciplinado por GNSS 1 vez/día) y que pueda **calcular pasadas offline**.
-- Implementación sugerida: TLE + propagador **SGP4** en el ESP32.
+El nodo transmite en epochs periódicas sin conocer pasadas. Este modo puede
+consumir airtime/energía y causar interferencia continua. **No es fallback
+operacional automático**: requiere evaluación y autorización específicas.
 
-Pros: maximiza capacidad útil y energía; no depende de NTP.
-Contras: requiere mantener TLE actualizado (out-of-band).
+### 3.2 B2 — pass-aware slotted
 
-## 5) Parámetros PHY recomendados (baseline a validar)
+El nodo transmite solo dentro de una ventana calculada a partir de datos
+orbitales, sitio y tiempo UTC.
 
-### 5.0 Baseline de referencia para primeras operaciones (a validar)
-Prioridad: **sensibilidad** (nodos típicos, enlace justo) y control de colisiones por slotting.
+Requiere:
 
-- PHY: **SF12 / BW TBD / CR 4/5 / CRC ON / explicit header**
-- Preamble: **16** (robustez de sync)
-- Payload objetivo: **12 B** (frame METEO)
-- Redundancia: **2 TX por ventana** (primary + retry) en slots distintos.
+- TLE/elementos orbitales con provenance e identidad del objeto;
+- propagador y versión registrados;
+- error de predicción y edad máxima derivados de mediciones;
+- base temporal dentro del presupuesto;
+- ventana recortada por elevación y autorización, no “6 min” fija;
+- inhibición si cualquier entrada es inválida o incierta.
 
-> **BW definitivo: TBD.** BW125 maximiza sensibilidad pero es frágil ante la combinación de error de cristal (±10 ppm → ±9 kHz a 915 MHz) y Doppler orbital (±23 kHz típico en LEO). **BW250 es el candidato preferente para robustez** frente a CFO/Doppler. BW125 solo puede adoptarse como opción definitiva si la evidencia de banco/campo demuestra margen suficiente con hardware real de clase nodo, offset realista y tasa CRC OK aceptable. Ver §5.1, §5.2 y §13 Puntos abiertos.
+B2 reduce airtime fuera de pasada; no mejora link budget ni elimina colisiones.
 
-Canalización sugerida (para mantener simple y con margen):
-- **2 canales** de 125 kHz separados 200 kHz (ejemplo): `f1=915.2 MHz`, `f2=915.4 MHz`.
-- Cada nodo manda primary en `f1` y retry en `f2` (reduce riesgo de interferencia puntual y ayuda con offsets).
+## 4) PHY candidato
 
-Ventana uplink sugerida (si el nodo puede estimar pasadas):
-- **6 min** alrededor del máximo de elevación (núcleo “alto” de la pasada).
+Parámetros para ensayos iniciales:
 
-Nota: todos estos parámetros deben quedar **tuneables** desde tierra (por comando TTC UHF) y/o por actualización de firmware de nodos.
+- LoRa SF12;
+- Coding Rate 4/5;
+- header explícito;
+- CRC PHY habilitado;
+- preámbulo 16 símbolos;
+- BW125 y BW250 como alternativas;
+- payload real `TBD` después de agregar identidad y autenticación.
 
-### 5.1 Opción BW125 (máxima sensibilidad — requiere evidencia)
-- LoRa: **SF12**, **BW 125 kHz**, **CR 4/5**, CRC ON
+BW125 aporta mayor sensibilidad de referencia. BW250 aporta mayor tolerancia a
+Doppler/CFO a costa de sensibilidad. Ninguno queda adoptado sin evidencia.
 
-ToA (Time-on-Air) aproximado (payload 12 B): **~1.155 s**.
+### 4.1 Time-on-Air reproducible
 
-> **Advertencia CFO/Doppler:** BW125 queda en el límite de tolerancia frente a la combinación de offset de cristal (±10 ppm) y Doppler orbital (±23 kHz típico). Con hardware real de clase nodo (sin TCXO), el offset total puede acercarse al BW disponible para demodulación. **Solo adoptar BW125 como opción definitiva con evidencia experimental** que demuestre margen de PDR/CRC OK aceptable bajo condiciones realistas de pasada. Ver §13.
+Para **12 bytes de payload legado**, Low Data Rate Optimization activa y los
+parámetros anteriores:
 
-### 5.2 Opción BW250 (candidato preferente por robustez a CFO/Doppler)
-- LoRa: **SF12**, **BW 250 kHz**, **CR 4/5**, CRC ON
+| BW | ToA exacto de referencia |
+|---:|---:|
+| 125 kHz | 1.417216 s |
+| 250 kHz | 0.708608 s |
 
-ToA aproximado (payload 12 B): **~0.496 s**.
+Los valores históricos 1.155 s/0.496 s correspondían a otras condiciones de
+preámbulo y eran incorrectos para preámbulo 16.
 
-Nota: BW250 reduce sensibilidad ~3 dB vs BW125 (orden de magnitud), pero es significativamente más tolerante al offset combinado CFO+Doppler. **BW250 es el candidato preferente** mientras no haya evidencia experimental que respalde BW125. El BW definitivo queda **TBD** hasta Gate B.
+El frame autenticado será mayor a 12 bytes. Por lo tanto, estos ToA **no pueden
+dimensionar la configuración final**. Se recalcularán con el payload serializado
+exacto usando `docs/COMMS/rf_calculations.py`.
 
-## 6) Slotting: tamaño de slot y guard
-Propuesta inicial (conservadora):
-- `slot_len = ToA_max + guard`
-- `guard = 250–500 ms` (para error de hora + drift + retardo de scheduling)
+## 5) Canalización
 
-Ejemplos con payload 12 B:
-- SF12/BW125: slot_len ≈ 1.155 s + 0.5 s ≈ **1.65 s**
-- SF12/BW250: slot_len ≈ 0.496 s + 0.3 s ≈ **0.80 s**
+No hay centros de canal adoptados. El plan final debe:
 
-Slots por ventana (ej. ventana = 4 min = 240 s):
-- BW125: ~240/1.65 ≈ **145 slots**
-- BW250: ~240/0.80 ≈ **300 slots**
+- estar dentro de la autorización escrita;
+- usar occupied bandwidth medido, no solo BW nominal;
+- incluir tolerancia de osciladores y Doppler;
+- impedir solapamiento entre canales que pretendan diversidad;
+- considerar selectividad, canal adyacente, blocking e interferencia local.
 
-## 7) Cálculo de slot por nodo (determinístico)
+Los antiguos centros 915.2/915.4 MHz, separados 200 kHz, no sirven como dos
+canales independientes si se usa BW250: sus anchos nominales se solapan 50 kHz.
 
-Inputs mínimos:
-- `node_id` (16-bit)
-- `epoch_id` (ej. minuto UTC o índice de ventana)
-- `S = slots_por_epoch`
+El plan de BW125 y el de BW250 serán artefactos distintos. Un cambio de BW
+obliga a recalcular centros, guards, ToA, capacidad, sensibilidad y permiso.
 
-Propuesta:
-- `slot_index = hash16(node_id XOR epoch_id) mod S`
-- offset de inicio = `slot_index * slot_len`
-- jitter dentro del slot: `±(guard/3)` para romper sincronías perfectas
+## 6) Slot y guard
 
-## 8) Formato de payload recomendado (meteo)
-Para minimizar ToA:
+Definiciones:
 
-### 8.1 Frame METEO (12 bytes)
-- `node_id` (uint16)
-- `seq` (uint16)
-- `temp_c_x100` (int16)
-- `rh_x100` (uint16)
-- `press_hpa_x10` (uint16)
-- `batt_mV` (uint16)
+- `ToA_max`: peor ToA de la configuración y longitud máxima autorizada;
+- `guard_total`: error total presupuestado antes/después del paquete;
+- `slot_len = ToA_max + guard_total`;
+- el firmware debe garantizar que el paquete completo queda dentro del slot.
 
-### 8.2 Frame GNSS (opcional, raro)
-Enviar GNSS solo cada X pasadas/día (no en cada uplink). Definir separado.
+Ejemplo histórico de 12 bytes en una ventana de 240 s:
 
-## 9) Receptor orbital “más robusto” (para mejorar uplink y ampliar capacidad)
-Decisión de exploración (P1): usar **LoRa concentrator** (RX tipo gateway, multi‑canal/multi‑SF) para uplink.
+| BW | ToA | Guard total de estudio | Slot | Slots completos |
+|---:|---:|---:|---:|---:|
+| 125 kHz | 1.417216 s | 0.500 s | 1.917216 s | 125 |
+| 250 kHz | 0.708608 s | 0.300 s | 1.008608 s | 237 |
 
-Motivo:
-- con nodos típicos el uplink es justo; un RX más robusto permite:
-  - demodular múltiples SF (y a veces múltiples canales) en paralelo,
-  - tolerar mejor coexistencia de muchos nodos,
-  - registrar métricas por paquete (RSSI/SNR/CFO) con alta fidelidad.
+Los guards son hipótesis de estudio, no criterios aceptados. Deben derivarse de
+errores medidos de RTC, GNSS, scheduler, propagación y latencia.
 
-Criterio adicional de diseño:
-- priorizar **sensibilidad** sobre “cantidad máxima” (la capacidad se obtiene principalmente con slotting, no con BW enorme).
+No se usa jitter `±guard/3` sin límites: puede invadir el slot vecino. Si se
+adopta dither, su intervalo permitido se define dentro del guard y se verifica
+formalmente que `tx_start >= slot_start` y `tx_end <= slot_end`.
 
-## 10) Clock / sincronización de slots — requisito de base temporal para B2
+## 7) Selección de slot y colisiones
 
-> **Restricción de sistema (ver `ADR-20260313-b2-uplink-timebase-requirement.md`):** El modo B2 NO puede depender implícitamente de un RTC interno sin validar.
+El algoritmo debe estar completamente especificado y versionado. Propuesta de
+ensayo:
 
-### 10.1 Condiciones de aceptación para B2
-Para que un nodo opere en B2 (pass-aware slotted), debe cumplir **al menos una** de las siguientes condiciones:
+```text
+seed = SHA-256(
+  "AUSTRALIS-LORA-SLOT-v1" ||
+  mission_id || network_id || node_id ||
+  boot_epoch || seq || pass_id || retry_index ||
+  channel_plan_version
+)
+slot_index = uint32_be(seed[0:4]) mod S
+```
 
-1. **Base temporal validada experimentalmente:** deriva medida del RTC/cristal dentro del guard time para el BW y slot_len elegidos, bajo condiciones de temperatura representativas.
-2. **Cristal/RTC externo adecuado:** cristal de referencia de baja deriva (p. ej. 32.768 kHz con histéresis térmica conocida) que garantice la precisión requerida.
-3. **Resincronización activa ≤24 h antes de la pasada:** el nodo disciplina su RTC con una fuente externa confiable (GNSS u otra) con periodicidad suficiente para el presupuesto de slot.
-4. **Otra estrategia documentada y validada:** cualquier mecanismo que garantice el error temporal dentro del guard time, documentado con evidencia experimental.
+SHA-256 aquí distribuye slots; **no autentica**. La autenticación usa la
+credencial del nodo.
 
-### 10.2 Fallback obligatorio
-Si ninguna de las condiciones anteriores se cumple → el nodo **shall operar en B1** (always-on slotted) hasta que la base temporal sea validada.
+Incluir `retry_index` y canal evita que un par que colisionó repita
+necesariamente el mismo slot. Aun así se debe modelar la correlación real.
 
-### 10.3 Supuesto de trabajo (pendiente de validación)
-El supuesto de trabajo es: ESP32 + disciplina GNSS 1 vez/día. **Este supuesto debe validarse experimentalmente** para el guard time de slot elegido (ver §6), bajo condiciones de temperatura representativas del despliegue real. No se fijan cifras de deriva del RTC hasta tener medición con el hardware específico.
+Con `N` nodos y `S` slots uniformes, la probabilidad ideal de que un intento no
+colisione es:
 
-### 10.4 Riesgo documentado
-El riesgo principal es: cristal de ESP32 con deriva térmica real mayor al guard time → slots desalineados en la práctica → colisiones → pérdida de paquetes. Ver `07_Risk/comms_uplink_slotting_time_sync_risk.md` y top-risk #3.
+\[
+P_{solo}=(1-1/S)^{N-1}
+\]
 
-## 11) Firmware de nodo: cálculo de pasadas (offline)
-- Los nodos (ESP32) calculan pasadas offline usando **TLE+SGP4**.
-- Se disciplina el RTC con GNSS 1 vez/día.
-- Documento guía: `05_Software/node_uplink_scheduler_pass_prediction.md`.
+Para `N=100`, `S=125`, es aproximadamente 45 %. Dos intentos independientes
+darían alrededor de 70 % de al menos un éxito, pero independencia, captura,
+near-far y PDR físico no están garantizados. La capacidad final requiere
+Monte Carlo + ensayo.
 
-## 12) Downlink: filosofía “resumen primero; detalle on‑demand”
-Para no saturar el downlink UHF:
-- por defecto se baja un **resumen** (agregado) de recepción LoRa:
-  - conteos por `node_id`, últimos `seq`, %CRC OK, estadísticas de RSSI/SNR/CFO,
-  - y un “top‑N” de eventos/anomalías.
-- el detalle (payloads crudos) se baja **solo** bajo comando (uplink TTC UHF):
-  - seleccionar `node_id`/rango de tiempo/últimos K paquetes,
-  - y permitir descarga en 1 o múltiples pasadas por chunks.
+## 8) Frame lógico autenticado
 
-## 13) Puntos abiertos / TBD
-- Definir canalización (cantidad de frecuencias) y spacing dentro de 915–928.
-- Definir elevación mínima operacional del uplink para nodos típicos (probablemente ≥25–35°).
-- Medir sensibilidad real del concentrator + front‑end RF y tolerancia a CFO/Doppler.
-- Definir estrategia anti‑CFO/Doppler si BW=125 (ej. diversidad de frecuencia en nodo).
+El frame legado de 12 bytes (`node_id`, `seq`, sensores) no prueba origen,
+misión, versión ni replay. El frame candidato contiene:
 
-## 11) Referencias cruzadas
+| Campo | Función |
+|---|---|
+| `protocol_version` | Parsing y evolución |
+| `mission_id` / `network_id` | Separación de dominio |
+| `message_type` | METEO/GNSS/STATUS |
+| `node_id` | Identidad provisionada |
+| `key_epoch` | Rotación/revocación |
+| `boot_epoch` | Distinguir resets sin reutilizar nonce |
+| `seq` | Orden y anti-replay por nodo |
+| `time_quality` / `timestamp` | Correlación; no única defensa |
+| `payload_len` / `payload` | Datos tipados y versionados |
+| `auth_tag` | MAC o firma sobre header + payload |
+
+El CRC PHY detecta corrupción; el `auth_tag` autentica. El contenido permanece
+en claro. Algoritmo, tamaño del tag y encoding quedan `TBD` mediante revisión de
+seguridad y dictamen regulatorio.
+
+### 8.1 Anti-replay de nodos
+
+El receptor mantiene por `(node_id, key_epoch)`:
+
+- último `boot_epoch` aceptado;
+- ventana de `seq` y bitmap si admite reordenamiento;
+- estado persistente o política explícita de reconstrucción;
+- contadores de duplicate/replay/auth fail.
+
+`boot_epoch` debe ser monotónico persistente o único con mecanismo demostrado.
+Un reset que vuelva a cero no se acepta silenciosamente.
+
+### 8.2 Ubicación de origen
+
+Un MAC prueba que transmitió una credencial, **no que el transmisor estaba en
+Buenos Aires**. La evidencia del criterio de misión debe correlacionar:
+
+- inventario/provisioning del nodo;
+- sitio de prueba y responsable;
+- tiempo UTC;
+- logs TX locales firmados o preservados;
+- predicción de pasada;
+- frame recibido/ACK de evidencia.
+
+No se infiere ubicación física solo de `node_id`.
+
+## 9) Base temporal y datos orbitales
+
+B2 requiere un presupuesto completo:
+
+```text
+error_total =
+  error_reloj_nodo
+  + error_sincronizacion
+  + error_propagador/TLE
+  + latencia_scheduler
+  + incertidumbre_ejecucion
+```
+
+El nodo debe almacenar junto al schedule:
+
+- source URL/provider;
+- object/catalog ID;
+- epoch orbital;
+- `fetched_at`;
+- hash y firma/provenance disponibles;
+- versión del parser/SGP4;
+- ventana de validez derivada de medición;
+- error predicho en tiempo/elevación.
+
+HTTPS protege transporte, pero no sustituye firma/provenance, object ID,
+expiry ni rollback protection. Los umbrales de 7/30 días no se adoptan sin
+convertir edad de TLE en error de ventana para la órbita real.
+
+Si el error puede llevar la transmisión fuera de la ventana autorizada o del
+slot, el nodo no transmite. B1 no se activa automáticamente.
+
+## 10) Receptor orbital y logging
+
+La comparación concentrador vs single-channel debe medir:
+
+- sensibilidad absoluta por SF/BW/CR;
+- tolerancia a rampa Doppler/CFO;
+- número real de demoduladores/canales para la configuración;
+- blocking, near-far, canal adyacente y co-canal;
+- consumo e inrush;
+- ruido/EMC con UHF, EPS y CM5;
+- disponibilidad del front-end, TCXO y filtros;
+- logging de RSSI/SNR/CFO y sus calibraciones.
+
+Por paquete se conserva raw frame, resultado CRC/auth/replay, timestamp/time
+quality, RF metrics, receptor/configuración y `pass_id`.
+
+## 11) Criterio de adopción
+
+Antes de adoptar B1/B2, BW o canalización:
+
+- `REG-LORA-915` cerrado;
+- PDR/PER y confianza preregistrados;
+- cantidad de nodos/carga/retries definida;
+- simulación de colisiones y ensayo multi-node;
+- sensibilidad y Doppler medidos;
+- seguridad/autenticación validada;
+- data budget y retención cerrados;
+- evidencia raw/versionada/hasheada.
+
+## 12) Puntos abiertos
+
+- banda/servicio autorizado o alternativa;
+- receptor y antena orbital;
+- BW/canales/occupied bandwidth;
+- tamaño y encoding del frame autenticado;
+- suite de autenticación/provisioning;
+- capacidad máxima y política de retries;
+- elevación/ventana derivada de evidencia;
+- estrategia de TLE/timebase.
+
+## 13) Referencias
+
+- `04_Communications/regulatory_gate_rf.md`
 - `04_Communications/link_budget_lora_uplink_preliminary.md`
-- `01_Mission/mission_definition.md`
-- `07_Risk/comms_lora_uplink_feasibility_risk.md`
+- `04_Communications/uplink_data_products_and_downlink_policy.md`
+- `docs/COMMS/uplink_lora_bench_testing_plan.md`
+- `docs/COMMS/rf_calculations.py`

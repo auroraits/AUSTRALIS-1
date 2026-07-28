@@ -1,5 +1,8 @@
 # Documento Técnico — MVP v1.1 (1U / DIY / Arduino-compatible)
 
+**Estado:** Historical Snapshot — superseded por `MVP v2.2.md`
+**Nota:** no normativo; cifras, modos y claims se conservan solo para trazabilidad.
+
 ## 1) Objetivo (no cambia)
 
 **Demostrar conexión end-to-end** y capturar métricas para iterar:

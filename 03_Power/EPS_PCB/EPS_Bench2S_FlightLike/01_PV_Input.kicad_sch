@@ -295,7 +295,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "String A activo: P1 y P2 en serie. String B reservado (futuro)."
+	(text "NO FABRICAR: topología solar preliminar; entradas y ratings siguen TBD."
 		(exclude_from_sim no)
 		(at 93.83 50.82 0)
 		(effects
@@ -488,16 +488,6 @@
 			(type solid)
 		)
 		(uuid "b457f32f-9f59-4a93-9a17-38d65876b8d2")
-	)
-	(wire
-		(pts
-			(xy 188.83 93.82) (xy 188.83 106.82)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "c1664f79-e3e7-4417-89c1-c19f01d78a29")
 	)
 	(wire
 		(pts

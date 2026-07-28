@@ -1,7 +1,13 @@
 # ADR-20260314-mission-redef-ai-primary
 
 - **Fecha:** 2026-03-14
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-mission-scientific-experiment-baseline.md`
+
+> **Disposición 2026-07-27:** se conserva la decisión de investigar asistencia
+> IA bajo autoridad determinística. El modelo SmolLM2 y los pisos de cinco
+> inferencias/100 logs/un prompt/diez paquetes no constituyen una hipótesis ni
+> un criterio científico suficiente y dejan de ser normativos.
 
 ---
 

@@ -1,7 +1,13 @@
 # ADR-20260218-uhf-link-budget-preliminary
 
 - **Fecha:** 2026-02-18
-- **Estado:** Accepted (preliminar — sujeto a revisión con módulo seleccionado)
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-rf-regulatory-command-security-baseline.md`
+
+> **Nota de disposición (2026-07-27):** se conserva como análisis histórico. La
+> geometría, sensibilidad, pérdidas y margen no estaban demostrados con hardware,
+> y no deben usarse como link budget aceptado ni como justificación de máscara
+> operativa.
 
 ## Contexto
 El presupuesto de potencia del MVP usaba 2.5 W eléctrico para UHF TX sin sustento en link

@@ -1,3 +1,10 @@
+<#
+INVALIDATED LEGACY DIAGNOSTIC.
+
+This script uses the contaminated historical smoke suite and a permissive
+static scorer. It is not admissible for model selection, safety evidence, or
+flight validation. Use AgenticBenchmarkRunner_v1.py instead.
+#>
 param(
   [Parameter(Mandatory=$true, Position=0)]
   [string[]]$Models,
@@ -10,14 +17,34 @@ param(
   [int]$WarmupDelaySec = 1,
   [int]$KeepAliveSeconds = 600,
   [int]$NumPredict = 300,
+  [int]$NumCtx = 2048,
   [double]$Temperature = 0,
   [int]$Seed = 42,
-  [switch]$NoWarmup
+  [string]$OllamaBaseUrl = "",
+  [switch]$NoWarmup,
+  [switch]$NoUnload,
+  [switch]$DisableThinking,
+  [switch]$JsonFormat,
+  [switch]$AllowInvalidatedLegacyDiagnostic
 )
 
 $ErrorActionPreference = "Stop"
-$endpoint = "http://127.0.0.1:11434/api/chat"
-$versionEndpoint = "http://127.0.0.1:11434/api/version"
+if (-not $AllowInvalidatedLegacyDiagnostic) {
+  throw ("Legacy diagnostic is disabled because its JSON extractor and scorer " +
+    "are not safety-valid. Use AgenticBenchmarkRunner_v1.py, or pass " +
+    "-AllowInvalidatedLegacyDiagnostic only for provenance work.")
+}
+Write-Warning "DIAGNOSTIC ONLY: results are inadmissible for selection or validation."
+if (-not $OllamaBaseUrl) {
+  if ($env:OLLAMA_BASE_URL) {
+    $OllamaBaseUrl = $env:OLLAMA_BASE_URL
+  } else {
+    $OllamaBaseUrl = "http://127.0.0.1:11434"
+  }
+}
+$ollamaRoot = $OllamaBaseUrl.TrimEnd("/")
+$endpoint = "$ollamaRoot/api/chat"
+$versionEndpoint = "$ollamaRoot/api/version"
 
 function Sanitize-FileName {
   param([string]$Name)
@@ -48,6 +75,12 @@ function New-JsonBody {
     keep_alive = $KeepAliveSeconds
     messages = $messages
     options = $Options
+  }
+  if ($DisableThinking) {
+    $body.think = $false
+  }
+  if ($JsonFormat) {
+    $body.format = "json"
   }
 
   return ($body | ConvertTo-Json -Depth 8 -Compress)
@@ -320,7 +353,7 @@ if ($Models.Count -eq 1 -and $Models[0].Contains(",")) {
 try {
   $null = Invoke-RestMethod -Uri $versionEndpoint -Method Get
 } catch {
-  throw "No puedo conectar a Ollama en http://127.0.0.1:11434. Asegurate de que Ollama esté corriendo."
+  throw "No puedo conectar a Ollama en $ollamaRoot. Asegurate de que el endpoint configurado esté disponible."
 }
 
 if (-not (Test-Path $SuiteFile)) {
@@ -339,6 +372,7 @@ $options = @{
   temperature = $Temperature
   seed = $Seed
   num_predict = $NumPredict
+  num_ctx = $NumCtx
 }
 
 $results = @()
@@ -367,14 +401,15 @@ foreach ($m in $Models) {
         $effectiveSystem = $effectiveSystem + "`n`n" + [string]$t.policyPrompt
       }
 
-      $run = Invoke-OllamaChat -Model $m -SystemPrompt $effectiveSystem -UserPrompt ([string]$t.userPrompt) -KeepAliveSeconds $KeepAliveSeconds -Options $options
+      $effectiveUserPrompt = "ID contractual del caso: $($t.id). En la salida JSON, case_id debe ser exactamente `"$($t.id)`".`n`n" + [string]$t.userPrompt
+      $run = Invoke-OllamaChat -Model $m -SystemPrompt $effectiveSystem -UserPrompt $effectiveUserPrompt -KeepAliveSeconds $KeepAliveSeconds -Options $options
       $eval = Evaluate-Response -TestCase $t -RawResponse ([string]$run.response) -ToolCalls $run.tool_calls
 
       $safeModel = Sanitize-FileName -Name $m
       $safeCase = Sanitize-FileName -Name ([string]$t.id)
       $base = "{0}_{1}_run{2}" -f $safeModel, $safeCase, $r
 
-      Save-TextFile -Path (Join-Path $ResponsesDir ($base + ".prompt.txt")) -Text ([string]$t.userPrompt)
+      Save-TextFile -Path (Join-Path $ResponsesDir ($base + ".prompt.txt")) -Text $effectiveUserPrompt
       Save-TextFile -Path (Join-Path $ResponsesDir ($base + ".response.json")) -Text ([string]$run.response)
       Save-TextFile -Path (Join-Path $ResponsesDir ($base + ".thinking.txt")) -Text ([string]$run.thinking)
       Save-TextFile -Path (Join-Path $ResponsesDir ($base + ".eval.json")) -Text (ConvertTo-JsonSafe $eval)
@@ -400,10 +435,12 @@ foreach ($m in $Models) {
     }
   }
 
-  try {
-    $unloadPrompt = '{"case_id":"UNLOAD","recommended_action":"NOOP","ai_payload_state":"UNCHANGED","mission_mode":"UNCHANGED","downlink_priority":[],"selected_items":[],"confidence":0.0,"rationale":[],"constraints_checked":[],"notes":"unload"}'
-    $null = Invoke-OllamaChat -Model $m -SystemPrompt $systemPrompt -UserPrompt $unloadPrompt -KeepAliveSeconds 0 -Options $options
-  } catch { }
+  if (-not $NoUnload) {
+    try {
+      $unloadPrompt = '{"case_id":"UNLOAD","recommended_action":"NOOP","ai_payload_state":"UNCHANGED","mission_mode":"UNCHANGED","downlink_priority":[],"selected_items":[],"confidence":0.0,"rationale":[],"constraints_checked":[],"notes":"unload"}'
+      $null = Invoke-OllamaChat -Model $m -SystemPrompt $systemPrompt -UserPrompt $unloadPrompt -KeepAliveSeconds 0 -Options $options
+    } catch { }
+  }
 }
 
 $summaryByModel = $results | Group-Object model | ForEach-Object {

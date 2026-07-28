@@ -2,6 +2,16 @@
 
 Audit date: 2026-06-15
 
+Status: **Historical Snapshot**
+
+Disposition date: 2026-07-27
+
+This document records the pre-publication review that led to the clean public
+mirror. It is not a current release authorization, technical baseline or list
+of still-open blockers. Current publication controls are in
+`PUBLIC_RELEASE_PROCESS.md`; technical maturity is controlled by
+`SYSTEM_BASELINE.md`, the accepted ADRs and the VCRM.
+
 Scope: `auroraits/DIY-Nanosat`, branch `audit/publication-readiness`.
 
 ## Executive result
@@ -98,14 +108,17 @@ from a fresh single-root commit produced from the reviewed sanitized tree.
 
 ## AI model role decision
 
-The AI payload model roles are now split explicitly:
+Historical conclusion at the time of this audit:
 
 - Granite 350M: flight candidate / compact development line, not flight-ready;
 - Granite 3.1 2B: bench and ground experimentation model, not primary flight
   candidate under the current power and thermal budget.
 
-See `08_Decisions/ADR-20260615-ai-model-roles-granite350m-flight-candidate-2b-experimentation.md`
-and `05_Software/AI PAYLOAD/MODEL_ASSETS.md`.
+This conclusion was superseded on 2026-07-27. The current candidate is
+`gemma4:e2b`, with no validation claim. Granite evidence is historical and the
+results formerly attributed to Granite 350M were in fact produced with Granite
+3.1 2B. See
+`08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`.
 
 ## Legal enforcement decision
 
@@ -120,7 +133,7 @@ For stronger commercial enforcement, counsel should review whether to replace
 the split scheme with a custom AUSTRALIS non-commercial research license before
 the public mirror is made public. See `LEGAL_ENFORCEMENT_REVIEW.md`.
 
-## Remaining blockers before public release
+## Historical blockers before the original public release
 
 1. Create a clean public mirror/export. A deletion commit is not enough because
    history still contains removed material.
@@ -132,6 +145,10 @@ the public mirror is made public. See `LEGAL_ENFORCEMENT_REVIEW.md`.
    protection and commercial license template.
 5. Decide whether any patent/trademark filing must happen before disclosure.
 6. Add automated secret scanning to CI before publication.
+
+These items describe the 2026-06-15 release boundary. They must not be reused as
+evidence that a later revision passed legal, provenance, security or release
+review.
 
 ## Validation commands used
 

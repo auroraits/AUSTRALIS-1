@@ -1,7 +1,13 @@
 # ADR-20260313-compliance-matrix-artefacto-sistema
 
 - **Fecha:** 2026-03-13
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-verification-and-review-governance.md`
+
+> **Disposición 2026-07-27:** se conserva la obligación de una compliance
+> matrix viva. El modelo `Open/Partial/Closed` queda reemplazado por
+> `Open/Planned/Implemented/Verified/Waived/Blocked by Integrator`, y la
+> verificación interna se controla 1:1 en la VCRM.
 
 ---
 

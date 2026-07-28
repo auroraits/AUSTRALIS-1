@@ -1,7 +1,12 @@
 # ADR-20260313-b2-uplink-timebase-requirement
 
 - **Fecha:** 2026-03-13
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-rf-regulatory-command-security-baseline.md`
+
+> **Disposición 2026-07-27:** perder validez temporal no autoriza un fallback
+> transmisor automático. El comportamiento seguro es fail-silent. B1 requiere
+> autorización regulatoria, airtime/energía y criterio propios.
 
 ---
 

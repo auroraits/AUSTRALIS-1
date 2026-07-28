@@ -1,114 +1,203 @@
-# Link Budget UHF Preliminar — AUSTRALIS-1 / DIY Nanosat MVP
+# Link Budget UHF bidireccional preliminar — AUSTRALIS-1
 
-**Fecha de revisión:** 2026-03-14
+**Revisión:** 2026-07-27
+**Estado:** Preliminary — cálculo de factibilidad, no evidencia de hardware
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/regulatory_gate_rf.md`, `docs/COMMS/rf_calculations.py`
 
-## 1) Objetivo
-Establecer el link budget preliminar del downlink UHF para el MVP.
+## 1) Alcance y límites
 
-## 2) Supuestos de diseño
+Este documento calcula por separado:
 
-| Parámetro | Valor | Nota |
-|---|---|---|
-| Frecuencia | 435 MHz | Downlink MVP bloqueado |
-| Potencia TX RF | 500 mW (+27 dBm) | Objetivo preliminar |
-| Órbita de referencia | 550 km zenith | Supuesto de diseño |
-| Rango oblicuo peor caso | ~2 500 km | Elevación mínima 10° |
-| Antena satélite | 0 dBi | 1/4 onda o dipolo simple |
-| Antena tierra | +10 dBi | Yagi estación Buenos Aires |
-| Pérdidas misceláneas | -3 dB | Polarización, cableado, implementación |
-| Sensibilidad RX tierra | -120 dBm | Estimación conservadora (FSK 1k2) |
+- downlink satélite → tierra;
+- uplink de Telemetría, Seguimiento y Comando (TTC) tierra → satélite.
 
-## 3) Cálculo de Free-Space Path Loss
-Fórmula:
+No demuestra disponibilidad de servicio, Bit Error Rate (BER), Packet Error
+Rate (PER), cumplimiento espectral ni compatibilidad SatNOGS. La potencia,
+sensibilidad, patrón de antena y pérdidas siguen sin medirse en el hardware
+integrado.
 
-\[ FSPL = 20\log_{10}\left(\frac{4\pi d}{\lambda}\right) \]
+La frecuencia no es `435.000 MHz`. Es una **asignación coordinada TBD dentro de
+435–438 MHz**, sujeta a ENACOM, coordinación IARU y trámite UIT. Para que el
+cálculo sea reproducible se usa `436.5 MHz` únicamente como frecuencia de
+referencia; no es una asignación ni una autorización.
 
-Con:
-- \( f = 435\,\text{MHz} \Rightarrow \lambda = c/f \approx 0.689\,\text{m} \)
-- Zenith: \( d = 550\,\text{km} = 550000\,\text{m} \)
-- Elevación 10°: \( d \approx 2500\,\text{km} = 2500000\,\text{m} \)
+## 2) Geometría correcta
 
-Resultados aproximados:
-- FSPL(550 km) ≈ **140 dB**
-- FSPL(2500 km) ≈ **153 dB**
+Para una Tierra esférica de radio \(R_E=6371\,km\), altitud \(h\) y elevación
+\(e\), la distancia oblicua es:
 
-## 4) Tabla de link budget
+\[
+d=\sqrt{(R_E+h)^2-(R_E\cos e)^2}-R_E\sin e
+\]
 
-| Parámetro | Símbolo | Valor | Unidad | Notas |
-|---|---|---:|---|---|
-| Potencia TX | Ptx | +27 | dBm | 500 mW RF |
-| Ganancia antena TX satélite | Gtx | 0 | dBi | 1/4 onda |
-| Ganancia antena RX tierra | Grx | +10 | dBi | Yagi |
-| Pérdidas misceláneas | Lmisc | -3 | dB | Cableado/polarización |
-| FSPL zenith | Lfs,90 | -140 | dB | 550 km |
-| FSPL 10° | Lfs,10 | -153 | dB | ~2500 km |
-| Sensibilidad RX | Srx | -120 | dBm | FSK 1k2 (estimado) |
+La Free-Space Path Loss (FSPL) se calcula como:
 
-## 5) Resultados por elevación
+\[
+FSPL[dB]=32.44+20\log_{10}(f_{MHz})+20\log_{10}(d_{km})
+\]
 
-| Elevación | Distancia slant aprox. | FSPL (dB) | Potencia recibida (dBm) | Margen vs -120 dBm |
-|---:|---:|---:|---:|---:|
-| 10° | 2500 km | 153 | -119 | +1 dB |
-| 30° | 1100 km | 145 | -111 | +9 dB |
-| 90° | 550 km | 140 | -106 | +14 dB |
+Resultados a 436.5 MHz:
 
-Cálculo de potencia recibida:
-\[ P_{rx} = P_{tx} + G_{tx} + G_{rx} - FSPL - L_{misc} \]
+| Altitud | Elevación | Distancia oblicua | FSPL |
+|---:|---:|---:|---:|
+| 550 km | 10° | 1815.1 km | 150.42 dB |
+| 550 km | 20° | 1293.6 km | 147.48 dB |
+| 550 km | 30° | 992.8 km | 145.18 dB |
+| 550 km | 90° | 550.0 km | 140.05 dB |
+| 600 km | 10° | 1931.6 km | 150.96 dB |
+| 600 km | 20° | 1392.2 km | 148.11 dB |
+| 600 km | 30° | 1075.1 km | 145.87 dB |
+| 600 km | 90° | 600.0 km | 140.80 dB |
+| 650 km | 10° | 2044.7 km | 151.45 dB |
+| 650 km | 20° | 1488.8 km | 148.70 dB |
+| 650 km | 30° | 1156.4 km | 146.50 dB |
+| 650 km | 90° | 650.0 km | 141.50 dB |
 
-## 6) Resultado del cálculo de papel
-Con 500 mW RF (+27 dBm), el enlace de papel muestra **+1 dB a 10°** (2500 km) y margen mayor en elevaciones medias/altas.
+El valor histórico de 2500 km a 550 km/10° era incorrecto. Los cálculos y
+regresiones están en `docs/COMMS/rf_calculations.py`.
 
-**Este +1 dB NO es un criterio nominal de operación.** Es un margen de papel esencialmente inoperable con pérdidas reales:
-- Pérdidas por polarización / tumbling del satélite: 0–3+ dB.
-- Body loss / detuning de antena en satélite: 1–5 dB.
-- Cableado + LNA + setup de estación terrena: 0–3 dB.
-- Eficiencia real del PA (diferente a la hipótesis de 500 mW RF): variable (ver CONF-01).
+## 3) Downlink — caso de referencia, no validado
 
-**Regla operativa:** tratar la operación a **<20°** como experimental/oportunista, no como criterio nominal de éxito.
+### 3.1 Supuestos aritméticos
 
-## 6.1 Sensibilidad (qué hace caer el margen)
-Pérdidas típicas a considerar (orden de magnitud):
-- mismatch de polarización (lineal vs circular / orientación variable): 0–3+ dB
-- body loss / detuning en satélite: 1–5 dB
-- cableado/conectores tierra + LNA/SDR setup: 0–3 dB
+| Término | Valor de papel | Estado |
+|---|---:|---|
+| Potencia RF satelital | +27 dBm | Objetivo; medir conducted y EIRP |
+| Ganancia TX satelital | 0 dBi | Hipótesis; patrón integrado TBD |
+| Ganancia RX terrestre | +10 dBi | Hipótesis; patrón y pointing TBD |
+| Pérdidas agrupadas | 3 dB | Placeholder, no presupuesto cerrado |
+| Sensibilidad terrestre | −120 dBm | Hipótesis; medir a PER objetivo |
+| Altitud de referencia | 600 km | Punto de cálculo, órbita final no congelada |
 
-Estas pérdidas no medidas implican que el enlace a 10° puede ser **negativo** con hardware real. La operación a 10° es experimental/oportunista.
+La convención de signos es:
 
-## 6.2 Máscara de elevación operativa (criterio provisional)
+\[
+P_{RX}=P_{TX}+G_{TX}+G_{RX}-L_{FS}-L_{misc}
+\]
 
-> **Este criterio es provisional** — recomendación conservadora basada en análisis de papel. Debe confirmarse o revisarse tras medir el hardware TX candidato (Gate C). Ver `ADR-20260313-uhf-downlink-operational-mask.md`.
+donde todas las pérdidas \(L\) son magnitudes positivas.
 
-| Rango de elevación | Tratamiento operativo |
-|---|---|
-| **≥20°** | Zona nominal para validación inicial y criterio de éxito de Gate C |
-| **20°–25°** | Zona conservadora/prudente recomendada para primeras operaciones |
-| **<20°** | Experimental / oportunista — **no** criterio nominal de éxito del MVP |
+### 3.2 Resultado de papel a 600 km
 
-**Justificación:** la zona ≥20° tiene ~+9 dB de margen teórico, mucho más robusto a incertidumbres de implementación que el +1 dB teórico a 10°.
+| Elevación | FSPL | Potencia recibida | Margen contra −120 dBm |
+|---:|---:|---:|---:|
+| 10° | 150.96 dB | −116.96 dBm | +3.04 dB |
+| 20° | 148.11 dB | −114.11 dBm | +5.89 dB |
+| 30° | 145.87 dB | −111.87 dBm | +8.13 dB |
+| 90° | 140.80 dB | −106.80 dBm | +13.20 dB |
 
-**Próximo paso:** Confirmar o revisar esta máscara tras medir con hardware TX real en Gate C.
+Por lo tanto, la afirmación anterior de “~+9 dB a 20°” era incorrecta: bajo
+estos supuestos el resultado es **+5.9 dB**, antes de incertidumbres no
+asignadas. La máscara de 20° solo puede mantenerse como máscara de
+planificación provisional, no como garantía ni criterio verificado.
 
-## 7) Próximos pasos
-1. Seleccionar módulo transceptor UHF de vuelo (TBD).
-2. Medir potencia RF y eficiencia real de PA en banco.
-3. Medir sensibilidad real del receptor de estación terrena.
-4. Refinar pérdidas reales de antena/cableado/polarización.
-5. Validar perfil de margen por elevación con simulación orbital.
-6. Definir una elevación mínima operacional inicial (ej. 20°) hasta cerrar mediciones.
+## 4) Uplink TTC — presupuesto que faltaba
 
-## 8) Referencias
-- `08_Decisions/ADR-20260218-uhf-link-budget-preliminary.md`
-- `00_MVP/MVP v2.2.md`
+El uplink requiere presupuesto propio porque el transmisor terrestre, el
+receptor orbital y sus patrones no son los mismos del downlink.
 
-## 9) Integración con arbitraje y uplink mínimo
-- El cálculo de margen se aplica al tráfico priorizado del Downlink Manager (`HOUSEKEEPING` y `COMMAND_ACK`) como garantía de servicio.
-- El resto de colas opera por cuota best-effort con el siguiente orden: `AI_BEHAVIOR_LOG`, `LORA_LOG`, `SCIENCE`, `OPTIONAL_PAYLOAD`.
-- El uplink mínimo de control (`SET_MODE`, `POWER_SET`, `DL_SELECT`, `DL_SET_LIMITS`, `REQUEST_STATUS`, `ABORT`) se considera tráfico crítico de comando/ACK.
+### 4.1 Caso de referencia simétrico
 
-<!-- FEATURE:PHOTO_DEMO START -->
+Hasta seleccionar hardware, se conserva un caso aritmético explícito:
 
-## 10) [PHOTO_DEMO] Nota de presupuesto de enlace opcional
-- [PHOTO_DEMO] utiliza exclusivamente cuota best-effort de `OPTIONAL_PAYLOAD`.
-- Si no hay margen de enlace en una pasada, se pospone transferencia sin degradar housekeeping/comandos.
+| Término | Valor de papel | Evidencia requerida |
+|---|---:|---|
+| Potencia TX terrestre | +27 dBm | Medición en puerto y límite autorizado |
+| Ganancia TX terrestre | +10 dBi | Patrón/calibración de la antena |
+| Ganancia RX satelital | 0 dBi | Patrón integrado en actitud nominal/degradada |
+| Pérdidas agrupadas | 3 dB | Ledger de cable, polarización, pointing y body loss |
+| Sensibilidad orbital | −120 dBm | Medición a BER/PER y temperatura definidos |
 
-<!-- FEATURE:PHOTO_DEMO END -->
+Con esos valores el resultado numérico coincide con la tabla de §3.2, pero
+esto **no demuestra simetría del enlace real**. En particular deben cerrarse:
+
+- EIRP permitido de la estación;
+- sensibilidad del receptor orbital con el front-end y filtro finales;
+- pérdida por orientación corporal y nulo de antena;
+- ruido/desensibilización durante operación integrada;
+- probabilidad de recepción y PER de comando;
+- ACK autenticado de cada comando aceptado o rechazado.
+
+No se considera verificable ningún comando crítico hasta cerrar este uplink.
+
+## 5) Pérdidas e incertidumbre que deben presupuestarse
+
+No se permite esconder todos los efectos dentro de “3 dB”. El ledger final
+debe separar, con nominal, peor caso e incertidumbre:
+
+- cable, conectores, switch T/R, filtro y mismatch;
+- polarización;
+- pointing y patrón de la estación;
+- patrón realizado del satélite, body loss y detuning;
+- tolerancia de potencia del PA con tensión y temperatura;
+- ruido de implementación, Noise Figure (NF) y temperatura de antena;
+- fading, interferencia, Doppler residual y error de osciladores;
+- degradación de hardware y margen de implementación.
+
+La sensibilidad debe derivarse o medirse para una waveform exacta, ancho de
+filtro, BER/PER objetivo, tamaño de frame, Forward Error Correction (FEC) y
+confianza estadística. `−120 dBm` no es todavía un requisito verificable.
+
+## 6) Doppler y waveform provisional
+
+A 438 MHz y una cota de velocidad radial de 7.7 km/s:
+
+\[
+|\Delta f| \leq f\,|v_r|/c \approx 11.25\,kHz
+\]
+
+La asignación coordinada debe dejar guardas para Doppler y tolerancia del
+oscilador. El perfil de ingeniería conserva:
+
+- 2-FSK;
+- 1200 bit/s;
+- framing versionado y CRC para detección de errores;
+- autenticación criptográfica y anti-replay para comandos.
+
+Siguen `TBD` hasta medición y decisión:
+
+- desviación FSK y occupied bandwidth;
+- preámbulo, sync word, whitening y line coding;
+- FEC/interleaver;
+- ancho de filtro, rango de adquisición y Automatic Frequency Control (AFC);
+- precompensación Doppler en tierra;
+- MTU, fragmentación, ARQ y timeout.
+
+El diseño debe demostrar adquisición con rampa Doppler orbital más error
+combinado de osciladores y cumplir el ancho ocupado autorizado. En el marco
+amateur-satellite argentino, el límite aplicable a digimodos y la frecuencia
+exacta deben confirmarse en el expediente regulatorio.
+
+## 7) Antena y actitud
+
+`0 dBi` es una hipótesis de cálculo, no un patrón isotrópico real. Un monopolo
+normal a la cara nadir presenta un nulo axial aproximadamente hacia la estación
+en pasadas de alta elevación. Antes de seleccionar antena se debe:
+
+1. definir los frames mecánico, corporal y de antena;
+2. comparar dipolo, monopolo tangencial y alternativas desplegables;
+3. simular el patrón 3D con estructura, paneles, harness y radiales;
+4. medir realized gain, polarización y detuning en modelo integrado;
+5. propagar el patrón por actitud nominal, error, tumble y modo seguro.
+
+El link budget final debe usar el percentil/pérdida de patrón correspondiente,
+no una ganancia escalar de 0 dBi.
+
+## 8) Criterios de cierre
+
+Este análisis puede pasar de `Preliminary` a evidencia de diseño solo si:
+
+- existe asignación/coordinación y autorización aplicable;
+- downlink y uplink tienen waveform y hardware identificados;
+- EIRP, sensibilidad, patrón y pérdidas están medidos;
+- BER/PER y disponibilidad tienen criterio previo y tamaño muestral;
+- se ejecutan Doppler, temperatura, coexistencia y pruebas OTA integradas;
+- los resultados se guardan con configuración, calibraciones, raw data y hash.
+
+## 9) Referencias
+
+- `04_Communications/regulatory_gate_rf.md`
+- `04_Communications/uhf_command_security_protocol.md`
+- `04_Communications/rf_subsystem_overview.md`
+- `docs/COMMS/rf_calculations.py`
+- `docs/COMMS/uhf_ttc_bench_testing_plan.md`

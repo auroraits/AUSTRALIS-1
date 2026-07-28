@@ -5,6 +5,15 @@
 **Estado:** documento de research / referencia histórica  
 **Carácter:** **no implica decisión tomada**; resume hallazgos, comparaciones y criterios técnicos discutidos en la sesión.
 
+> **Errata 2026-07-27 — no usar los layouts ni potencias como baseline.**
+> Este memo se conserva como investigación histórica. Se preparó con una caja
+> 1.5U de 150 mm, un target solar de 1.2 W y un balance energético que ya no son
+> válidos. La referencia CDS Rev. 14.1 es Z=`170.2 ± 0.1 mm`; el área útil debe
+> salir del CAD con rieles y keep-outs. Todo packing, potencia por cara, ranking
+> de candidato y margen debe recalcularse con curvas I-V hot/cold/BOL/EOL,
+> topología MPPT, actitud y cargas completas. Ningún SKU de este memo está
+> seleccionado.
+
 ---
 
 ## 1) Propósito del documento
@@ -27,10 +36,13 @@ Este research se interpretó contra el baseline vigente del proyecto, no contra 
 
 ### 2.1 Parámetros de sistema que condicionan la decisión solar
 
-- **Form factor actual:** **1.5U** (100 × 100 × 150 mm).
+- **Form factor usado históricamente en esta sesión:** **1.5U**
+  (100 × 100 × 150 mm, corregido posteriormente a Z=`170.2 ± 0.1 mm`).
 - **Topología de batería de vuelo:** **2S Li-ion**.
-- **Objetivo de potencia neta disponible en sol:** **≥ 1.2 W**.
-- **Recomendación de diseño para margen:** apuntar a **2–3 W BOL (Beginning Of Life)** efectivos en sol.
+- **Objetivo histórico de potencia neta en sol:** **≥ 1.2 W**, retirado en
+  2026-07-27 hasta cerrar el power budget.
+- **Recomendación histórica:** **2–3 W BOL (Beginning Of Life)** efectivos;
+  no constituye requisito ni target vigente.
 - **MPPT (Maximum Power Point Tracking):** recomendado para la arquitectura de vuelo.
 - **Body-mounted vs deployables:** el baseline admite ambas rutas; deployables no están descartados.
 - **Bench 1S con CN3065:** válido como banco funcional, **no** como arquitectura de vuelo.
@@ -127,7 +139,8 @@ Se evaluaron positivamente por:
 
 El principal problema detectado fue geométrico:
 
-- una celda completa tipo **125 × 125 mm** no encaja limpiamente como unidad principal en caras de un **1.5U 100 × 100 × 150 mm**.
+- una celda completa tipo **125 × 125 mm** no encaja limpiamente como unidad
+  principal en la sección transversal nominal de 100 × 100 mm.
 
 Eso llevó a la discusión sobre **celdas cortadas**.
 
@@ -215,7 +228,10 @@ Strings base discutidos:
 | SM261K10TF | 11.16 Vmp | 1.142 W |
 | SM351K09TF | 10.04 Vmp | 1.389 W |
 
-### 7.3 Cara lateral 100 × 150 mm (estimación ideal)
+### 7.3 Cara lateral histórica 100 × 150 mm (estimación ideal no vigente)
+
+> Esta tabla no representa la cara 1.5U CDS actual de 100 × 170.2 mm ni sus
+> keep-outs. Se conserva solo para trazabilidad y no debe extrapolarse.
 
 | Modelo | Unidades por cara | Potencia por cara | Observación |
 |---|---:|---:|---|
@@ -269,7 +285,8 @@ Debilidad:
 
 La conclusión más equilibrada de la sesión fue:
 
-> **SM261K10TF** quedó como la mejor referencia preliminar de compromiso.  
+> **SM261K10TF** quedó en esa sesión como referencia preliminar de compromiso,
+> hoy no seleccionada.
 > **SM141K10TF** quedó como opción para un escenario donde el margen energético por cara pese más que la complejidad de integración.  
 > **SM351K09TF** no quedó bien posicionada como baseline principal.
 

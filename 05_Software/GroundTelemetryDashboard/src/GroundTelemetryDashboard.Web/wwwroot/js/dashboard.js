@@ -3,6 +3,7 @@ window.dashboard = {
     this.dotnetRef = dotnetRef;
     this.terminal = document.getElementById('terminal');
     this.hud = document.getElementById('attitudeHud');
+    this.measurementClass = document.getElementById('measurementClass');
     this.maxLines = 160;
     this.lines = [];
     this.pendingRaw = [];
@@ -34,6 +35,12 @@ window.dashboard = {
     conn.on('rawLine', (line) => this.enqueueRaw(line));
     conn.on('telemetrySample', (sample) => this.pushSample(sample));
     conn.on('telemetryStats', (stats) => this.pushStats(stats));
+    conn.on('connectionStatus', async (status) => {
+      if (!this.dotnetRef) return;
+      try {
+        await this.dotnetRef.invokeMethodAsync('OnConnectionStatus', status);
+      } catch {}
+    });
     await conn.start();
   },
 
@@ -158,13 +165,15 @@ window.dashboard = {
 
   updateSignalQuality: function (stats) {
     if (!stats) return;
-    const ok = Number(stats.okCountWindow ?? stats.OkCountWindow ?? stats.okCount ?? stats.OkCount ?? 0);
-    const lost = Number(stats.lostCountWindow ?? stats.LostCountWindow ?? stats.lostCountEstimado ?? stats.LostCountEstimado ?? 0);
+    const ok = Number(stats.linkReceivedCountWindow ?? stats.LinkReceivedCountWindow ?? 0);
+    const lost = Number(stats.linkLostCountWindow ?? stats.LinkLostCountWindow ?? 0);
     const total = ok + lost;
-    const success = total > 0 ? (ok / total) : 1;
+    const success = total > 0 ? (ok / total) : null;
 
     if (this.signalQualityValue) {
-      this.signalQualityValue.textContent = `${(success * 100).toFixed(1)}%`;
+      this.signalQualityValue.textContent = success === null
+        ? 'N/A'
+        : `${(success * 100).toFixed(1)}%`;
     }
 
     if (this.signalQualityChart) {
@@ -175,7 +184,9 @@ window.dashboard = {
     }
 
     const now = Date.now();
-    this.signalQualityHistory.push({ at: now, value: success * 100 });
+    if (success !== null) {
+      this.signalQualityHistory.push({ at: now, value: success * 100 });
+    }
     const minTs = now - (this.signalTrendRangeSec * 1000);
     this.signalQualityHistory = this.signalQualityHistory.filter(p => p.at >= minTs);
     this.renderSignalQualityTrend();
@@ -311,6 +322,10 @@ window.dashboard = {
 
   pushSample: function (s) {
     const now = performance.now();
+    if (this.measurementClass) {
+      this.measurementClass.textContent =
+        s?.measurementClass ?? s?.MeasurementClass ?? 'DIAGNOSTIC_ONLY';
+    }
 
     if (this.cube && now - this.last3dUpdate > 50) {
       const qw = this.getNum(s, 'q0', 'Q0', 1.0);

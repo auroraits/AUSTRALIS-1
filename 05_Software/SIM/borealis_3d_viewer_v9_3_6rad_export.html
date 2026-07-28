@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BOREALIS Orbit/Thermal Trade Viewer v9.3</title>
+  <title>AUSTRALIS SSO/Thermal Sensitivity v10-pre</title>
   <style>
     :root{
       --bg:#0f172a;
@@ -191,19 +191,22 @@
   <div id="viewerWrap">
     <div id="viewer"></div>
     <div id="overlay">
-      <div><b>BOREALIS v9.3 — TLE real + SGP4 + barrido conceptual (6-rad export)</b></div>
+      <div><b>AUSTRALIS SIM v10-pre — sensibilidad SSO/térmica no validada</b></div>
       <div class="muted" style="margin-top:5px">
         <b>Modo Real TLE</b>: órbita propagada con <b>SGP4</b> a partir de un TLE real. La Tierra rota con tiempo sideral y el Sol se calcula desde la hora UTC global.
       </div>
       <div class="muted" style="margin-top:6px">
-        <b>Modo Diseño/Trade</b>: barrido de <b>inclinación</b>, <b>altitud</b>, <b>LTAN</b> y <b>actitud nadir</b> para optimizar pasadas sobre Buenos Aires, energía, eclipses y térmica.
+        <b>Modo sensibilidad</b>: deriva la inclinación SSO circular para cada
+        altitud y compara LTAN/actitud ideal. No optimiza ni selecciona órbita,
+        radiador, paneles o ADCS.
       </div>
       <div class="muted" style="margin-top:6px">
-        <b>v9.2:</b> Eclipse cónico con penumbra. Albedo modulado por posición subsolar.
-        View factors analíticos por altitud. CM5 con estado OFF (0 W) fuera de duty-cycle.
-        C_batt = 100 J/K (2× 18650). η solar, albedo, IR y CM5 parametrizables.
-        <b>v9.3:</b> CSV exporta las 6 caras evaluadas como radiador por candidato (Wh, Tcm5, Tbat, paneles, thermalKey).
-        Permite comparación directa entre radiadores para la misma órbita. Horizonte hasta 8760h (1 año).
+        <b>v10-pre:</b> geometría CDS 1.5U Z=170.2 mm; SSO J2 derivada;
+        albedo, IR y extracción FV corregidos; energía normalizada por día;
+        export CSV + manifest JSON. El modelo sigue <b>INCOMPLETE</b>: actitud
+        perfecta, propiedades/mallas/conductancias sin correlación, solo calor
+        CM5 y sin ADCS/EPS/RF/batería completa. Sus temperaturas no son
+        evidencia de diseño.
       </div>
       <div class="muted" style="margin-top:6px">
         En el 3D el marco es <b>ECI</b>: la órbita está en el espacio inercial, la Tierra rota debajo y el Sol evoluciona con el tiempo absoluto.
@@ -242,14 +245,14 @@
           <label>Modo de visualización</label>
           <select id="viewMode">
             <option value="realTle" selected>Real TLE / SGP4</option>
-            <option value="bestDesign">Mejor candidato de diseño</option>
+            <option value="referenceDesign">Primer caso de sensibilidad (no “mejor”)</option>
           </select>
         </div>
         <div class="field">
           <label>Actitud visual</label>
           <select id="viewerAttitude">
             <option value="squareNadir" selected>Nadir en cara 10×10</option>
-            <option value="rectNadir">Nadir en cara 10×15</option>
+            <option value="rectNadir">Nadir en cara lateral 10×17.02</option>
           </select>
         </div>
       </div>
@@ -301,19 +304,11 @@
     </div>
 
     <div class="card">
-      <h3>3) Barrido de diseño / optimización</h3>
+      <h3>3) Barrido de sensibilidad SSO (sin ranking)</h3>
       <div class="grid3">
         <div class="field">
-          <label>i mín [deg]</label>
-          <input id="incMin" type="number" step="0.1" value="97.6" />
-        </div>
-        <div class="field">
-          <label>i máx [deg]</label>
-          <input id="incMax" type="number" step="0.1" value="98.8" />
-        </div>
-        <div class="field">
-          <label>Δi [deg]</label>
-          <input id="incStep" type="number" step="0.05" value="0.3" />
+          <label>Git commit/tag (obligatorio para exportar)</label>
+          <input id="sourceRevision" type="text" placeholder="ej. abc1234" />
         </div>
         <div class="field">
           <label>Alt mín [km]</label>
@@ -352,17 +347,20 @@
           <select id="sweepAttitudes">
             <option value="both" selected>Comparar ambas</option>
             <option value="squareNadir">Solo nadir en 10×10</option>
-            <option value="rectNadir">Solo nadir en 10×15</option>
+            <option value="rectNadir">Solo nadir en 10×17.02</option>
           </select>
         </div>
       </div>
       <div class="muted small" style="margin-top:8px">
-        Score por defecto = 30% pasadas Buenos Aires + 25% energía 4 caras + 15% menos eclipse + 30% margen térmico (límites operativos CM5 80°C, batt −10°C).
-        <br>Horizontes sugeridos: 24h (rápido), 4320h (6 meses), <b>8760h (1 año)</b>. Para ≥4320h usar dt ≥ 180s.
-        <br>CSV exporta <b>las 6 caras como radiador</b> por candidato para comparación directa.
+        La inclinación se deriva de altitud imponiendo precesión J2 igual al
+        año tropical. No se barren altitud e inclinación como variables
+        independientes.
+        <br>No hay score ni “mejor candidato”: se exportan todos los casos y
+        las seis configuraciones de radiador para requisitos externos.
+        <br>Actitud nadir/LVLH perfecta = caso ideal; no representa un ADCS.
       </div>
       <div class="btnRow" style="margin-top:10px">
-        <button id="runSweepBtn" class="primary">Optimizar</button>
+        <button id="runSweepBtn" class="primary">Ejecutar sensibilidad</button>
       </div>
       <div style="margin-top:10px" id="progressWrap"><div id="progressBar"></div></div>
       <div class="muted small" id="progressText" style="margin-top:6px">esperando barrido…</div>
@@ -397,7 +395,11 @@
           </select>
         </div>
         <div class="field">
-          <label>P CM5 activo [W]</label>
+          <label>η EPS eléctrica (hipótesis)</label>
+          <input id="paramEpsEff" type="number" step="0.01" min="0" max="1" value="0.80" />
+        </div>
+        <div class="field">
+          <label>P CM5 activo [W] (gemma4:e2b TBD)</label>
           <input id="paramCm5Active" type="number" step="0.1" value="4.5" />
         </div>
         <div class="field">
@@ -428,8 +430,9 @@
         </div>
       </div>
       <div class="muted small" style="margin-top:8px">
-        Albedo modulado por posición orbital relativa al punto subsolar. View factors calculados analíticamente desde altitud.
-        CM5 en modo "Apagado" = 0 W fuera del duty-cycle activo (recomendado para duty-cycle realista).
+        Todas las propiedades son hipótesis de sensibilidad. CM5/gemma4:e2b
+        debe reemplazarse por medición exacta. No se modelan disipaciones
+        OBC/EPS/RF/ADCS/batería ni control de carga.
       </div>
     </div>
 
@@ -449,11 +452,11 @@
     </div>
 
     <div class="card">
-      <h3>6) Resultado del barrido</h3>
-      <div id="bestSummary" class="muted">Todavía no se ejecutó el optimizador.</div>
+      <h3>6) Resultado de sensibilidad</h3>
+      <div id="bestSummary" class="muted">Todavía no se ejecutó el barrido.</div>
       <div style="margin-top:10px; max-height:320px; overflow:auto" id="resultsTableWrap" class="muted">—</div>
       <div class="btnRow" style="margin-top:10px">
-        <button id="exportCsvBtn">Exportar CSV</button>
+        <button id="exportCsvBtn">Exportar CSV + manifest</button>
       </div>
     </div>
   </div>
@@ -483,6 +486,37 @@ try {
   const J2 = 1.08262668e-3;
   const K0 = 273.15;
   const pi = Math.PI;
+  const TROPICAL_YEAR_SEC = 365.2422 * 86400;
+  const TARGET_SSO_RAAN_RATE = 2*pi / TROPICAL_YEAR_SEC;
+  const MODEL_VERSION = 'australis-sim-v10-pre-2026-07-27';
+  const MODEL_STATUS = 'INCOMPLETE_NOT_FOR_DESIGN_DECISIONS';
+  const SOLAR_CONSTANT_W_M2 = 1361;
+  const SPACE_T_K = 2.725;
+  const THERMAL_ASSUMPTIONS = Object.freeze({
+    baseAlphaSolar:0.35,
+    baseEpsIR:0.85,
+    panelFillFraction:0.88,
+    panelAlphaSolar:0.90,
+    panelEpsIR:0.85,
+    radiatorAlphaSolar:0.20,
+    radiatorEpsIR:0.88,
+    baseFrameFaceConductance_W_K:0.45,
+    radiatorFrameFaceConductance_W_K:1.00,
+    cm5RadiatorConductance_W_K:0.60,
+    batteryNadirConductance_W_K:0.03,
+    frameBatteryConductance_W_K:0.08,
+    frameCm5Conductance_W_K:0.70,
+    faceHeatCapacity_J_K:[180,180,180,180,130,130],
+    frameHeatCapacity_J_K:450,
+    batteryHeatCapacity_J_K:100,
+    cm5HeatCapacity_J_K:60,
+    panelTemperatureCoefficient_per_K:-0.0035,
+    initialNodeTemperature_K:293.15,
+    numericalSubstepMax_s:20,
+    numericalClampMin_K:150,
+    numericalClampMax_K:450,
+    cm5ForcedOffInEclipse:true
+  });
 
   const BA = { latDeg: -34.6037, lonDeg: -58.3816, heightKm: 0.03 };
   const BA_GD = {
@@ -582,7 +616,7 @@ try {
     return Number.isFinite(x) ? `${x.toFixed(digits)}${suffix}` : '—';
   }
   function areaByFace(){
-    return [0.015,0.015,0.015,0.015,0.010,0.010]; // m²
+    return [0.01702,0.01702,0.01702,0.01702,0.010,0.010]; // m², caja ideal CDS
   }
   function createTextSprite(text, options = {}){
     const canvas = document.createElement('canvas');
@@ -779,7 +813,7 @@ try {
   satCarrier.add(satGroup);
   satGroup.scale.setScalar(0.5);
 
-  const boxX = 1.0, boxY = 1.0, boxZ = 1.5;
+  const boxX = 1.0, boxY = 1.0, boxZ = 1.702;
   const frameBox = new THREE.Mesh(
     new THREE.BoxGeometry(boxX, boxY, boxZ),
     new THREE.MeshPhysicalMaterial({color:0x44546b, metalness:0.45, roughness:0.55, transparent:true, opacity:0.10})
@@ -853,8 +887,9 @@ try {
   // ------ Dynamic state ------
   let loadedSatrec = null;
   let loadedTleInfo = null;
-  let bestDesign = null;
+  let referenceDesign = null;
   let lastSweepResults = [];
+  let lastSweepManifest = null;
   let playing = false;
   let simElapsedSec = 0;
   let lastFrameMs = performance.now();
@@ -916,7 +951,7 @@ try {
     const vhat = vVec.clone().normalize();
     const nadir = rhat.clone().multiplyScalar(-1).normalize();
     if(attitudeMode === 'rectNadir'){
-      const xBody = nadir;           // face +X nadir (10x15)
+      const xBody = nadir;           // face +X nadir (10x17.02)
       const zBody = vhat;            // face +Z ram-ish
       const yBody = new THREE.Vector3().crossVectors(zBody, xBody).normalize();
       const zFix = new THREE.Vector3().crossVectors(xBody, yBody).normalize();
@@ -943,12 +978,12 @@ try {
   const R_SUN_KM = 696000;      // radio solar [km]
   const D_SUN_KM = 149597870.7; // distancia media Tierra-Sol [km] (1 AU)
 
-  function eclipseFraction(rEci, sunEci){
+  function eclipseFraction(rEci, sunEci, requestedModel=null){
     const proj = rEci.dot(sunEci);
     if(proj >= 0) return 0; // lado iluminado
 
     const closest = Math.sqrt(Math.max(0, rEci.lengthSq() - proj*proj));
-    const eclipseModel = document.getElementById('paramEclipseModel').value;
+    const eclipseModel = requestedModel || document.getElementById('paramEclipseModel').value;
 
     if(eclipseModel === 'cylindrical'){
       return closest < RE ? 1 : 0;
@@ -1008,6 +1043,21 @@ try {
   function j2RaanDot(aKm, inclRad){
     const n = Math.sqrt(MU / Math.pow(aKm, 3));
     return -1.5 * J2 * Math.pow(RE / aKm, 2) * n * Math.cos(inclRad); // rad/s (circular)
+  }
+
+  function sunSynchronousInclinationDeg(aKm){
+    const n = Math.sqrt(MU / Math.pow(aKm, 3));
+    const denominator = 1.5 * J2 * Math.pow(RE / aKm, 2) * n;
+    const cosInclination = -TARGET_SSO_RAAN_RATE / denominator;
+    if(Math.abs(cosInclination) > 1){
+      throw new Error(`No existe solución SSO circular J2 para a=${aKm.toFixed(3)} km`);
+    }
+    return rad2deg(Math.acos(cosInclination));
+  }
+
+  function ltanDriftHoursPerYear(aKm, inclDeg){
+    const actualRate = j2RaanDot(aKm, deg2rad(inclDeg));
+    return rad2deg((actualRate - TARGET_SSO_RAAN_RATE) * TROPICAL_YEAR_SEC) / 15;
   }
 
   function syntheticOrbitState(date, design){
@@ -1129,6 +1179,7 @@ try {
       albedo: parseFloat(document.getElementById('paramAlbedo').value),
       earthIR: parseFloat(document.getElementById('paramEarthIR').value),
       panelEff: parseFloat(document.getElementById('paramPanelEff').value),
+      epsEff: parseFloat(document.getElementById('paramEpsEff').value),
       cm5Active: parseFloat(document.getElementById('paramCm5Active').value),
       cm5Idle: parseFloat(document.getElementById('paramCm5Idle').value),
       cm5OffMode: document.getElementById('paramCm5OffMode').value,
@@ -1137,11 +1188,26 @@ try {
     };
   }
 
+  function validateUIParams(params){
+    const finiteNonnegative = ['earthIR','cm5Active','cm5Idle','cm5Cycle'];
+    for(const key of finiteNonnegative){
+      if(!Number.isFinite(params[key]) || params[key] < 0){
+        throw new Error(`${key} debe ser finito y no negativo.`);
+      }
+    }
+    if(params.cm5Cycle <= 0) throw new Error('cm5Cycle debe ser > 0.');
+    for(const key of ['albedo','panelEff','epsEff','cm5Duty']){
+      if(!Number.isFinite(params[key]) || params[key] < 0 || params[key] > 1){
+        throw new Error(`${key} debe pertenecer a [0,1].`);
+      }
+    }
+  }
+
   function evaluateDesignCandidate(candidate, dtSec, hours){
     const durationSec = hours * 3600;
-    const steps = Math.floor(durationSec / dtSec);
+    const steps = Math.ceil(durationSec / dtSec);
     const energyPotential = new Array(6).fill(0);
-    let eclipseSteps = 0;
+    let eclipseSec = 0;
     let passCount = 0;
     let totalVisibleSec = 0;
     let inPass = false;
@@ -1150,16 +1216,17 @@ try {
     const normals = faceBodyNormals();
     const views = faceNadZenViews(candidate.attitudeMode, candidate.altKm);
     const areas = areaByFace();
-    const uiP = getUIParams();
+    const uiP = candidate.uiParams;
 
-    for(let k=0;k<=steps;k++){
+    for(let k=0;k<steps;k++){
+      const sampleDtSec = Math.min(dtSec, durationSec - k*dtSec);
       const date = new Date(candidate.epochDate.getTime() + k*dtSec*1000);
       const st = syntheticOrbitState(date, candidate);
       const sunEci = sunVectorECI(date);
       const { xBody, yBody, zBody } = st.basis;
 
       // Shadow fraction: 0 = full sun, 1 = full umbra
-      const shadow = eclipseFraction(st.rEci, sunEci);
+      const shadow = eclipseFraction(st.rEci, sunEci, candidate.eclipseModel);
       const sunFactor = 1 - shadow; // 0 in umbra, fractional in penumbra, 1 in full sun
 
       const sunBody = normals.map(n => {
@@ -1167,26 +1234,27 @@ try {
         return sunFactor * posPart(nEci.dot(sunEci));
       });
 
-      // Albedo modulation: factor depends on orbital position relative to subsolar point
-      // nadir vector dotted with sun = how much the ground below is lit
-      const nadirVec = st.rEci.clone().normalize().multiplyScalar(-1);
-      const albedoMod = clamp(posPart(nadirVec.dot(sunEci)) * 2, 0, 1); // 0 over night side, ~1 near subsolar
+      // Illumination of the Earth surface below the spacecraft. The outward
+      // surface normal is +rhat; using the nadir vector would invert day/night.
+      const groundOutwardNormal = st.rEci.clone().normalize();
+      const albedoMod = clamp(posPart(groundOutwardNormal.dot(sunEci)) * 2, 0, 1);
 
       for(let i=0;i<6;i++){
-        energyPotential[i] += 1361 * areas[i] * sunBody[i] * uiP.panelEff * dtSec / 3600.0;
+        energyPotential[i] += SOLAR_CONSTANT_W_M2 * areas[i] * sunBody[i] * uiP.panelEff * sampleDtSec / 3600.0;
       }
 
       const isEcl = shadow >= 0.98;
-      if(isEcl) eclipseSteps++;
+      if(isEcl) eclipseSec += sampleDtSec;
       const elev = st.baElevDeg;
       const visible = elev > 10;
       if(visible){
-        totalVisibleSec += dtSec;
+        totalVisibleSec += sampleDtSec;
         if(!inPass){ passCount++; inPass = true; }
       } else inPass = false;
 
       series.push({
         date,
+        dtSec: sampleDtSec,
         sunBody,
         eclipse: isEcl,
         shadow,
@@ -1203,8 +1271,8 @@ try {
     const top4CandidateFaces = order.slice(0,4).map(o=>o.face);
     const faceActivityCount = energyPotential.filter(e => e > 0.15 * Math.max(...energyPotential, 1e-9)).length;
 
-    // Determine best radiator face by thermal scan — store ALL 6 results
-    let bestThermal = null;
+    // Evaluate all faces. No automatic radiator selection is scientifically
+    // valid until absolute thermal requirements and correlated properties exist.
     const allRadiatorResults = [];
     for(let radFace=1; radFace<=6; radFace++){
       const panelFaces = [];
@@ -1214,10 +1282,15 @@ try {
       const therm = runThermalSweep(series, candidate, radFace, panelFaces);
       const entry = { ...therm, radiatorFace: radFace, panelFaces };
       allRadiatorResults.push(entry);
-      if(!bestThermal || therm.thermalKey > bestThermal.thermalKey){
-        bestThermal = entry;
-      }
     }
+    const referenceThermal = allRadiatorResults[5]; // -Z only for 3D visualization
+    const hotValues = allRadiatorResults.map(r => r.hotMaxC);
+    const battValues = allRadiatorResults.map(r => r.battMinEclipseC);
+    const battMinAllValues = allRadiatorResults.map(r => r.battMinAllC);
+    const battMaxAllValues = allRadiatorResults.map(r => r.battMaxAllC);
+    const battMinSunlitValues = allRadiatorResults.map(r => r.battMinSunlitC);
+    const energyValues = allRadiatorResults.map(r => r.panelElectricalWhPerDay);
+    const numericalClampHit = allRadiatorResults.some(r => r.numericalClampHit);
 
     return {
       ...candidate,
@@ -1226,13 +1299,17 @@ try {
       top4PotentialFaces: top4CandidateFaces,
       passCount,
       totalVisibleMin: totalVisibleSec/60,
-      eclipseFraction: eclipseSteps / Math.max(1, steps+1),
-      hotMaxC: finiteOr(bestThermal.hotMaxC, 999),
-      battMinEclipseC: finiteOr(bestThermal.battMinEclipseC, -999),
-      netPanelWh: finiteOr(bestThermal.netPanelWh, 0),
-      radiatorFace: bestThermal.radiatorFace,
-      panelFaces: bestThermal.panelFaces,
-      panelFaceEnergyWh: bestThermal.panelFaceEnergyWh,
+      eclipseFraction: eclipseSec / Math.max(1, durationSec),
+      ltanDriftHoursPerYear: ltanDriftHoursPerYear(RE + candidate.altKm, candidate.incDeg),
+      thermalModelStatus: MODEL_STATUS,
+      referenceRadiatorFace: referenceThermal.radiatorFace,
+      hotMaxCRange: [Math.min(...hotValues), Math.max(...hotValues)],
+      battMinEclipseCRange: [Math.min(...battValues), Math.max(...battValues)],
+      battMinAllCRange: [Math.min(...battMinAllValues), Math.max(...battMinAllValues)],
+      battMaxAllCRange: [Math.min(...battMaxAllValues), Math.max(...battMaxAllValues)],
+      battMinSunlitCRange: [Math.min(...battMinSunlitValues), Math.max(...battMinSunlitValues)],
+      panelElectricalWhPerDayRange: [Math.min(...energyValues), Math.max(...energyValues)],
+      numericalClampHit,
       allRadiators: allRadiatorResults
     };
   }
@@ -1242,37 +1319,42 @@ try {
     const views = faceNadZenViews(candidate.attitudeMode, candidate.altKm);
     const earthView = views.earthView.slice();
     const spaceView = views.spaceView.slice();
-    const uiP = getUIParams();
+    const uiP = candidate.uiParams;
 
-    const alphaSolar = new Array(6).fill(0.35);
-    const epsIR = new Array(6).fill(0.85);
-    const earthIRAbs = new Array(6).fill(0.60);
+    const alphaSolar = new Array(6).fill(THERMAL_ASSUMPTIONS.baseAlphaSolar);
+    const epsIR = new Array(6).fill(THERMAL_ASSUMPTIONS.baseEpsIR);
     const panelArea = new Array(6).fill(0);
     panelFaces.forEach(f => {
-      panelArea[f-1] = areas[f-1] * 0.88;
-      alphaSolar[f-1] = 0.90;
-      epsIR[f-1] = 0.85;
-      earthIRAbs[f-1] = 0.85;
+      panelArea[f-1] = areas[f-1] * THERMAL_ASSUMPTIONS.panelFillFraction;
+      alphaSolar[f-1] = THERMAL_ASSUMPTIONS.panelAlphaSolar;
+      epsIR[f-1] = THERMAL_ASSUMPTIONS.panelEpsIR;
     });
-    alphaSolar[radiatorFace-1] = 0.20;
-    epsIR[radiatorFace-1] = 0.88;
-    earthIRAbs[radiatorFace-1] = 0.20;
+    alphaSolar[radiatorFace-1] = THERMAL_ASSUMPTIONS.radiatorAlphaSolar;
+    epsIR[radiatorFace-1] = THERMAL_ASSUMPTIONS.radiatorEpsIR;
     panelArea[radiatorFace-1] = 0;
 
-    const G_frame_face = new Array(6).fill(0.45);
+    const G_frame_face = new Array(6).fill(THERMAL_ASSUMPTIONS.baseFrameFaceConductance_W_K);
     const G_cm5_face = new Array(6).fill(0);
     const G_batt_face = new Array(6).fill(0);
-    G_frame_face[radiatorFace-1] = 1.00;
-    G_cm5_face[radiatorFace-1] = 0.60;
-    G_batt_face[views.nadirIndex-1] = 0.03;
+    G_frame_face[radiatorFace-1] = THERMAL_ASSUMPTIONS.radiatorFrameFaceConductance_W_K;
+    G_cm5_face[radiatorFace-1] = THERMAL_ASSUMPTIONS.cm5RadiatorConductance_W_K;
+    G_batt_face[views.nadirIndex-1] = THERMAL_ASSUMPTIONS.batteryNadirConductance_W_K;
 
-    let T_face = new Array(6).fill(293.15);
-    let T_frame = 293.15, T_batt = 293.15, T_cm5 = 293.15;
-    const C_face = [180,180,180,180,130,130];
-    // C_batt: 2× 18650 ~90g @ ~1100 J/(kg·K) ≈ 100 J/K (corregido de 220)
-    const C_frame = 450, C_batt = 100, C_cm5 = 60;
-    const G_batt_frame = 0.08, G_cm5_frame = 0.70;
-    const panelTempCoeff = -0.0035;
+    const initialTemperatureK = THERMAL_ASSUMPTIONS.initialNodeTemperature_K;
+    const numericalMinK = THERMAL_ASSUMPTIONS.numericalClampMin_K;
+    const numericalMaxK = THERMAL_ASSUMPTIONS.numericalClampMax_K;
+    let T_face = new Array(6).fill(initialTemperatureK);
+    let T_frame = initialTemperatureK;
+    let T_batt = initialTemperatureK;
+    let T_cm5 = initialTemperatureK;
+    const C_face = THERMAL_ASSUMPTIONS.faceHeatCapacity_J_K.slice();
+    // Unverified placeholders; model remains incomplete until CAD/test correlation.
+    const C_frame = THERMAL_ASSUMPTIONS.frameHeatCapacity_J_K;
+    const C_batt = THERMAL_ASSUMPTIONS.batteryHeatCapacity_J_K;
+    const C_cm5 = THERMAL_ASSUMPTIONS.cm5HeatCapacity_J_K;
+    const G_batt_frame = THERMAL_ASSUMPTIONS.frameBatteryConductance_W_K;
+    const G_cm5_frame = THERMAL_ASSUMPTIONS.frameCm5Conductance_W_K;
+    const panelTempCoeff = THERMAL_ASSUMPTIONS.panelTemperatureCoefficient_per_K;
     // CM5 power from UI
     const P_cm5_active = uiP.cm5Active;
     const P_cm5_idle = uiP.cm5Idle;
@@ -1286,19 +1368,23 @@ try {
 
     let hotMaxC = -1e9;
     let battMinEclipseC = 1e9;
+    let battMinSunlitC = 1e9;
+    let battMinAllC = 1e9;
+    let battMaxAllC = -1e9;
+    let numericalClampHit = false;
     const panelFaceEnergyWh = new Array(6).fill(0);
     let netPanelWh = 0;
 
     for(let k=0;k<series.length;k++){
       const s = series[k];
-      const dtRaw = k > 0 ? (series[k].date - series[k-1].date)/1000 : ((series.length>1) ? (series[1].date - series[0].date)/1000 : 120);
+      const dtRaw = s.dtSec;
       const dtSec = (Number.isFinite(dtRaw) && dtRaw > 0) ? dtRaw : 120;
       const time = (s.date - candidate.epochDate)/1000;
 
       // CM5 power model: active during duty window, OFF (or idle) outside
       const inDutyWindow = ((time % cm5Cycle) < cm5Duty * cm5Cycle);
       let P_cm5;
-      if(s.eclipse){
+      if(s.eclipse && THERMAL_ASSUMPTIONS.cm5ForcedOffInEclipse){
         P_cm5 = 0; // CM5 off during eclipse
       } else if(inDutyWindow){
         P_cm5 = P_cm5_active;
@@ -1306,7 +1392,10 @@ try {
         P_cm5 = cm5OffIsIdle ? P_cm5_idle : 0; // OFF = 0W, idle = P_idle
       }
 
-      const substeps = Math.max(1, Math.ceil(dtSec / 20));
+      const substeps = Math.max(
+        1,
+        Math.ceil(dtSec / THERMAL_ASSUMPTIONS.numericalSubstepMax_s)
+      );
       const h = dtSec / substeps;
 
       // Albedo modulation factor from series (varies with orbital position)
@@ -1319,95 +1408,167 @@ try {
 
         for(let i=0;i<6;i++){
           const inc = Number.isFinite(s.sunBody[i]) ? clamp(s.sunBody[i], 0, 1) : 0;
-          const Ti = clamp(finiteOr(T_face[i], 293.15), 150, 450);
-          const Tf = clamp(finiteOr(T_frame, 293.15), 150, 450);
-          const Tb = clamp(finiteOr(T_batt, 293.15), 150, 450);
-          const Tc = clamp(finiteOr(T_cm5, 293.15), 150, 450);
+          const Ti = clamp(
+            finiteOr(T_face[i], initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
+          const Tf = clamp(
+            finiteOr(T_frame, initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
+          const Tb = clamp(
+            finiteOr(T_batt, initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
+          const Tc = clamp(
+            finiteOr(T_cm5, initialTemperatureK),
+            numericalMinK,
+            numericalMaxK
+          );
 
-          const qsun = 1361 * alphaSolar[i] * areas[i] * inc;
+          const incidentSolar = SOLAR_CONSTANT_W_M2 * areas[i] * inc;
+          const qsun = alphaSolar[i] * incidentSolar;
           // Albedo: modulated by subsolar position, zero in eclipse
-          const qalb = s.eclipse ? 0 : userAlbedo * albMod * 1361 * alphaSolar[i] * areas[i] * earthView[i];
-          // Earth IR: parametric, always present
-          const qir = userEarthIR * earthIRAbs[i] * areas[i] * earthView[i];
-          const qrad = 5.670374419e-8 * epsIR[i] * areas[i] * spaceView[i] * (Math.pow(Ti,4) - Math.pow(2.725,4));
+          const qalb = s.eclipse ? 0 : userAlbedo * albMod * SOLAR_CONSTANT_W_M2 * alphaSolar[i] * areas[i] * earthView[i];
+          // Kirchhoff in thermal IR: absorptivity equals emissivity.
+          const qir = userEarthIR * epsIR[i] * areas[i] * earthView[i];
+          const qradSpace = 5.670374419e-8 * epsIR[i] * areas[i] * spaceView[i] * (Math.pow(Ti,4) - Math.pow(SPACE_T_K,4));
+          // Outgoing long-wave radiation toward Earth; incoming Earth IR is qir.
+          const qradEarthOut = 5.670374419e-8 * epsIR[i] * areas[i] * earthView[i] * Math.pow(Ti,4);
           const qff = G_frame_face[i] * (Tf - Ti);
           const qcf = G_cm5_face[i] * (Tc - Ti);
           const qbf = G_batt_face[i] * (Tb - Ti);
           qFrameToFace[i] = qff;
 
-          const qnet = qsun + qalb + qir + qff + qcf + qbf - qrad;
+          const peff = Math.max(0, userPanelEff * (1 + panelTempCoeff*(Ti - 298.15)));
+          const pface = incidentSolar * (panelArea[i] / Math.max(areas[i], 1e-12)) * peff;
+          // Generated electrical power leaves the panel thermal node. Its
+          // downstream dissipation is not modeled and keeps the model incomplete.
+          const qnet = qsun + qalb + qir + qff + qcf + qbf - pface - qradSpace - qradEarthOut;
           dT_face[i] = qnet / C_face[i];
 
-          const peff = Math.max(0, userPanelEff * (1 + panelTempCoeff*(Ti - 298.15)));
-          const pface = 1361 * panelArea[i] * inc * peff;
           panelFaceEnergyWh[i] += pface * h / 3600;
           P_panelGross += pface;
         }
 
-        const Tf = clamp(finiteOr(T_frame, 293.15), 150, 450);
-        const Tb = clamp(finiteOr(T_batt, 293.15), 150, 450);
-        const Tc = clamp(finiteOr(T_cm5, 293.15), 150, 450);
+        const Tf = clamp(
+          finiteOr(T_frame, initialTemperatureK),
+          numericalMinK,
+          numericalMaxK
+        );
+        const Tb = clamp(
+          finiteOr(T_batt, initialTemperatureK),
+          numericalMinK,
+          numericalMaxK
+        );
+        const Tc = clamp(
+          finiteOr(T_cm5, initialTemperatureK),
+          numericalMinK,
+          numericalMaxK
+        );
         const dT_frame = (
           -qFrameToFace.reduce((acc,q)=>acc + q, 0)
           + G_cm5_frame * (Tc - Tf)
           + G_batt_frame * (Tb - Tf)
         ) / C_frame;
 
-        const sumQcm5 = G_cm5_face.reduce((acc,g,i)=>acc + g * (Tc - clamp(finiteOr(T_face[i],293.15),150,450)), 0);
+        const sumQcm5 = G_cm5_face.reduce(
+          (acc,g,i)=>acc + g * (
+            Tc - clamp(
+              finiteOr(T_face[i], initialTemperatureK),
+              numericalMinK,
+              numericalMaxK
+            )
+          ),
+          0
+        );
         const dT_cm5 = (P_cm5 - G_cm5_frame * (Tc - Tf) - sumQcm5) / C_cm5;
-        const sumQbatt = G_batt_face.reduce((acc,g,i)=>acc + g * (Tb - clamp(finiteOr(T_face[i],293.15),150,450)), 0);
+        const sumQbatt = G_batt_face.reduce(
+          (acc,g,i)=>acc + g * (
+            Tb - clamp(
+              finiteOr(T_face[i], initialTemperatureK),
+              numericalMinK,
+              numericalMaxK
+            )
+          ),
+          0
+        );
         const dT_batt = (- G_batt_frame * (Tb - Tf) - sumQbatt) / C_batt;
 
         for(let i=0;i<6;i++){
-          T_face[i] = clamp(finiteOr(T_face[i],293.15) + h * dT_face[i], 150, 450);
+          T_face[i] = clamp(
+            finiteOr(T_face[i], initialTemperatureK) + h * dT_face[i],
+            numericalMinK,
+            numericalMaxK
+          );
         }
-        T_frame = clamp(finiteOr(T_frame,293.15) + h * dT_frame, 150, 450);
-        T_cm5 = clamp(finiteOr(T_cm5,293.15) + h * dT_cm5, 150, 450);
-        T_batt = clamp(finiteOr(T_batt,293.15) + h * dT_batt, 150, 450);
+        T_frame = clamp(
+          finiteOr(T_frame, initialTemperatureK) + h * dT_frame,
+          numericalMinK,
+          numericalMaxK
+        );
+        T_cm5 = clamp(
+          finiteOr(T_cm5, initialTemperatureK) + h * dT_cm5,
+          numericalMinK,
+          numericalMaxK
+        );
+        T_batt = clamp(
+          finiteOr(T_batt, initialTemperatureK) + h * dT_batt,
+          numericalMinK,
+          numericalMaxK
+        );
+        numericalClampHit = numericalClampHit
+          || T_face.some(t => t <= numericalMinK || t >= numericalMaxK)
+          || T_frame <= numericalMinK || T_frame >= numericalMaxK
+          || T_cm5 <= numericalMinK || T_cm5 >= numericalMaxK
+          || T_batt <= numericalMinK || T_batt >= numericalMaxK;
 
-        if(!s.eclipse) hotMaxC = Math.max(hotMaxC, T_cm5 - K0);
-        if(s.eclipse) battMinEclipseC = Math.min(battMinEclipseC, T_batt - K0);
-        netPanelWh += P_panelGross * 0.80 * h / 3600;
+        const cm5C = T_cm5 - K0;
+        const battC = T_batt - K0;
+        hotMaxC = Math.max(hotMaxC, cm5C);
+        battMinAllC = Math.min(battMinAllC, battC);
+        battMaxAllC = Math.max(battMaxAllC, battC);
+        if(s.eclipse) {
+          battMinEclipseC = Math.min(battMinEclipseC, battC);
+        } else {
+          // Sunlit is only a charge-eligibility proxy; charge state is not modeled.
+          battMinSunlitC = Math.min(battMinSunlitC, battC);
+        }
+        netPanelWh += P_panelGross * uiP.epsEff * h / 3600;
       }
     }
 
     if(!Number.isFinite(hotMaxC) || hotMaxC < -200) hotMaxC = T_cm5 - K0;
     if(!Number.isFinite(battMinEclipseC) || battMinEclipseC > 200) battMinEclipseC = T_batt - K0;
+    if(!Number.isFinite(battMinSunlitC) || battMinSunlitC > 200) battMinSunlitC = T_batt - K0;
+    if(!Number.isFinite(battMinAllC) || battMinAllC > 200) battMinAllC = T_batt - K0;
+    if(!Number.isFinite(battMaxAllC) || battMaxAllC < -200) battMaxAllC = T_batt - K0;
     if(!Number.isFinite(netPanelWh)) netPanelWh = 0;
     for(let i=0;i<panelFaceEnergyWh.length;i++){
       if(!Number.isFinite(panelFaceEnergyWh[i])) panelFaceEnergyWh[i] = 0;
     }
 
-    // Margin-based thermalKey: operational limits as reference
-    // When both temps are far from limits, energy becomes the tiebreaker (physically correct)
-    const T_CM5_LIMIT = 80;    // °C operational limit CM5 (abs max ~85°C)
-    const T_BATT_COLD = -10;   // °C Li-ion discharge lower limit (survival -20°C)
-    const cm5Margin = clamp((T_CM5_LIMIT - hotMaxC) / T_CM5_LIMIT, 0, 1);
-    const battMargin = clamp((battMinEclipseC - T_BATT_COLD) / 50, 0, 1);
-    // Energy has real mission impact: paneles en una cara solar desperdiciada cuestan Wh reales
-    const energyScore = netPanelWh / 100;
-    const thermalKey = cm5Margin + 0.5 * battMargin + 0.8 * energyScore;
-    return { hotMaxC, battMinEclipseC, netPanelWh, panelFaceEnergyWh, thermalKey: finiteOr(thermalKey, -1e6) };
+    const durationSec = series.reduce((sum, sample) => sum + sample.dtSec, 0);
+    const durationDays = durationSec / 86400;
+    const panelElectricalWhPerDay = durationDays > 0 ? netPanelWh / durationDays : 0;
+    return {
+      hotMaxC,
+      battMinEclipseC,
+      battMinSunlitC,
+      battMinAllC,
+      battMaxAllC,
+      numericalClampHit,
+      panelElectricalWh: netPanelWh,
+      panelElectricalWhPerDay,
+      panelFaceEnergyWh,
+      modelStatus: MODEL_STATUS
+    };
   }
 
-  function normalizeScore(items, key, higherBetter=true){
-    const vals = items.map(i => Number.isFinite(i[key]) ? i[key] : NaN);
-    const finiteVals = vals.filter(v => Number.isFinite(v));
-    if(!finiteVals.length) return items.map(() => 0);
-    const min = Math.min(...finiteVals), max = Math.max(...finiteVals);
-    return items.map((i, idx) => {
-      const v = vals[idx];
-      if(!Number.isFinite(v)) return 0;
-      let s = (max - min) < 1e-9 ? 1 : ((v - min) / (max - min));
-      if(!higherBetter) s = 1 - s;
-      return clamp(s, 0, 1);
-    });
-  }
-
-  async function runOptimizer(){
-    const incMin = parseFloat(document.getElementById('incMin').value);
-    const incMax = parseFloat(document.getElementById('incMax').value);
-    const incStep = parseFloat(document.getElementById('incStep').value);
+  async function runSensitivitySweep(){
     const altMin = parseFloat(document.getElementById('altMin').value);
     const altMax = parseFloat(document.getElementById('altMax').value);
     const altStep = parseFloat(document.getElementById('altStep').value);
@@ -1418,23 +1579,36 @@ try {
     const dtSec = parseFloat(document.getElementById('sweepDt').value);
     const attSel = document.getElementById('sweepAttitudes').value;
     const epochDate = parseLocalDateInput();
+    const frozenUiParams = getUIParams();
+    validateUIParams(frozenUiParams);
+    const eclipseModel = document.getElementById('paramEclipseModel').value;
+    if(![altMin, altMax, altStep, ltanMin, ltanMax, ltanStep, hours, dtSec].every(Number.isFinite)){
+      throw new Error('Todos los parámetros numéricos del barrido deben ser finitos.');
+    }
+    if(altStep <= 0 || ltanStep <= 0 || hours <= 0 || dtSec <= 0 || altMax < altMin || ltanMax < ltanMin){
+      throw new Error('Rangos, pasos, horizonte y dt deben ser positivos y ordenados.');
+    }
 
     const attitudes = attSel === 'both' ? ['squareNadir','rectNadir'] : [attSel];
     const candidates = [];
-    for(let inc=incMin; inc<=incMax+1e-9; inc+=incStep){
-      for(let alt=altMin; alt<=altMax+1e-9; alt+=altStep){
-        for(let ltan=ltanMin; ltan<=ltanMax+1e-9; ltan+=ltanStep){
-          for(const attitudeMode of attitudes){
-            candidates.push({
-              incDeg:+inc.toFixed(4),
-              altKm:+alt.toFixed(3),
-              ltanHours:+ltan.toFixed(4),
-              attitudeMode,
-              epochDate,
-              u0:0,
-              raanDot:j2RaanDot(RE + alt, deg2rad(inc))
-            });
-          }
+    for(let alt=altMin; alt<=altMax+1e-9; alt+=altStep){
+      const incDeg = sunSynchronousInclinationDeg(RE + alt);
+      for(let ltan=ltanMin; ltan<=ltanMax+1e-9; ltan+=ltanStep){
+        for(const attitudeMode of attitudes){
+          candidates.push({
+            incDeg:+incDeg.toFixed(6),
+            altKm:+alt.toFixed(3),
+            ltanHours:+ltan.toFixed(4),
+            attitudeMode,
+            epochDate,
+            u0:0,
+            raanDot:j2RaanDot(RE + alt, deg2rad(incDeg)),
+            ssoMethod:'circular_J2_tropical_year',
+            analysisHours:hours,
+            analysisDtSec:dtSec,
+            uiParams:{...frozenUiParams},
+            eclipseModel
+          });
         }
       }
     }
@@ -1454,31 +1628,62 @@ try {
       }
     }
 
-    const passScore = raw.map((r,i)=>0); // fill below
-    const visibleNorm = normalizeScore(raw, 'totalVisibleMin', true);
-    const passCountNorm = normalizeScore(raw, 'passCount', true);
-    const energyNorm = normalizeScore(raw, 'netPanelWh', true);
-    const eclipseNorm = normalizeScore(raw, 'eclipseFraction', false);
-    const hotNorm = normalizeScore(raw, 'hotMaxC', false);
-    const battNorm = normalizeScore(raw, 'battMinEclipseC', true);
-    const activeFaceNorm = raw.map(r => Math.min(r.faceActivityCount,4)/4);
-
-    raw.forEach((r,i) => {
-      const pass = 0.55*passCountNorm[i] + 0.45*visibleNorm[i];
-      const energy = 0.55*energyNorm[i] + 0.45*activeFaceNorm[i];
-      const thermal = 0.55*hotNorm[i] + 0.45*battNorm[i];
-      r.scoreBreakdown = { pass, energy, eclipse: eclipseNorm[i], thermal };
-      r.totalScore = 0.30*pass + 0.25*energy + 0.15*eclipseNorm[i] + 0.30*thermal;
-    });
-
-    raw.sort((a,b)=>b.totalScore-a.totalScore);
-    bestDesign = raw[0] || null;
+    // Preserve deterministic input order. Ranking by min-max normalization
+    // changes when the search bounds change and is not a physical requirement.
+    referenceDesign = raw[0] || null;
     lastSweepResults = raw;
-    document.getElementById('viewMode').value = 'bestDesign';
+    lastSweepManifest = {
+      schemaVersion: 1,
+      modelVersion: MODEL_VERSION,
+      modelStatus: MODEL_STATUS,
+      generatedAtUtc: new Date().toISOString(),
+      sourceRevision: document.getElementById('sourceRevision').value.trim() || null,
+      inputs: {
+        epochUtc: epochDate.toISOString(),
+        hours,
+        dtSec,
+        altitudeKm: {min:altMin, max:altMax, step:altStep},
+        ltanHours: {min:ltanMin, max:ltanMax, step:ltanStep},
+        attitudes,
+        ui: frozenUiParams,
+        minimumPassElevationDeg: 10
+      },
+      constants: {
+        muKm3S2: MU,
+        earthRadiusKm: RE,
+        j2: J2,
+        tropicalYearSec: TROPICAL_YEAR_SEC,
+        targetSsoRaanRateRadSec: TARGET_SSO_RAAN_RATE,
+        solarConstantWm2: SOLAR_CONSTANT_W_M2,
+        spaceTemperatureK: SPACE_T_K
+      },
+      thermalAssumptions: THERMAL_ASSUMPTIONS,
+      geometry: {
+        formFactor: '1.5U conceptual ideal box',
+        dimensionsM: [0.1, 0.1, 0.1702],
+        faceAreasM2: areaByFace(),
+        note: 'usable areas require controlled CAD, rails and keep-outs'
+      },
+      methods: {
+        orbit: 'circular two-body plus secular J2 RAAN; inclination derived for SSO',
+        eclipse: eclipseModel,
+        attitude: 'perfect LVLH/nadir ideal case only',
+        thermal: 'uncorrelated lumped-parameter sensitivity; incomplete loads'
+      },
+      dependencies: {
+        three:'0.160.0',
+        satelliteJs:'6.0.2'
+      },
+      runtime: {
+        userAgent:navigator.userAgent,
+        timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
+    };
+    document.getElementById('viewMode').value = 'referenceDesign';
 
     renderResults(raw);
     progressBar.style.width = '100%';
-    progressText.textContent = `listo: ${candidates.length} candidatos evaluados`;
+    progressText.textContent = `listo: ${candidates.length} casos SSO evaluados sin ranking`;
   }
 
   function renderResults(rows){
@@ -1487,46 +1692,37 @@ try {
       document.getElementById('resultsTableWrap').textContent = '—';
       return;
     }
-    const best = rows[0];
-    const bestSquare = rows.find(r => r.attitudeMode === 'squareNadir');
-    const bestRect = rows.find(r => r.attitudeMode === 'rectNadir');
-
-    function facesToStr(arr){ return arr.map(f => faceName(f)).join(', '); }
-
-    let summary = `<div><b>Mejor candidato global</b></div>
+    const first = rows[0];
+    let summary = `<div><b>Sensibilidad completada — sin candidato recomendado</b></div>
       <div class="muted" style="margin-top:6px">
-        i = <b>${best.incDeg.toFixed(2)}°</b>, alt = <b>${best.altKm.toFixed(0)} km</b>, LTAN = <b>${best.ltanHours.toFixed(2)} h</b>,
-        actitud = <b>${best.attitudeMode === 'squareNadir' ? 'nadir en 10×10' : 'nadir en 10×15'}</b>.
+        ${rows.length} casos en orden determinista de entrada. La inclinación
+        SSO se deriva por altitud; el primer caso (${first.altKm.toFixed(0)} km,
+        i=${first.incDeg.toFixed(4)}°) se usa solo para visualización 3D.
       </div>
       <div class="muted" style="margin-top:6px">
-        Pasadas BA = <b>${best.passCount}</b>, visibilidad total = <b>${best.totalVisibleMin.toFixed(1)} min</b>, eclipse = <b>${(best.eclipseFraction*100).toFixed(1)}%</b>.
-      </div>
-      <div class="muted" style="margin-top:6px">
-        Térmica: max CM5 = <b>${fmtNum(best.hotMaxC,1,'°C')}</b>, min batería en eclipse = <b>${fmtNum(best.battMinEclipseC,1,'°C')}</b>.
-      </div>
-      <div class="muted" style="margin-top:6px">
-        Recomendación de caras: <b>radiador = ${faceName(best.radiatorFace)}</b>; <b>paneles = ${facesToStr(best.panelFaces)}</b>.
+        <b>${MODEL_STATUS}</b>: las seis configuraciones de radiador se exportan
+        sin ranking. Deben evaluarse contra requisitos térmicos, energéticos,
+        ADCS y de batería externos y verificados.
       </div>`;
-    if(bestSquare) summary += `<div class="muted" style="margin-top:8px">Mejor 10×10 nadir: i ${bestSquare.incDeg.toFixed(2)}°, alt ${bestSquare.altKm.toFixed(0)} km, LTAN ${bestSquare.ltanHours.toFixed(2)} h, score ${fmtNum(bestSquare.totalScore*100,1)}</div>`;
-    if(bestRect) summary += `<div class="muted" style="margin-top:4px">Mejor 10×15 nadir: i ${bestRect.incDeg.toFixed(2)}°, alt ${bestRect.altKm.toFixed(0)} km, LTAN ${bestRect.ltanHours.toFixed(2)} h, score ${fmtNum(bestRect.totalScore*100,1)}</div>`;
     document.getElementById('bestSummary').innerHTML = summary;
 
-    let html = '<table><thead><tr><th>#</th><th>Actitud</th><th>i</th><th>alt</th><th>LTAN</th><th>Pases BA</th><th>Wh netos</th><th>Eclipse</th><th>Tmax CM5</th><th>Tmin batt</th><th>Radiador</th><th>Paneles</th><th>Score</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Caso</th><th>Actitud ideal</th><th>i SSO</th><th>alt</th><th>LTAN</th><th>drift LTAN</th><th>Pases BA</th><th>Eclipse</th><th>Wh/día (rango 6 rad)</th><th>Tmax CM5 all (rango)</th><th>T batt all (rango global)</th><th>Tmin batt sunlit (proxy carga)</th><th>Tmin batt eclipse</th><th>Clamp numérico</th></tr></thead><tbody>';
     rows.slice(0,20).forEach((r,idx)=>{
       html += `<tr>
         <td>${idx+1}</td>
-        <td>${r.attitudeMode === 'squareNadir' ? '10×10 nadir' : '10×15 nadir'}</td>
-        <td>${r.incDeg.toFixed(2)}°</td>
+        <td>${r.attitudeMode === 'squareNadir' ? '10×10 nadir' : '10×17.02 nadir'}</td>
+        <td>${r.incDeg.toFixed(4)}°</td>
         <td>${r.altKm.toFixed(0)}</td>
         <td>${r.ltanHours.toFixed(2)}</td>
+        <td>${fmtNum(r.ltanDriftHoursPerYear,4,' h/año')}</td>
         <td>${r.passCount} / ${r.totalVisibleMin.toFixed(1)}m</td>
-        <td>${fmtNum(r.netPanelWh,2)}</td>
         <td>${fmtNum(r.eclipseFraction*100,1,'%')}</td>
-        <td>${fmtNum(r.hotMaxC,1,'°C')}</td>
-        <td>${fmtNum(r.battMinEclipseC,1,'°C')}</td>
-        <td>${faceName(r.radiatorFace)}</td>
-        <td>${r.panelFaces.map(f=>faceName(f)).join(', ')}</td>
-        <td>${fmtNum(r.totalScore*100,1)}</td>
+        <td>${fmtNum(r.panelElectricalWhPerDayRange[0],2)}–${fmtNum(r.panelElectricalWhPerDayRange[1],2)}</td>
+        <td>${fmtNum(r.hotMaxCRange[0],1,'°C')}–${fmtNum(r.hotMaxCRange[1],1,'°C')}</td>
+        <td>${fmtNum(r.battMinAllCRange[0],1,'°C')}–${fmtNum(r.battMaxAllCRange[1],1,'°C')}</td>
+        <td>${fmtNum(r.battMinSunlitCRange[0],1,'°C')}–${fmtNum(r.battMinSunlitCRange[1],1,'°C')}</td>
+        <td>${fmtNum(r.battMinEclipseCRange[0],1,'°C')}–${fmtNum(r.battMinEclipseCRange[1],1,'°C')}</td>
+        <td>${r.numericalClampHit ? 'HIT — inválido' : 'no'}</td>
       </tr>`;
     });
     html += '</tbody></table>';
@@ -1589,11 +1785,11 @@ try {
     const date = getCurrentSimDate();
     const mode = document.getElementById('viewMode').value;
     const attitudeMode = document.getElementById('viewerAttitude').value;
-    if(mode === 'bestDesign' && bestDesign){
-      const st = syntheticOrbitState(date, bestDesign);
-      updateOrbitLineForDesign(date, bestDesign);
-      setSatelliteScene(st, bestDesign.radiatorFace || 6);
-      updateCurrentKpis(st, bestDesign.attitudeMode === 'squareNadir' ? 'mejor diseño 10×10' : 'mejor diseño 10×15');
+    if(mode === 'referenceDesign' && referenceDesign){
+      const st = syntheticOrbitState(date, referenceDesign);
+      updateOrbitLineForDesign(date, referenceDesign);
+      setSatelliteScene(st, referenceDesign.referenceRadiatorFace || 6);
+      updateCurrentKpis(st, referenceDesign.attitudeMode === 'squareNadir' ? 'primer caso SSO ideal 10×10' : 'primer caso SSO ideal 10×17.02');
     } else {
       const st = sampleRealTleState(date, attitudeMode);
       if(st){
@@ -1636,10 +1832,10 @@ try {
   document.getElementById('resetBtn').addEventListener('click', ()=>{ simElapsedSec = 0; renderAtCurrentTime(); });
   document.getElementById('runSweepBtn').addEventListener('click', async ()=>{
     try{
-      await runOptimizer();
+      await runSensitivitySweep();
       renderAtCurrentTime();
     } catch(err){
-      showFatal('Error en optimización: ' + err.message);
+      showFatal('Error en sensibilidad: ' + err.message);
       console.error(err);
     }
   });
@@ -1647,38 +1843,103 @@ try {
     document.getElementById(id).addEventListener('change', ()=>{ simElapsedSec = 0; renderAtCurrentTime(); });
   });
 
-  // CSV export
-  document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
-    if(!lastSweepResults.length){ alert('Ejecutá el optimizador primero.'); return; }
-    // Build header: common cols + per-radiator-face cols
+  function csvCell(value){
+    const text = String(value ?? '');
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
+
+  function downloadText(filename, text, mimeType){
+    const blob = new Blob([text], {type:mimeType});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+
+  async function sha256Hex(text){
+    if(!globalThis.crypto || !globalThis.crypto.subtle){
+      throw new Error('Web Crypto SHA-256 no disponible; export bloqueado.');
+    }
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  // CSV + manifest export
+  document.getElementById('exportCsvBtn').addEventListener('click', async ()=>{
+    if(!lastSweepResults.length || !lastSweepManifest){ alert('Ejecutá la sensibilidad primero.'); return; }
+    const sourceRevision = document.getElementById('sourceRevision').value.trim();
+    if(!sourceRevision){
+      alert('Ingresá el git commit/tag exacto antes de exportar.');
+      return;
+    }
     const faces = ['+X','-X','+Y','-Y','+Z','-Z'];
-    let header = 'Rank,Attitude,Inc_deg,Alt_km,LTAN_h,Passes_BA,Visible_min,Eclipse_%,BestRad,Score';
-    faces.forEach(f => { header += `,Rad${f}_Wh,Rad${f}_Tcm5,Rad${f}_Tbat,Rad${f}_Panels,Rad${f}_ThermalKey`; });
-    header += '\n';
+    const header = [
+      'Case','ModelVersion','SourceRevision','EpochUTC','Hours','Dt_s',
+      'AttitudeIdeal','IncSSO_deg','Alt_km','LTAN_h','LTANDrift_h_per_year',
+      'Passes_BA','Visible_min','Eclipse_pct','NumericalClampHit','ModelStatus'
+    ];
+    faces.forEach(f => header.push(
+      `Rad${f}_Wh_per_day`, `Rad${f}_Tcm5max_C`,
+      `Rad${f}_TbattMinAll_C`, `Rad${f}_TbattMaxAll_C`,
+      `Rad${f}_TbattMinSunlit_C`, `Rad${f}_TbattMinEclipse_C`,
+      `Rad${f}_Panels`
+    ));
 
     const rows = lastSweepResults.map((r,i) => {
-      let line = `${i+1},${r.attitudeMode === 'squareNadir' ? '10x10_nadir' : '10x15_nadir'},${r.incDeg.toFixed(2)},${r.altKm.toFixed(0)},${r.ltanHours.toFixed(2)},${r.passCount},${r.totalVisibleMin.toFixed(1)},${(r.eclipseFraction*100).toFixed(1)},${faceName(r.radiatorFace)},${(r.totalScore*100).toFixed(1)}`;
-      // Append all 6 radiator results
+      const cells = [
+        i+1, MODEL_VERSION, sourceRevision, r.epochDate.toISOString(),
+        r.analysisHours, r.analysisDtSec,
+        r.attitudeMode === 'squareNadir' ? '10x10_nadir_ideal' : '10x17p02_nadir_ideal',
+        r.incDeg.toFixed(6), r.altKm.toFixed(3), r.ltanHours.toFixed(4),
+        r.ltanDriftHoursPerYear.toFixed(6), r.passCount,
+        r.totalVisibleMin.toFixed(3), (r.eclipseFraction*100).toFixed(4),
+        r.numericalClampHit, MODEL_STATUS
+      ];
       if(r.allRadiators && r.allRadiators.length === 6){
         for(let fi=0; fi<6; fi++){
           const ar = r.allRadiators[fi];
-          line += `,${finiteOr(ar.netPanelWh,0).toFixed(2)},${finiteOr(ar.hotMaxC,999).toFixed(1)},${finiteOr(ar.battMinEclipseC,-999).toFixed(1)},${ar.panelFaces.map(f=>faceName(f)).join('+')},${finiteOr(ar.thermalKey,-999).toFixed(3)}`;
+          cells.push(
+            finiteOr(ar.panelElectricalWhPerDay,0).toFixed(6),
+            finiteOr(ar.hotMaxC,999).toFixed(3),
+            finiteOr(ar.battMinAllC,-999).toFixed(3),
+            finiteOr(ar.battMaxAllC,999).toFixed(3),
+            finiteOr(ar.battMinSunlitC,-999).toFixed(3),
+            finiteOr(ar.battMinEclipseC,-999).toFixed(3),
+            ar.panelFaces.map(f=>faceName(f)).join('+')
+          );
         }
       } else {
-        for(let fi=0; fi<6; fi++) line += ',,,,,';
+        for(let fi=0; fi<6; fi++) cells.push('','','','','','','');
       }
-      return line;
-    }).join('\n');
-
-    const blob = new Blob([header + rows], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `borealis_sweep_6rad_${new Date().toISOString().slice(0,19).replace(/:/g,'')}.csv`;
-    a.click();
+      return cells.map(csvCell).join(',');
+    });
+    const csvText = header.map(csvCell).join(',') + '\n' + rows.join('\n') + '\n';
+    try{
+      const csvSha256 = await sha256Hex(csvText);
+      const timestamp = new Date().toISOString().slice(0,19).replace(/[:-]/g,'');
+      const manifest = {
+        ...lastSweepManifest,
+        sourceRevision,
+        exportedAtUtc:new Date().toISOString(),
+        csvFile:`australis_sensitivity_${timestamp}.csv`,
+        csvSha256,
+        rowCount:lastSweepResults.length
+      };
+      downloadText(manifest.csvFile, csvText, 'text/csv;charset=utf-8');
+      downloadText(
+        `australis_sensitivity_${timestamp}.manifest.json`,
+        JSON.stringify(manifest, null, 2) + '\n',
+        'application/json;charset=utf-8'
+      );
+    } catch(err){
+      alert(`Export bloqueado: ${err.message}`);
+    }
   });
 
   // New parameter controls trigger re-render
-  ['paramAlbedo','paramEarthIR','paramPanelEff','paramCm5OffMode','paramEclipseModel'].forEach(id=>{
+  ['paramAlbedo','paramEarthIR','paramPanelEff','paramEpsEff','paramCm5OffMode','paramEclipseModel'].forEach(id=>{
     document.getElementById(id).addEventListener('change', ()=>{ renderAtCurrentTime(); });
   });
 

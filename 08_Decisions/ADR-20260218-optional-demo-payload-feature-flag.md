@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-02-18
 - **Estado:** Superseded
-- **Supersedida por:** `ADR-20260313-photo-demo-opcional-no-critico.md` (2026-03-13)
+- **Superseded por:** `ADR-20260313-photo-demo-opcional-no-critico.md`
 
 > Esta ADR queda en estado `Superseded`. Las decisiones sobre PHOTO_DEMO están formalizadas en `ADR-20260313-photo-demo-opcional-no-critico.md`.
 

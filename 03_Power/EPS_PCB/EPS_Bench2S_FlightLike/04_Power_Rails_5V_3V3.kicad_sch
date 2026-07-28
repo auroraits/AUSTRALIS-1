@@ -301,7 +301,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "Objetivos: +5V/2A y +3V3/1.5A."
+	(text "NO FABRICAR: rails, regulación, límites y protecciones no están diseñados."
 		(exclude_from_sim no)
 		(at 20 20 0)
 		(effects
@@ -311,7 +311,7 @@
 		)
 		(uuid "0933176d-f8e9-449f-8945-adbcbd414dd5")
 	)
-	(text "Módulos buck genéricos: VIN, GND, VOUT, EN."
+	(text "Entradas/salidas deliberadamente desconectadas; corrientes objetivo TBD."
 		(exclude_from_sim no)
 		(at 20 15 0)
 		(effects
@@ -320,36 +320,6 @@
 			)
 		)
 		(uuid "61e87e1c-b964-4f68-92c9-caa51be22803")
-	)
-	(wire
-		(pts
-			(xy 20 64) (xy 180 64)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "080c4471-fe08-4c96-9309-abb4e3db5f46")
-	)
-	(wire
-		(pts
-			(xy 20 54) (xy 180 54)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "0eedeea2-d010-4b32-b4b7-b9d7d640a9b0")
-	)
-	(wire
-		(pts
-			(xy 60 64) (xy 180 74)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "d88b7872-7a3a-4d9b-b78c-9a867c08bfef")
 	)
 	(hierarchical_label "GND"
 		(shape output)

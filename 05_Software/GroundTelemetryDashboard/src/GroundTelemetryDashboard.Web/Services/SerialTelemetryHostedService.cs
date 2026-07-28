@@ -9,6 +9,7 @@ public sealed class SerialTelemetryHostedService : BackgroundService
 {
     private readonly SerialConnectionManager _manager;
     private readonly TelemetryState _state;
+    private readonly EvidenceRecorder _evidence;
     private readonly IHubContext<TelemetryHub> _hub;
     private readonly ILogger<SerialTelemetryHostedService> _logger;
     private DateTime _lastPush = DateTime.MinValue;
@@ -16,11 +17,13 @@ public sealed class SerialTelemetryHostedService : BackgroundService
     public SerialTelemetryHostedService(
         SerialConnectionManager manager,
         TelemetryState state,
+        EvidenceRecorder evidence,
         IHubContext<TelemetryHub> hub,
         ILogger<SerialTelemetryHostedService> logger)
     {
         _manager = manager;
         _state = state;
+        _evidence = evidence;
         _hub = hub;
         _logger = logger;
     }
@@ -30,7 +33,8 @@ public sealed class SerialTelemetryHostedService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var status = _manager.GetStatus();
-            if (!status.IsConnected || string.IsNullOrWhiteSpace(status.PortName))
+            if (status.State != "REQUESTED" ||
+                string.IsNullOrWhiteSpace(status.PortName))
             {
                 await Task.Delay(200, stoppingToken);
                 continue;
@@ -38,15 +42,37 @@ public sealed class SerialTelemetryHostedService : BackgroundService
 
             try
             {
+                if (!_manager.MarkOpening(status.Generation))
+                {
+                    continue;
+                }
+                status = _manager.GetStatus();
                 using var port = new SerialPort(status.PortName, status.Baud)
                 {
                     NewLine = "\n",
                     ReadTimeout = 500
                 };
                 port.Open();
-
-                while (!stoppingToken.IsCancellationRequested && _manager.GetStatus().IsConnected)
+                if (!_manager.MarkOpen(status.Generation))
                 {
+                    continue;
+                }
+                status = _manager.GetStatus();
+                _evidence.RecordConnection(status, "opened");
+                await _hub.Clients.All.SendAsync(
+                    "connectionStatus",
+                    status,
+                    stoppingToken);
+
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    var currentStatus = _manager.GetStatus();
+                    if (!currentStatus.IsConnected ||
+                        currentStatus.Generation != status.Generation)
+                    {
+                        break;
+                    }
+
                     string line;
                     try
                     {
@@ -59,6 +85,7 @@ public sealed class SerialTelemetryHostedService : BackgroundService
 
                     line = line.Trim();
                     _state.AddRawLine(line);
+                    _evidence.RecordRawLine(line);
                     var shouldPush = ShouldPush();
 
                     if (shouldPush)
@@ -66,21 +93,54 @@ public sealed class SerialTelemetryHostedService : BackgroundService
                         await _hub.Clients.All.SendAsync("rawLine", line, stoppingToken);
                     }
 
-                    if (SerialLineParser.TryParseCsvLine(line, out var sample) && sample is not null)
+                    if (SerialLineParser.TryParseCsvLine(
+                            line,
+                            out var sample,
+                            out var parseError) &&
+                        sample is not null)
                     {
-                        var stats = _state.AddSample(sample);
+                        var registration = _state.AddSample(sample);
+                        _evidence.RecordSample(sample, registration);
                         if (shouldPush)
                         {
-                            await _hub.Clients.All.SendAsync("telemetrySample", sample, stoppingToken);
-                            await _hub.Clients.All.SendAsync("telemetryStats", stats, stoppingToken);
+                            if (registration.AcceptedForSeries)
+                            {
+                                await _hub.Clients.All.SendAsync(
+                                    "telemetrySample",
+                                    sample,
+                                    stoppingToken);
+                            }
+                            await _hub.Clients.All.SendAsync(
+                                "telemetryStats",
+                                registration.Stats,
+                                stoppingToken);
                         }
                     }
+                    else if (!line.StartsWith('#') &&
+                             !line.StartsWith("version,", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _evidence.RecordRejectedLine(
+                            line,
+                            parseError ?? "UNKNOWN_PARSE_ERROR");
+                    }
                 }
+
+                _evidence.RecordConnection(
+                    _manager.GetStatus(),
+                    "closed_or_reconfigured");
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Serial loop issue on port {Port}", status.PortName);
-                _manager.Disconnect();
+                _evidence.Record(
+                    "serial_error",
+                    new { status, error_type = ex.GetType().Name, ex.Message });
+                _evidence.RecordConnection(status, "serial_error");
+                _manager.MarkFault(status.Generation, ex.GetType().Name);
+                await _hub.Clients.All.SendAsync(
+                    "connectionStatus",
+                    _manager.GetStatus(),
+                    stoppingToken);
                 try
                 {
                     await _hub.Clients.All.SendAsync("rawLine",

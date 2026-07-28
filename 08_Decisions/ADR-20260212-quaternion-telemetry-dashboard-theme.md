@@ -1,5 +1,10 @@
 # ADR-20260212-quaternion-telemetry-dashboard-theme
 
+- **Fecha:** 2026-02-12
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-telemetry-bench-433-v4.md`
+- **Alcance:** visualización de banco terrestre; no constituye solución ni evidencia de ADCS orbital
+
 ## Contexto
 El banco RF 433 MHz de laboratorio ya transmitía IMU cruda (`ax..gz`), pero la visualización 3D del dashboard estimaba actitud con aproximaciones Euler, introduciendo gimbal lock y poca estabilidad en pitch/roll. Se requiere enviar orientación fusionada y mejorar la UX del dashboard sin agregar toolchains pesados.
 

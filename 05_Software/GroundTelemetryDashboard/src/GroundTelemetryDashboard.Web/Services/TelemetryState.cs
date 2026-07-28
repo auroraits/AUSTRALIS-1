@@ -18,23 +18,35 @@ public sealed class TelemetryState
         _samples = new RingBuffer<TelemetrySample>(bufferSize);
         _rawLines = new RingBuffer<string>(bufferSize);
         _stats = new StatsCalculator(TimeSpan.FromSeconds(window));
-        CurrentStats = new TelemetryStats(0, 0, 0, 0, 1, 0, null, DateTime.UtcNow);
+        CurrentStats = new TelemetryStats(
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            null, null,
+            0, 0, 0, 0, null,
+            null, null, DateTime.UtcNow);
     }
 
     public TelemetryStats CurrentStats { get; private set; }
 
-    public TelemetryStats AddSample(TelemetrySample sample)
+    public TelemetryRegistration AddSample(TelemetrySample sample)
     {
         lock (_sync)
         {
-            _samples.Add(sample);
-            CurrentStats = _stats.RegisterSample(sample);
-            return CurrentStats;
+            var registration = _stats.RegisterSampleDetailed(sample);
+            if (registration.AcceptedForSeries)
+            {
+                _samples.Add(sample);
+            }
+            CurrentStats = registration.Stats;
+            return registration;
         }
     }
 
     public void AddRawLine(string line)
     {
-        _rawLines.Add(line);
+        lock (_sync)
+        {
+            _rawLines.Add(line);
+        }
     }
 }

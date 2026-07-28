@@ -1,5 +1,10 @@
 # ADR-20260212-telemetry-bench-433mhz
 
+- **Fecha:** 2026-02-12
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-telemetry-bench-433-v4.md`
+- **Alcance:** banco terrestre, no representativo del enlace orbital
+
 ## Contexto
 Se requiere un banco de pruebas rápido para telemetría IMU usando hardware disponible (ESP32-S3 + FS1000A + RX433 + Arduino UNO) para validar empaquetado, conteo de pérdidas y logging CSV en tierra.
 
@@ -22,6 +27,3 @@ Adoptar un enlace **solo de laboratorio** en 433 MHz con `RadioHead RH_ASK` a 20
 - `docs/TELEMETRY_433_README.md`
 - `architecture.md`
 - Impacto en costos/riesgos: **TBD** para cuantificación formal si este banco pasa a fase preintegración.
-
-## Estado
-Accepted

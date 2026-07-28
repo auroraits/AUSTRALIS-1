@@ -56,17 +56,44 @@ struct TelemetryPacketV3 {
   float q3;
   uint16_t dt_ms;
 };
+
+struct TelemetryPacketV4 {
+  uint8_t magic;
+  uint8_t version;
+  uint8_t sensor_type;
+  uint8_t quality_flags;
+  uint32_t boot_id;
+  uint32_t seq;
+  uint32_t t_ms;
+  int16_t ax;
+  int16_t ay;
+  int16_t az;
+  int16_t gx;
+  int16_t gy;
+  int16_t gz;
+  float q0;
+  float q1;
+  float q2;
+  float q3;
+  uint16_t dt_ms;
+};
 #pragma pack(pop)
 
 static const uint8_t PACKET_MAGIC = 'T';
 static const uint8_t PACKET_VERSION_3 = 3;
+static const uint8_t PACKET_VERSION_4 = 4;
 static const bool ENABLE_DEBUG_RPY = false;
 
 
 uint32_t packetsOk = 0;
 uint32_t packetsDropped = 0;
 uint32_t packetsLost = 0;
+uint32_t packetsDuplicate = 0;
+uint32_t packetsOutOfOrder = 0;
+uint32_t sessionCount = 0;
+uint32_t currentBootId = 0;
 uint32_t lastSeq = 0;
+bool hasBootId = false;
 bool hasLastSeq = false;
 unsigned long lastSummaryMs = 0;
 
@@ -76,9 +103,17 @@ void initRadio() {
   }
 }
 
+void printCsvPrefix(uint8_t version, uint32_t bootId, uint32_t seq, uint32_t tMs, uint8_t sensorType, uint8_t qualityFlags) {
+  Serial.print(version); Serial.print(',');
+  Serial.print(bootId); Serial.print(',');
+  Serial.print(seq); Serial.print(',');
+  Serial.print(tMs); Serial.print(',');
+  Serial.print(sensorType); Serial.print(',');
+  Serial.print(qualityFlags); Serial.print(',');
+}
+
 void printCsvV1AsExtended(const TelemetryPacketV1 &pkt) {
-  Serial.print(pkt.seq); Serial.print(',');
-  Serial.print(pkt.t_ms); Serial.print(',');
+  printCsvPrefix(1, 0, pkt.seq, pkt.t_ms, 0, 0);
   Serial.print(pkt.ax); Serial.print(',');
   Serial.print(pkt.ay); Serial.print(',');
   Serial.print(pkt.az); Serial.print(',');
@@ -88,12 +123,12 @@ void printCsvV1AsExtended(const TelemetryPacketV1 &pkt) {
   Serial.print(1.0f, 6); Serial.print(',');
   Serial.print(0.0f, 6); Serial.print(',');
   Serial.print(0.0f, 6); Serial.print(',');
-  Serial.println(0.0f, 6);
+  Serial.print(0.0f, 6); Serial.print(',');
+  Serial.println(0);
 }
 
 void printCsvV2(const TelemetryPacketV2 &pkt) {
-  Serial.print(pkt.seq); Serial.print(',');
-  Serial.print(pkt.t_ms); Serial.print(',');
+  printCsvPrefix(2, 0, pkt.seq, pkt.t_ms, 0, 0);
   Serial.print(pkt.ax); Serial.print(',');
   Serial.print(pkt.ay); Serial.print(',');
   Serial.print(pkt.az); Serial.print(',');
@@ -103,13 +138,13 @@ void printCsvV2(const TelemetryPacketV2 &pkt) {
   Serial.print(pkt.q0, 6); Serial.print(',');
   Serial.print(pkt.q1, 6); Serial.print(',');
   Serial.print(pkt.q2, 6); Serial.print(',');
-  Serial.println(pkt.q3, 6);
+  Serial.print(pkt.q3, 6); Serial.print(',');
+  Serial.println(pkt.dt_ms);
   printDebugRpy(pkt.q0, pkt.q1, pkt.q2, pkt.q3);
 }
 
 void printCsvV3(const TelemetryPacketV3 &pkt) {
-  Serial.print(pkt.seq); Serial.print(',');
-  Serial.print(pkt.t_ms); Serial.print(',');
+  printCsvPrefix(3, 0, pkt.seq, pkt.t_ms, pkt.sensor_type, 0);
   Serial.print(pkt.ax); Serial.print(',');
   Serial.print(pkt.ay); Serial.print(',');
   Serial.print(pkt.az); Serial.print(',');
@@ -119,7 +154,24 @@ void printCsvV3(const TelemetryPacketV3 &pkt) {
   Serial.print(pkt.q0, 6); Serial.print(',');
   Serial.print(pkt.q1, 6); Serial.print(',');
   Serial.print(pkt.q2, 6); Serial.print(',');
-  Serial.println(pkt.q3, 6);
+  Serial.print(pkt.q3, 6); Serial.print(',');
+  Serial.println(pkt.dt_ms);
+  printDebugRpy(pkt.q0, pkt.q1, pkt.q2, pkt.q3);
+}
+
+void printCsvV4(const TelemetryPacketV4 &pkt) {
+  printCsvPrefix(pkt.version, pkt.boot_id, pkt.seq, pkt.t_ms, pkt.sensor_type, pkt.quality_flags);
+  Serial.print(pkt.ax); Serial.print(',');
+  Serial.print(pkt.ay); Serial.print(',');
+  Serial.print(pkt.az); Serial.print(',');
+  Serial.print(pkt.gx); Serial.print(',');
+  Serial.print(pkt.gy); Serial.print(',');
+  Serial.print(pkt.gz); Serial.print(',');
+  Serial.print(pkt.q0, 6); Serial.print(',');
+  Serial.print(pkt.q1, 6); Serial.print(',');
+  Serial.print(pkt.q2, 6); Serial.print(',');
+  Serial.print(pkt.q3, 6); Serial.print(',');
+  Serial.println(pkt.dt_ms);
   printDebugRpy(pkt.q0, pkt.q1, pkt.q2, pkt.q3);
 }
 
@@ -143,11 +195,37 @@ void printDebugRpy(float qw, float qx, float qy, float qz) {
   Serial.print(",yaw="); Serial.println(yaw * 57.29578f, 2);
 }
 
-void updateCounters(uint32_t seq) {
-  packetsOk++;
-  if (hasLastSeq && seq > (lastSeq + 1)) {
-    packetsLost += (seq - lastSeq - 1);
+void startSession(uint32_t bootId) {
+  currentBootId = bootId;
+  hasBootId = true;
+  hasLastSeq = false;
+  sessionCount++;
+}
+
+void updateCounters(uint32_t bootId, uint32_t seq) {
+  if (!hasBootId || bootId != currentBootId) {
+    startSession(bootId);
   }
+  if (bootId == 0 && hasLastSeq && seq < lastSeq && (lastSeq - seq) > 16) {
+    // Legacy V1-V3 has no boot_id; a large counter reset starts a new
+    // receiver-side session instead of corrupting PER across reboots.
+    startSession(bootId);
+  }
+
+  if (hasLastSeq) {
+    const uint32_t delta = seq - lastSeq;
+    if (delta == 0) {
+      packetsDuplicate++;
+      return;
+    }
+    if (delta < 0x80000000UL) {
+      packetsLost += (delta - 1);
+    } else {
+      packetsOutOfOrder++;
+      return;
+    }
+  }
+  packetsOk++;
   lastSeq = seq;
   hasLastSeq = true;
 }
@@ -157,7 +235,10 @@ void printSummaryIfNeeded() {
   if (now - lastSummaryMs >= 30000UL) {
     Serial.print("#SUMMARY,ok="); Serial.print(packetsOk);
     Serial.print(",dropped="); Serial.print(packetsDropped);
-    Serial.print(",lost="); Serial.println(packetsLost);
+    Serial.print(",lost="); Serial.print(packetsLost);
+    Serial.print(",duplicate="); Serial.print(packetsDuplicate);
+    Serial.print(",out_of_order="); Serial.print(packetsOutOfOrder);
+    Serial.print(",sessions="); Serial.println(sessionCount);
     lastSummaryMs = now;
   }
 }
@@ -165,7 +246,7 @@ void printSummaryIfNeeded() {
 void setup() {
   Serial.begin(115200);
   initRadio();
-  Serial.println("seq,t_ms,ax,ay,az,gx,gy,gz,q0,q1,q2,q3");
+  Serial.println("version,boot_id,seq,t_ms,sensor_type,quality_flags,ax,ay,az,gx,gy,gz,q0,q1,q2,q3,dt_ms");
 }
 
 void loop() {
@@ -177,13 +258,22 @@ void loop() {
       if (len == sizeof(TelemetryPacketV2)) {
         TelemetryPacketV2 pkt;
         memcpy(&pkt, buf, sizeof(pkt));
-        updateCounters(pkt.seq);
+        updateCounters(0, pkt.seq);
         printCsvV2(pkt);
+      } else if (len == sizeof(TelemetryPacketV4)) {
+        TelemetryPacketV4 pkt;
+        memcpy(&pkt, buf, sizeof(pkt));
+        if (pkt.magic == PACKET_MAGIC && pkt.version == PACKET_VERSION_4) {
+          updateCounters(pkt.boot_id, pkt.seq);
+          printCsvV4(pkt);
+        } else {
+          packetsDropped++;
+        }
       } else if (len == sizeof(TelemetryPacketV3)) {
         TelemetryPacketV3 pkt;
         memcpy(&pkt, buf, sizeof(pkt));
         if (pkt.magic == PACKET_MAGIC && pkt.version == PACKET_VERSION_3) {
-          updateCounters(pkt.seq);
+          updateCounters(0, pkt.seq);
           printCsvV3(pkt);
         } else {
           packetsDropped++;
@@ -191,7 +281,7 @@ void loop() {
       } else if (len == sizeof(TelemetryPacketV1)) {
         TelemetryPacketV1 pkt;
         memcpy(&pkt, buf, sizeof(pkt));
-        updateCounters(pkt.seq);
+        updateCounters(0, pkt.seq);
         printCsvV1AsExtended(pkt);
       } else {
         packetsDropped++;

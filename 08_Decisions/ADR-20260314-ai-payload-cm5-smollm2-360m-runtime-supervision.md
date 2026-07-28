@@ -1,7 +1,12 @@
 # ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision
 
 - **Fecha:** 2026-03-14
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
+
+> **Nota de disposición (2026-07-27):** se conserva la motivación histórica.
+> La arquitectura segura de payload fue reafirmada por la ADR sucesora; la
+> selección SmolLM2 y cualquier SKU CM5 específico dejan de ser baseline.
 
 ---
 

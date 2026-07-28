@@ -3,6 +3,11 @@
 - **Fecha:** 2026-03-14
 - **Estado:** Accepted
 
+> **Alcance aclarado 2026-07-27:** esta ADR acepta la taxonomía de cuatro
+> estados, no sus umbrales ni una implementación. Thresholds, tolerancias,
+> histéresis, dwell/debounce, boot/unknown, sensor inválido y precedencia de
+> fallas permanecen `Open` bajo `EPS-REQ-01`.
+
 ---
 
 ## Contexto

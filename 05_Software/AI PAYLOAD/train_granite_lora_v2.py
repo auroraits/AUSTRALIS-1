@@ -1,11 +1,20 @@
+"""INVALIDATED legacy Granite 3.1 2B experiment; not validation evidence."""
+
+import os
+
+# This script uses 2B, not Granite 350M. Its legacy dataset is contaminated.
+if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
+    raise SystemExit(
+        "Refusing invalidated legacy training. "
+        "Set AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI=1 only for provenance work."
+    )
+
 import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import LoraConfig
 from trl import SFTTrainer, SFTConfig
 
-# Bench/ground experimentation model. The compact flight-candidate line is
-# Granite 350M; 2B is intentionally kept for lab exploration and comparisons.
 model_id = "ibm-granite/granite-3.1-2b-instruct"
 data_file = "cubesat_granite_v3_1800.jsonl"
 output_dir = "granite_cubesat_lora"

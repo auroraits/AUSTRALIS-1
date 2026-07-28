@@ -28,7 +28,7 @@
             <button class="btn ghost" @onclick="SetReference">Set Reference (Zero)</button>
             <button class="btn ghost" @onclick="ToggleFollow">Follow: @(followCamera ? "ON" : "OFF")</button>
             <span class="status-dot @(status.IsConnected ? "ok" : "down")"></span>
-            <span>@(status.IsConnected ? "Connected" : "Disconnected")</span>
+            <span>@status.State</span>
         </div>
     </section>
 
@@ -39,8 +39,13 @@
             <div class="stats-grid">
                 <div class="stat-card"><span>Sensor</span><strong>@sensorInfo</strong></div>
                 <div class="stat-card"><span>Port</span><strong>@(status.PortName ?? "-")</strong></div>
-                <div class="stat-card"><span>Success</span><strong>@stats.SuccessRateWindow.ToString("P1")</strong></div>
-                <div class="stat-card"><span>PER</span><strong>@stats.PerWindow.ToString("P1")</strong></div>
+                <div class="stat-card"><span>Link success</span><strong>@FormatRate(stats.LinkSuccessRateWindow)</strong></div>
+                <div class="stat-card"><span>Link PER</span><strong>@FormatRate(stats.LinkPerWindow)</strong></div>
+                <div class="stat-card"><span>Scientific yield</span><strong>@FormatRate(stats.ScientificYieldWindow)</strong></div>
+                <div class="stat-card"><span>Session</span><strong>@(stats.CurrentBootId?.ToString("X8") ?? "-")</strong></div>
+                <div class="stat-card"><span>Dup / OOO</span><strong>@($"{stats.DuplicateCount} / {stats.OutOfOrderCount}")</strong></div>
+                <div class="stat-card"><span>Time regressions</span><strong>@stats.TimeRegressionCount</strong></div>
+                <div class="stat-card"><span>Measurement class</span><strong id="measurementClass">No data</strong></div>
             </div>
         </article>
 
@@ -65,7 +70,7 @@
             <div class="signal-quality-wrap">
                 <div class="signal-quality-chart-wrap">
                     <canvas id="signalQualityChart"></canvas>
-                    <div id="signalQualityValue" class="signal-quality-value">100%</div>
+                    <div id="signalQualityValue" class="signal-quality-value">N/A</div>
                 </div>
                 <div class="signal-quality-legend">
                     <span class="ok">OK (verde)</span>
@@ -86,11 +91,27 @@
     private bool isDark = true;
     private bool followCamera = true;
     private string sensorInfo = "GY-521 (MPU6050) via I2C";
-    private ConnectionStatus status = new(false, null, 115200);
-    private TelemetryStats stats = new(0, 0, 0, 0, 1, 0, null, DateTime.UtcNow);
+    private ConnectionStatus status =
+        new(false, "DISCONNECTED", null, 115200, 0, null);
+    private TelemetryStats stats = new(
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        null, null,
+        0, 0, 0, 0, null,
+        null, null, DateTime.UtcNow);
+    private string? controlToken;
     private DotNetObjectReference<Index>? dotNetRef;
 
-    protected override async Task OnInitializedAsync() => await RefreshPorts();
+    private static string FormatRate(double? value) =>
+        value.HasValue ? value.Value.ToString("P1") : "N/A";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tokenResponse =
+            await Http.GetFromJsonAsync<ControlTokenResponse>("/api/control-token");
+        controlToken = tokenResponse?.Token;
+        await RefreshPorts();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -129,14 +150,25 @@
 
     private async Task Connect()
     {
-        if (string.IsNullOrWhiteSpace(selectedPort)) return;
-        var response = await Http.PostAsJsonAsync("/api/connect", new { PortName = selectedPort, Baud = baud });
+        if (string.IsNullOrWhiteSpace(selectedPort) ||
+            string.IsNullOrWhiteSpace(controlToken)) return;
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/connect")
+        {
+            Content = JsonContent.Create(new { PortName = selectedPort, Baud = baud })
+        };
+        request.Headers.Add("X-Australis-Control-Token", controlToken);
+        var response = await Http.SendAsync(request);
         status = await response.Content.ReadFromJsonAsync<ConnectionStatus>() ?? status;
     }
 
     private async Task Disconnect()
     {
-        var response = await Http.PostAsync("/api/disconnect", null);
+        if (string.IsNullOrWhiteSpace(controlToken)) return;
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            "/api/disconnect");
+        request.Headers.Add("X-Australis-Control-Token", controlToken);
+        var response = await Http.SendAsync(request);
         status = await response.Content.ReadFromJsonAsync<ConnectionStatus>() ?? status;
     }
 
@@ -149,5 +181,14 @@
         return InvokeAsync(StateHasChanged);
     }
 
+    [JSInvokable]
+    public Task OnConnectionStatus(ConnectionStatus incoming)
+    {
+        status = incoming;
+        return InvokeAsync(StateHasChanged);
+    }
+
     public void Dispose() => dotNetRef?.Dispose();
+
+    private sealed record ControlTokenResponse(string Token);
 }

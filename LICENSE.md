@@ -1,6 +1,12 @@
 # AUSTRALIS-1 public license notice
 
-Copyright (c) 2026 Aurora ITS and project owner.
+Status: **Interim notice / legal review open**
+
+Copyright holder(s) and chain of title: **TBD — confirmation from project
+records and qualified counsel is required.**
+
+Earlier revisions named "Aurora ITS and project owner". That wording was
+ambiguous and is not retained as proof of ownership or authority to license.
 
 This repository is published for study, personal experimentation, education and
 non-commercial collaborative research. Commercial use, commercial integration,
@@ -26,6 +32,12 @@ Official license texts:
 - PolyForm Noncommercial 1.0.0: https://polyformproject.org/licenses/noncommercial/1.0.0
 - CC BY-NC-SA 4.0: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en
 
+The URL alone is not a release-quality license bundle. Before the next tagged
+release, exact reviewed copies of the applicable license texts must be included
+in a `LICENSES/` directory and checksummed in the release manifest. The
+path-to-license classification is controlled by `LICENSE_SCOPE.md`; an explicit
+per-file notice and third-party terms take precedence.
+
 ## Important compatibility note
 
 This repository is source-available under non-commercial terms. It is not
@@ -50,3 +62,7 @@ release of a clean mirror.
 See `THIRD_PARTY_NOTICES.md`. Do not assume that this project license relicenses
 third-party files, models, datasets, libraries, PDFs, datasheets, examples, or
 reference designs.
+
+See also `ARTIFACT_PROVENANCE.md`. No model, dataset, adapter, binary, CAD or PCB
+artifact may be distributed as project-authored or used as verification
+evidence until its origin, revision, license and digest are recorded.

@@ -1,17 +1,19 @@
-# COMMS — Riesgo de factibilidad uplink LoRa 915 (tierra→satélite)
+# COMMS — Riesgo de factibilidad LoRa Tierra→espacio
 
-**Review date:** 2026-02-20
+**Revisión:** 2026-07-27
+**Estado:** Active — técnica y regulación abiertas
 
-## Resumen
-El objetivo de misión del MVP incluye recepción de paquetes LoRa 915 MHz originados en Buenos Aires.
-Si se interpreta “nodo” como un dispositivo LoRa típico (baja ganancia, potencia estándar, sin tracking), el uplink puede quedar sin margen suficiente, especialmente a elevaciones bajas.
+El satélite RX-only no autoriza una emisión intencional Tierra→espacio en
+915 MHz. Aun con autorización, el enlace con nodo típico puede no alcanzar
+margen/PDR suficientes.
 
-## Risk matrix
-
-| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger condition |
-|---|---|---|---|---|---|
-| COMMS-LORA-01 | Uplink LoRa 915 no cierra con “nodos típicos” (EIRP bajo) en geometría real | Alta | Alta | (1) Cerrar link budget uplink LoRa con sensibilidad real y pérdidas; (2) redefinir “nodo” como gateway dedicado con antena direccional / operación por ventana; (3) definir elevación mínima operacional; (4) alternativa: mover uplink a TTC UHF | Link budget uplink muestra margen < 0 dB en condiciones objetivo; pruebas de campo no detectan paquetes a distancias representativas |
+| ID | ParentRiskID | Riesgo | Prob. | Impacto | Owner role | Mitigación | Trigger | Due gate |
+|---|---|---|---|---|---|---|---|---|
+| COMMS-LORA-01 | RSK-COMMS-01 | Link/PDR no cierra con clase típica | Alta | Alta | COMMS | link budget completo, patrón integrado y PDR calibrado con N/IC | worst-case bajo threshold | Gate B |
+| COMMS-LORA-REG-01 | RSK-REG-01 | ENACOM no autoriza 915 MHz Tierra→espacio | Alta | Crítica | Regulatory/COMMS | consulta escrita; migrar servicio/banda, autorización experimental o redefinir objetivo | no existe respuesta favorable antes de radiar | SRR/Gate B |
+| COMMS-LORA-05 | RSK-SEC-03 | CRC/16-bit node ID se interpreta como prueba de origen | Alta | Alta | Security/Node/Science | identidad/version/MIC/anti-replay y provenance | spoof/replay aceptado | Gate B/TRR |
 
 ## Referencias
-- `04_Communications/link_budget_lora_uplink_preliminary.md`
-- `01_Mission/mission_definition.md`
+
+- `../08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`
+- `../01_Mission/mission_definition.md`

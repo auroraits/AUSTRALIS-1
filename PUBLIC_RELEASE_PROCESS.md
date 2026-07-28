@@ -1,9 +1,11 @@
 # Public release process
 
-Status: required for any public repository publication.
+Status: **Active — required for every public tag or exported release**
 
-Decision: publish AUSTRALIS-1 / DIY-Nanosat through a clean mirror/export, not by
-changing the visibility of the private working repository.
+The clean public mirror already exists. This process governs later public tags,
+archives and mirrors. It does not declare any other private repository
+authoritative and it must not be read as evidence of technical or flight
+readiness.
 
 ## Why
 
@@ -14,48 +16,39 @@ not enough for publication.
 
 ## Required release path
 
-1. Merge the publication-readiness cleanup into the private canonical repo.
-2. Export only the reviewed tree from the approved commit.
-3. Create a new empty repository for the public mirror.
-4. Commit the exported tree as the first public commit.
-5. Run the release checks below on the public mirror.
-6. Keep the public mirror private until a human release review signs off.
-7. Change visibility only after legal, IP and technical release gates are closed.
+1. Identify an exact reviewed commit in the public technical repository.
+2. Confirm repository authority using `REPOSITORY_GOVERNANCE.md`.
+3. Run the release checks below on that exact commit.
+4. Generate a manifest containing commit, tool versions, artifact digests,
+   licenses and known open technical claims.
+5. Require named human sign-off for publication, provenance, legal/IP and
+   technical-claims review.
+6. Tag or export only the reviewed commit; never import private history.
+7. Publish the manifest with the release.
 
 Do not use GitHub fork/import features for the public release, because those can
 carry private repository history.
 
-## Suggested export commands
+## Export rule
 
-From the private canonical repository after the cleanup commit is approved:
-
-```powershell
-$export = "$env:TEMP\DIY-Nanosat-public-export"
-Remove-Item -Recurse -Force $export -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Path $export | Out-Null
-git archive --format=tar HEAD | tar -x -C $export
-```
-
-Then initialize a fresh repository in `$export` and push that single-root-commit
-history to the new public mirror.
+When importing material from a non-public workspace, use an approved tree export
+or `git archive` from an exact commit. Never fork, mirror or import private
+history. Validate the resulting public tree independently.
 
 ## Release checks
 
 Run these checks in the clean mirror before publication:
 
 ```powershell
-git rev-list --all --count
 git ls-files -ci --exclude-standard
-git ls-files | rg -i '\.(pdf|docx|xlsx|zip|fzz|3mf|safetensors|dll|so|dylib|exe|pdb|nupkg|7z|rar)$'
-rg -n -i --hidden --glob '!/.git/**' --glob '!PUBLIC_RELEASE_PROCESS.md' '(api[_-]?key|secret|password|private[_-]?key|client[_-]?secret|BEGIN .* PRIVATE KEY)'
-rg -n -i --hidden --glob '!/.git/**' --glob '!PUBLIC_RELEASE_PROCESS.md' '(C:\\Users|/home/|/Users/|aurorarig|@auroraits|@gmail|@hotmail)'
+git ls-files | rg -i '\.(pdf|docx|xlsx|zip|fzz|3mf|safetensors|pt|pth|ckpt|onnx|bin|gguf|ggml|tflite|h5|keras|dll|so|dylib|exe|pdb|nupkg|7z|rar)$'
+rg -n -i --hidden --glob '!/.git/**' --glob '!PUBLIC_RELEASE_PROCESS.md' --glob '!PUBLICATION_AUDIT.md' '((api[_-]?key|client[_-]?secret|password|private[_-]?key)\s*[:=]\s*\S+|BEGIN [A-Z ]*PRIVATE KEY)'
+rg -n -i --hidden --glob '!/.git/**' --glob '!PUBLIC_RELEASE_PROCESS.md' --glob '!PUBLICATION_AUDIT.md' '(C:\\Users|/home/|/Users/|aurorarig|@auroraits|@gmail|@hotmail)'
 dotnet build '05_Software/GroundTelemetryDashboard/GroundTelemetryDashboard.sln'
 ```
 
 Expected result:
 
-- `git rev-list --all --count` returns `1` for the first public mirror commit,
-  unless later public-only release commits were intentionally added.
 - The binary-extension and sensitive-string scans return no unexpected matches.
 - The dashboard build succeeds.
 
@@ -70,3 +63,8 @@ Do not publish if any of these are true:
 - commercial-use and contribution terms have not been reviewed;
 - patent/trademark filing decisions are still pending for material that will be
   disclosed.
+- any model, dataset, adapter, generated result or design artifact lacks the
+  provenance fields required by `ARTIFACT_PROVENANCE.md`;
+- the release text promotes an open requirement, analysis or bench result to
+  "validated", "confirmed", "flight-ready" or equivalent;
+- the release manifest or required human sign-offs are absent.

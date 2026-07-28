@@ -1,8 +1,8 @@
 # Dual-Use Ground Station Design - SatNOGS / AUSTRALIS
 
-**Revision:** 2026-07-05
+**Revision:** 2026-07-27
 **Estado:** Draft
-**Trazabilidad:** `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md`, `04_Communications/rf_subsystem_overview.md`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/satnogs_public_beacon_architecture.md`, `04_Communications/rf_subsystem_overview.md`
 
 ---
 
@@ -16,6 +16,10 @@ Definir una estacion terrena dual-use para AUSTRALIS-1:
 - mantener SatNOGS fuera de cualquier camino de transmision o control del satelite.
 
 El objetivo de diseno es una estacion terrena con autonomia operativa alta, pero con transmision UHF siempre protegida por licencia, interlocks y procedimientos de seguridad.
+
+En este documento, `PRIVATE_UPLINK` y "privado" son nombres historicos para
+operacion por un operador autorizado. No implican cifrado ni confidencialidad
+RF.
 
 ---
 
@@ -50,6 +54,8 @@ Baseline recomendado:
 - receptor/decoder AUSTRALIS para `PUBLIC_BEACON` y `CONTROLLED_DOWNLINK`;
 - path TX separado logicamente para uplink privado;
 - switch T/R digital fail-safe, sin separacion de antenas RX/TX;
+- host SatNOGS fisicamente incapaz de transmitir;
+- controlador TX AUSTRALIS separado, con hardware arm y PTT gate;
 - scheduler que arbitre SatNOGS vs ventanas AUSTRALIS;
 - estacion meteorologica local para viento, lluvia, temperatura, humedad y presion;
 - UPS, watchdogs, telemetria local, control remoto y park automatico por clima/falla.
@@ -91,7 +97,13 @@ flowchart LR
     CMD --> TCTRL
 ```
 
-Regla de seguridad: SatNOGS puede controlar observaciones receive-only y, como maximo, compartir rotor/receptor. SatNOGS no debe tener credenciales, GPIO, PTT ni acceso de software al transmisor.
+Regla de seguridad: SatNOGS puede solicitar observaciones receive-only y, como
+maximo, compartir rotor/receptor mediante una interfaz acotada. Su host debe
+usar un SDR RX-only y no debe tener dispositivo TX, credenciales, claves, GPIO,
+PTT ni acceso al controlador de transmision.
+
+El TX AUSTRALIS se ejecuta en otro controlador/host. Una frontera solo logica
+en el mismo proceso o usuario no satisface este requisito.
 
 ---
 
@@ -119,8 +131,11 @@ Regla de seguridad: SatNOGS puede controlar observaciones receive-only y, como m
 
 ### `MODE_AUSTRALIS_PRIVATE_TX_ARMED`
 
-- Uplink privado/controlado.
-- Requiere operador/criterio de licencia, ventana planificada, TLE vigente, rotor tracking, potencia/SWR dentro de limites e interlocks activos.
+- Uplink de operador autorizado; el contenido no se presume confidencial.
+- Requiere `REG-UHF-AMATEUR`, `REG-GROUND`, frecuencia y sitio cerrados.
+- Requiere comando autenticado/anti-replay, operador/rol, ventana planificada,
+  orbit data con provenance valida, time quality, rotor tracking, potencia/SWR
+  e interlocks activos.
 - SatNOGS queda bloqueado en esa ventana.
 - Al terminar, la estacion vuelve automaticamente a RX y libera la ventana si corresponde.
 
@@ -164,13 +179,16 @@ Motivos:
 ### Interlocks minimos
 
 - default fisico en RX y TX deshabilitado;
-- llave logica `TX_ARM` separada del PTT;
+- llave fisica o hardware enable `TX_ARM` separada del PTT;
+- permiso software efimero, autenticado y ligado a la ventana/frecuencia;
 - watchdog que corta PTT ante perdida de control;
 - medicion de potencia directa/reflejada;
 - limite de SWR;
 - limite de duracion de TX por ventana;
 - bloqueo de TX si el rotor no esta trackeando;
 - bloqueo de TX fuera de frecuencia/servicio autorizado;
+- bloqueo ante orbit data, object ID, time quality o uncertainty invalidos;
+- bloqueo si el host/servicio SatNOGS intenta acceder a una interfaz TX;
 - E-stop local;
 - registro append-only de cada intento de TX.
 
@@ -192,7 +210,7 @@ Recomendacion inicial:
 - loop de servicio suficiente para movimiento AZ/EL sin fatiga del coax;
 - cables de rotor/control separados fisicamente de RF cuando sea posible.
 
-Perdidas orientativas a 435 MHz para 20 m:
+Perdidas orientativas a 436.5 MHz de referencia para 20 m:
 
 | Cable | Perdida tipica | Comentario |
 |---|---:|---|
@@ -269,7 +287,7 @@ Predimensionamiento del conjunto superior:
 
 | Bloque | Dimension / masa preliminar |
 |---|---|
-| UHF cross-Yagi 435 MHz | boom ~1.5-2.5 m, 2-5 kg |
+| UHF cross-Yagi 435–438 MHz | boom ~1.5-2.5 m, 2-5 kg |
 | Crossboom + clamps | ~1-2 m, 2-5 kg |
 | Rotor AZ/EL comercial | ~8-18 kg con soportes, segun modelo |
 | Gabinete RF mastil | 2-5 kg |
@@ -296,7 +314,8 @@ Autonomia minima objetivo:
 
 - SatNOGS Client con scheduler automatico;
 - AUSTRALIS pass scheduler con prioridad sobre SatNOGS para ventanas propias;
-- NTP + GNSS o fuente de tiempo redundante;
+- GNSS disciplinado + fuente independiente de contraste; NTP de red no es
+  unica referencia ni puede degradar silenciosamente el tiempo;
 - actualizacion TLE automatica con cache local;
 - rotator watchdog y park automatico;
 - estacion meteorologica local con anemometro, direccion de viento, lluvia, temperatura exterior, humedad exterior, presion, temperatura interior de gabinete y humedad interior;
@@ -311,7 +330,89 @@ Para `PRIVATE_UPLINK`, la autonomia debe estar limitada por una politica de arma
 
 ---
 
-## 10.1) Estacion meteorologica local
+## 10.1) Frontera de seguridad y red
+
+La separacion SatNOGS/AUSTRALIS debe ser verificable:
+
+| Dominio | Capacidades permitidas | Capacidades prohibidas |
+|---|---|---|
+| Host SatNOGS RX | SDR RX-only, decoder publico, solicitud de rotor | TX device, PTT, claves, command stack |
+| Broker rotor/schedule | requests acotados, arbitraje y park | payload de comandos, acceso a PA |
+| Ops AUSTRALIS | decoder, evidence store, command preparation | bypass de hardware arm |
+| TX controller | allowlist de frames ya autorizados, interlocks | Internet general, SatNOGS credentials |
+| Hardware safety | arm, PTT gate, watchdog, E-stop | override remoto sin presencia/rol |
+
+Requisitos:
+
+- cuentas, procesos y credenciales separados;
+- firewall deny-by-default y allowlist de IPC;
+- autenticacion mutua para IPC de control;
+- UI/control local-only por defecto;
+- ningun servicio de control en `0.0.0.0` sin autenticacion, TLS/VPN y firewall;
+- dependencias web operativas vendorizadas/versionadas, sin depender de CDN;
+- logs de acceso y cambios de configuracion;
+- backup/restauracion ensayados;
+- actualizaciones firmadas y rollback controlado.
+
+El acceso remoto prepara y monitorea; no sustituye la llave/hardware arm
+requerido para TX.
+
+## 10.2) Orbit data, TLE y scheduler
+
+Cada set orbital usado para tracking o TX debe conservar:
+
+- proveedor/source URL;
+- catalog/object ID esperado;
+- epoch;
+- `fetched_at`;
+- hash y firma/provenance disponible;
+- version de parser/propagador;
+- comparacion contra una fuente independiente;
+- edad y error de prediccion estimado.
+
+HTTPS protege el transporte, pero no sustituye object ID, expiry, rollback
+protection ni provenance. No se adoptan umbrales arbitrarios de 7/30 dias.
+La edad maxima se deriva de una campaña que traduzca edad del TLE a error de
+tiempo, azimut/elevacion y Doppler para la orbita real.
+
+La ventana de TX se calcula por elevacion autorizada y uncertainty. Una ventana
+fija de seis minutos alrededor del maximo no garantiza que todos sus instantes
+cumplan la mascara.
+
+Hard-fail:
+
+- object ID inesperado;
+- rollback de epoch;
+- checksum/parser error;
+- time source degradada mas alla del presupuesto;
+- error de pointing/elevacion/Doppler que pueda violar el permiso;
+- conflicto de schedules o estado de rotor ambiguo.
+
+El scheduler registra la decision completa y el set orbital usado. No se
+transmite usando un fallback continuo.
+
+## 10.3) Evidencia y persistencia
+
+El camino de adquisicion escribe primero un registro raw append-only y luego
+alimenta decoder/dashboard. Cada sesion incluye:
+
+- `session_id` y boot IDs;
+- tiempo UTC y quality;
+- orbit data/scheduler;
+- configuracion SDR/modem;
+- IQ/audio/raw frame cuando aplique;
+- decoder version/commit;
+- comandos y ACK autenticados;
+- rotor, potencia/SWR, clima e interlocks;
+- hashes y politica de retencion.
+
+Una UI en memoria o estadisticas sin raw data no cierran evidencia. El sistema
+debe permitir replay determinista y distinguir reboot, wrap, duplicate,
+out-of-order y nueva sesion al calcular PER.
+
+---
+
+## 10.4) Estacion meteorologica local
 
 La estacion terrena debe incluir instrumentacion meteorologica propia. No debe depender solo de reportes de clima externos porque el viento, lluvia y humedad relevantes son los del mastil y del gabinete.
 
@@ -367,6 +468,11 @@ Durante pre-flight:
 4. Validar decoder `PUBLIC_BEACON` y storage con capturas reproducibles.
 5. Probar el ground TTC modem/OpenLST-derived en loop cerrado antes de cualquier TX radiado.
 6. Ensayar T/R switch, secuenciador y fallas: perdida de control, SWR alto, LNA bias activo, rotor fuera de tracking, watchdog timeout.
+7. Ensayar la frontera SatNOGS/TX: el host RX-only no debe poder enumerar ni
+   activar ningun dispositivo de transmision.
+8. Inyectar TLE equivocado/viejo/rollback, time source degradada y error de
+   rotor; todos deben inhibir TX.
+9. Reproducir una pasada desde raw data y verificar hashes/resultados.
 
 Objetivo de salida pre-flight: estacion probada como SatNOGS receive-only y como banco end-to-end de AUSTRALIS sin depender de que el satelite exista aun.
 
@@ -399,7 +505,9 @@ Objetivo de salida pre-flight: estacion probada como SatNOGS receive-only y como
 
 - Agregar modem TTC, PA, filtro, medicion de potencia/SWR, T/R switch digital y secuenciador.
 - Probar solo en dummy load/coax hasta tener autorizacion/procedimiento.
-- Validar interlocks y logs.
+- Integrar controlador TX separado, hardware arm y PTT gate.
+- Validar comandos/ACK autenticados, anti-replay, interlocks y logs.
+- Mantener TX radiado bloqueado hasta cerrar todos los gates regulatorios.
 
 ### Fase 4 - Operacion orbital
 
@@ -417,6 +525,10 @@ Objetivo de salida pre-flight: estacion probada como SatNOGS receive-only y como
 - perdida TX por coax si la linea es larga o cable inadecuado;
 - dano de LNA/SDR por secuencia TX incorrecta;
 - TX accidental desde software SatNOGS o sistema no autorizado;
+- compromiso de red/UI de control;
+- TLE de otro objeto, rollback o error orbital no acotado;
+- PER calculado sobre sesiones mezcladas o sin raw evidence;
+- dependencia operativa de CDN/Internet durante una pasada;
 - ruido urbano UHF no caracterizado;
 - condensacion o humedad interior en gabinete electronico;
 - falta de cierre regulatorio para uplink y downlink controlado.
@@ -429,11 +541,40 @@ Mitigaciones:
 - usar switch T/R fail-safe con interlocks;
 - usar coax de baja perdida y puesta a tierra correcta;
 - bloquear SatNOGS fuera de cualquier control TX;
+- separar host RX y controlador TX, con hardware arm/PTT gate;
+- validar provenance orbital y bloquear incertidumbre fuera de presupuesto;
+- persistir raw append-only y ensayar replay;
 - tratar cifrado/privacidad y uplink como cierre regulatorio separado.
 
 ---
 
-## 14) BOM candidates - local procurement scan
+## 14) Minimum complete equipment list
+
+La BOM maestra debe cubrir, como filas separadas y con stage correcto:
+
+- antena, boom, mastil/torre, rotor AZ/EL y controlador;
+- cableado rotor/service loop y strain relief;
+- coax, conectores, lightning arrestor, bonding y puesta a tierra;
+- preselector/BPF, limiter, LNA y bias tee;
+- SDR RX-only SatNOGS;
+- modem TTC AUSTRALIS;
+- PA, Low-Pass Filter (LPF), switch T/R y secuenciador;
+- acoplador/circulator si se adopta;
+- medidor potencia directa/reflejada/SWR;
+- dummy load, atenuadores y fixtures de calibracion;
+- hardware arm, PTT gate, watchdog y E-stop;
+- host SatNOGS, host/controller AUSTRALIS y storage;
+- GNSS/time source y UPS/PDU;
+- estacion meteorologica y sensores de gabinete;
+- gabinete, refrigeracion, proteccion ambiental y cableado;
+- herramientas/EGSE RF y calibraciones;
+- ingenieria estructural, permisos y repuestos.
+
+Cada fila necesita cantidad, interfaz, costo/quote, lead time, lifecycle, riesgo,
+stage, criterio de aceptacion y evidencia. Esta lista no selecciona MPN ni
+constituye presupuesto.
+
+## 15) BOM candidates - local procurement scan
 
 These candidates are tracked in `06_Costs/BOM_master.csv` under `Ground Segment / EGSE`.
 
@@ -444,7 +585,7 @@ MercadoLibre pages may change and may require account verification. Treat all se
 | BOM role | Candidate | Fit | Recommendation |
 |---|---|---|---|
 | SatNOGS / `PUBLIC_BEACON` RX | RTL-SDR Blog V4 receiver | RX-only, low cost, widely documented, SatNOGS-friendly with the correct RTL-SDR v4 driver. | Preferred Phase 1 RX candidate if genuine. Use with UHF filter, mast LNA and good USB/RFI hygiene. |
-| SatNOGS / `PUBLIC_BEACON` RX alternate | Nooelec NESDR SMArt v5 / RTL-SDR premium metal | RX-only, metal case, TCXO class receiver, UHF 435 MHz coverage. | Good alternate to RTL-SDR Blog V4 if genuine and Linux/SatNOGS driver support is confirmed. |
+| SatNOGS / `PUBLIC_BEACON` RX alternate | Nooelec NESDR SMArt v5 / RTL-SDR premium metal | RX-only, metal case, TCXO class receiver, UHF 435–438 MHz coverage. | Good alternate to RTL-SDR Blog V4 if genuine and Linux/SatNOGS driver support is confirmed. |
 | AUSTRALIS modem development | PlutoSDR Zynq7010 AD9363 transceiver | SDR TX/RX platform, suitable for GNU Radio/libiio experiments around UHF. | Use as Phase 2 lab/development transceiver for controlled downlink/uplink waveforms. Do not expose it to SatNOGS or to an unattended TX path. |
 
 Candidate links:
@@ -481,7 +622,8 @@ Candidate:
 Compatibility reading:
 
 - This is compatible with the baseline if it is true 50 ohm LMR-400-class cable and the real station run is near 10 m.
-- Expected loss at 435 MHz for 10 m is roughly **0.8-1.0 dB**, before connector/adaptor losses.
+- At the 436.5 MHz reference frequency, expected loss for 10 m is roughly
+  **0.8-1.0 dB**, before connector/adaptor losses.
 - Confirm connector type before buying. Exterior RF runs should prefer N-type weatherproof connectors. SMA should remain inside the RF cabinet as short pigtails.
 - Confirm jacket UV rating, minimum bend radius, shielding quality, strain relief and whether the cable is flexible enough for the rotor service loop.
 - If the final route exceeds ~20-25 m, re-evaluate LMR-600 / hardline 1/2 in or moving the RF box closer to the mast.
@@ -514,7 +656,15 @@ Selection notes:
 
 ---
 
-## 15) Referencias externas
+## 16) Referencias
+
+Internas:
+
+- `04_Communications/regulatory_gate_rf.md`
+- `04_Communications/uhf_command_security_protocol.md`
+- `04_Communications/satnogs_public_beacon_architecture.md`
+- `docs/COMMS/ground_station_verification_plan.md`
+- `docs/COMMS/uhf_ttc_bench_testing_plan.md`
 
 - SatNOGS Ground Stations: https://wiki.satnogs.org/Ground_Stations
 - SatNOGS Main Page: https://wiki.satnogs.org/Main_Page

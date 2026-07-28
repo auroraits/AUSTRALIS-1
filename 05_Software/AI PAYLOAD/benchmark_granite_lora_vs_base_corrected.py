@@ -1,12 +1,19 @@
+"""INVALIDATED legacy Granite 3.1 2B scorer; retained for provenance only."""
+
 import json
+import os
 import time
-import torch
 from pathlib import Path
+
+if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
+    raise SystemExit(
+        "Refusing invalidated legacy benchmark. Use AgenticBenchmarkRunner_v1.py."
+    )
+
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import PeftModel
 
-# Bench/ground experimentation model. The compact flight-candidate line is
-# Granite 350M; 2B is intentionally kept for lab exploration and comparisons.
 BASE_MODEL = "ibm-granite/granite-3.1-2b-instruct"
 ADAPTER_PATH = "granite_cubesat_lora"
 SUITE_FILE = "CubeSatBenchmarkSuite.json"

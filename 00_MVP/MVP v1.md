@@ -1,5 +1,8 @@
 # Documento Técnico — MVP v1
 
+**Estado:** Historical Snapshot — superseded por `MVP v2.2.md`
+**Nota:** no normativo; cifras, modos y claims se conservan solo para trazabilidad.
+
 ## Nanosat IoT Experimental (LoRa Uplink + Downlink Satélite-a-Tierra probado)
 
 **Versión:** 1.0 (MVP)

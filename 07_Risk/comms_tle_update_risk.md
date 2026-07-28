@@ -1,16 +1,12 @@
-# COMMS/OPS — Riesgo: TLE desactualizado degrada predicción de pasadas (modo B2)
+# COMMS/OPS — Riesgo de TLE y predicción de pasadas
 
-**Review date:** 2026-02-20
+**Revisión:** 2026-07-27
+**Estado:** Active
 
-## Resumen
-El modo B2 (pass-aware) depende de predicción de pasadas con TLE+SGP4. Si el TLE está desactualizado, la ventana calculada puede correrse y reducir la probabilidad de uplink.
+| ID | ParentRiskID | Riesgo | Prob. | Impacto | Owner role | Mitigación | Trigger | Due gate |
+|---|---|---|---|---|---|---|---|---|
+| OPS-TLE-01 | RSK-COMMS-03 | TLE viejo desplaza ventana | Media | Alta | Node FW/Ground | convertir error/edad a incertidumbre de tiempo/elevación; invalidar según budget | error excede allocation | Gate B |
+| OPS-TLE-02 | RSK-COMMS-03; RSK-SEC-02 | Fuente falsa/object ID incorrecto/rollback | Media | Alta | Security/Node/Ground | fuente autenticada, object ID, expiry y monotonic update | firma/ID/epoch inválidos | Gate B |
+| OPS-TLE-03 | RSK-COMMS-02; RSK-REG-01 | Fallback B1 eleva airtime/interferencia | Media | Alta | COMMS/Regulatory | análisis regulatorio/energético y rate limit antes de habilitar | duty/airtime supera autorización | Gate B |
 
-## Risk matrix
-
-| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger condition |
-|---|---|---|---|---|---|
-| OPS-TLE-01 | TLE viejo desplaza la ventana uplink y baja la tasa de recepción | Media | Alta | Ventanas más anchas al inicio; elevación mínima conservadora; disciplina de actualización TLE out-of-band; fallback a B1 always-on slotted | Resúmenes por pasada muestran caída sistemática de rx_total vs esperado |
-
-## Referencias
-- `05_Software/node_uplink_scheduler_pass_prediction.md`
-- `04_Communications/uplink_lora_slotted_protocol.md`
+Los umbrales fijos de edad no sustituyen un error budget.

@@ -6,7 +6,12 @@
 >
 > **OpenLST:** análisis técnico activo, no baseline final. No adoptar "tal cual". RFFM6403 es EOL. Requiere ADR de adopción para convertirse en baseline.
 >
-> **TTC UHF:** hardware final TBD. Baseline operativo vigente: UHF 435 MHz FSK 1200 bps.
+> **TTC UHF:** hardware final TBD. Perfil de ingeniería: 2-FSK 1200 bit/s en
+> una asignación coordinada TBD dentro de 435–438 MHz. No usar 435.000 MHz como
+> centro literal.
+>
+> **LoRa 915–928:** RX-only en el satélite no autoriza emisiones
+> Tierra→espacio. Operación radiada bloqueada hasta dictamen escrito ENACOM.
 
 ## Propósito
 Define el sistema de comunicaciones:
@@ -14,12 +19,16 @@ Define el sistema de comunicaciones:
 
 Documentos clave:
 - `04_Communications/rf_subsystem_overview.md`
+- `04_Communications/regulatory_gate_rf.md`
+- `04_Communications/uhf_command_security_protocol.md`
 - `04_Communications/link_budget_uhf_preliminary.md`
 - `04_Communications/ground_station_dual_use_satnogs_australis.md`
 
 ## Cómo debe trabajar un agente aquí
 - Mantener un link budget trazable (tabla) con supuestos explícitos.
 - Separar: requisitos regulatorios/legales vs decisiones técnicas.
+- No presentar coordinación, autorización, confidencialidad o herencia de
+  hardware como resueltas sin evidencia exacta.
 
 Si se cambia banda, potencia TX, ganancia de antena, modulación o data rate:
 - actualizar riesgos (regulatorio + interferencias) en `07_Risk/`,
@@ -38,3 +47,5 @@ Si se cambia banda, potencia TX, ganancia de antena, modulación o data rate:
 - No promover OpenLST a baseline final sin ADR nueva `Accepted`.
 - No depender de RFFM6403 en ningún diseño. Alternativa de PA discreto requerida.
 - Parámetros TBD de uplink LoRa (elevación mínima, canalización, BW): dejar como TBD hasta evidencia de banco/campo.
+- Todo comando TTC requiere autenticación criptográfica, anti-replay
+  persistente y validación semántica OBC; CRC/hash sin clave no autentican.

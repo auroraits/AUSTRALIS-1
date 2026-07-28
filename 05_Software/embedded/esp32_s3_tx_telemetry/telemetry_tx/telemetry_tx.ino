@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <RH_ASK.h>
+#include <esp_system.h>
 
 #include "../../common/filters/MadgwickAHRS.h"
 
@@ -29,15 +30,41 @@ static const float GYRO_DEG_TO_RAD = 0.01745329251994f;
 
 static const float MADGWICK_BETA = 0.12f;
 static const uint32_t FILTER_DT_US = 10000UL;        // 100 Hz filtro
-static const uint32_t TX_DT_US = 50000UL;            // 20 Hz RF
+static const uint32_t TX_DT_US = 500000UL;           // 2 Hz RF, con margen de airtime
 static const uint16_t GYRO_CAL_SAMPLES = 400;
+static const uint16_t GYRO_CAL_MIN_VALID = 380;
+static const float GYRO_CAL_MAX_MEAN_RAD_S = 0.035f;
+static const float GYRO_CAL_MAX_STD_RAD_S = 0.02f;
+static const float GYRO_CAL_ACCEL_MEAN_MIN_G = 0.90f;
+static const float GYRO_CAL_ACCEL_MEAN_MAX_G = 1.10f;
+static const float GYRO_CAL_ACCEL_MAX_STD_G = 0.03f;
 
-static const int8_t BODY_AX_SIGN = +1;
-static const int8_t BODY_AY_SIGN = -1;
-static const int8_t BODY_AZ_SIGN = +1;
-static const int8_t BODY_GX_SIGN = +1;
-static const int8_t BODY_GY_SIGN = -1;
-static const int8_t BODY_GZ_SIGN = +1;
+// SENSOR_TO_BODY debe ser una rotacion cartesiana derecha. Identidad es el
+// unico baseline permitido hasta medir la orientacion fisica del sensor.
+static constexpr int8_t M00 = 1, M01 = 0, M02 = 0;
+static constexpr int8_t M10 = 0, M11 = 1, M12 = 0;
+static constexpr int8_t M20 = 0, M21 = 0, M22 = 1;
+static_assert(
+    M00 * (M11 * M22 - M12 * M21)
+      - M01 * (M10 * M22 - M12 * M20)
+      + M02 * (M10 * M21 - M11 * M20) == 1,
+    "SENSOR_TO_BODY must have determinant +1");
+static_assert(
+    M00 * M00 + M01 * M01 + M02 * M02 == 1 &&
+    M10 * M10 + M11 * M11 + M12 * M12 == 1 &&
+    M20 * M20 + M21 * M21 + M22 * M22 == 1 &&
+    M00 * M10 + M01 * M11 + M02 * M12 == 0 &&
+    M00 * M20 + M01 * M21 + M02 * M22 == 0 &&
+    M10 * M20 + M11 * M21 + M12 * M22 == 0,
+    "SENSOR_TO_BODY rows must be orthonormal");
+static_assert(
+    M00 * M00 + M10 * M10 + M20 * M20 == 1 &&
+    M01 * M01 + M11 * M11 + M21 * M21 == 1 &&
+    M02 * M02 + M12 * M12 + M22 * M22 == 1 &&
+    M00 * M01 + M10 * M11 + M20 * M21 == 0 &&
+    M00 * M02 + M10 * M12 + M20 * M22 == 0 &&
+    M01 * M02 + M11 * M12 + M21 * M22 == 0,
+    "SENSOR_TO_BODY columns must be orthonormal");
 
 // RH_ASK en 2000 bps (OOK/ASK)
 RH_ASK ask(2000, 255, TX_PIN, 255, false);
@@ -48,6 +75,8 @@ struct TelemetryPacket {
   uint8_t magic;
   uint8_t version;
   uint8_t sensor_type;
+  uint8_t quality_flags;
+  uint32_t boot_id;
   uint32_t seq;
   uint32_t t_ms;
   int16_t ax;
@@ -64,20 +93,44 @@ struct TelemetryPacket {
 };
 #pragma pack(pop)
 
+static_assert(
+    sizeof(TelemetryPacket) <= RH_ASK_MAX_MESSAGE_LEN,
+    "TelemetryPacket exceeds RadioHead ASK message limit");
+static constexpr uint32_t ASK_ESTIMATED_FRAME_BITS =
+    (sizeof(TelemetryPacket) + 7UL) * 12UL + 48UL;
+static constexpr uint32_t ASK_ESTIMATED_AIRTIME_US =
+    ASK_ESTIMATED_FRAME_BITS * 1000000UL / 2000UL;
+static_assert(
+    TX_DT_US >= ASK_ESTIMATED_AIRTIME_US * 5UL / 4UL,
+    "TX period must retain at least 25 percent airtime margin");
+
 enum : uint8_t {
   PACKET_MAGIC = 'T',
-  PACKET_VERSION = 3,
-  SENSOR_TYPE_MPU6050 = 1
+  PACKET_VERSION = 4,
+  SENSOR_TYPE_MPU6050 = 1,
+  QUALITY_IMU_VALID = 1 << 0,
+  QUALITY_ACCEL_REFERENCE_VALID = 1 << 1,
+  TX_STARTED = 0,
+  TX_BUSY = 1,
+  TX_REJECTED = 2
 };
 
 static uint32_t g_seq = 0;
+static uint32_t g_bootId = 0;
 static uint32_t g_lastFilterUs = 0;
 static uint32_t g_lastTxUs = 0;
+static uint32_t g_txBusySkips = 0;
 static TelemetryPacket g_lastPacket = {};
 static uint8_t g_mpuAddr = MPU_ADDR_DEFAULT;
 static float g_gyroBiasX = 0.0f;
 static float g_gyroBiasY = 0.0f;
 static float g_gyroBiasZ = 0.0f;
+static bool g_calibrationValid = false;
+static uint16_t g_calibrationValidSamples = 0;
+static float g_calibrationGyroStdMax = NAN;
+static float g_calibrationGyroMeanNorm = NAN;
+static float g_calibrationAccelMean = NAN;
+static float g_calibrationAccelStd = NAN;
 
 static String g_serialCmd;
 
@@ -135,37 +188,126 @@ bool readImu(int16_t &ax, int16_t &ay, int16_t &az, int16_t &gx, int16_t &gy, in
   return true;
 }
 
-void mapAxes(float &ax, float &ay, float &az, float &gx, float &gy, float &gz) {
-  ax *= BODY_AX_SIGN;
-  ay *= BODY_AY_SIGN;
-  az *= BODY_AZ_SIGN;
-  gx *= BODY_GX_SIGN;
-  gy *= BODY_GY_SIGN;
-  gz *= BODY_GZ_SIGN;
+void mapVectorToBody(float &x, float &y, float &z) {
+  const float sensorX = x;
+  const float sensorY = y;
+  const float sensorZ = z;
+  x = M00 * sensorX + M01 * sensorY + M02 * sensorZ;
+  y = M10 * sensorX + M11 * sensorY + M12 * sensorZ;
+  z = M20 * sensorX + M21 * sensorY + M22 * sensorZ;
 }
 
-void calibrateGyroBias() {
+void mapAxes(float &ax, float &ay, float &az, float &gx, float &gy, float &gz) {
+  mapVectorToBody(ax, ay, az);
+  mapVectorToBody(gx, gy, gz);
+}
+
+bool calibrateGyroBias() {
+  // El artículo debe permanecer inmóvil durante toda esta adquisición. Un
+  // intento fallido invalida el flag de calidad hasta una calibración exitosa.
+  g_calibrationValid = false;
   double sumX = 0.0;
   double sumY = 0.0;
   double sumZ = 0.0;
+  double sumSqX = 0.0;
+  double sumSqY = 0.0;
+  double sumSqZ = 0.0;
+  double sumAccelNorm = 0.0;
+  double sumSqAccelNorm = 0.0;
   uint16_t valid = 0;
 
   for (uint16_t i = 0; i < GYRO_CAL_SAMPLES; ++i) {
     int16_t axRaw, ayRaw, azRaw, gxRaw, gyRaw, gzRaw;
     if (readImu(axRaw, ayRaw, azRaw, gxRaw, gyRaw, gzRaw)) {
-      sumX += (((float)gxRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
-      sumY += (((float)gyRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
-      sumZ += (((float)gzRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double gx =
+          (((double)gxRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double gy =
+          (((double)gyRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double gz =
+          (((double)gzRaw) / GYRO_LSB_PER_DEG_S) * GYRO_DEG_TO_RAD;
+      const double ax = ((double)axRaw) / ACCEL_LSB_PER_G;
+      const double ay = ((double)ayRaw) / ACCEL_LSB_PER_G;
+      const double az = ((double)azRaw) / ACCEL_LSB_PER_G;
+      const double accelNorm = sqrt(ax * ax + ay * ay + az * az);
+      sumX += gx;
+      sumY += gy;
+      sumZ += gz;
+      sumSqX += gx * gx;
+      sumSqY += gy * gy;
+      sumSqZ += gz * gz;
+      sumAccelNorm += accelNorm;
+      sumSqAccelNorm += accelNorm * accelNorm;
       valid++;
     }
     delay(5);
   }
 
-  if (valid > 0) {
-    g_gyroBiasX = (float)(sumX / valid);
-    g_gyroBiasY = (float)(sumY / valid);
-    g_gyroBiasZ = (float)(sumZ / valid);
+  g_calibrationValidSamples = valid;
+  if (valid < GYRO_CAL_MIN_VALID) {
+    g_calibrationGyroStdMax = NAN;
+    g_calibrationGyroMeanNorm = NAN;
+    g_calibrationAccelMean = NAN;
+    g_calibrationAccelStd = NAN;
+    return false;
   }
+
+  const double meanX = sumX / valid;
+  const double meanY = sumY / valid;
+  const double meanZ = sumZ / valid;
+  const double varX = max(0.0, sumSqX / valid - meanX * meanX);
+  const double varY = max(0.0, sumSqY / valid - meanY * meanY);
+  const double varZ = max(0.0, sumSqZ / valid - meanZ * meanZ);
+  const double accelMean = sumAccelNorm / valid;
+  const double accelVariance =
+      max(0.0, sumSqAccelNorm / valid - accelMean * accelMean);
+  const double gyroStdMax =
+      max(sqrt(varX), max(sqrt(varY), sqrt(varZ)));
+  const double gyroMeanNorm =
+      sqrt(meanX * meanX + meanY * meanY + meanZ * meanZ);
+  const double accelStd = sqrt(accelVariance);
+
+  g_calibrationGyroStdMax = (float)gyroStdMax;
+  g_calibrationGyroMeanNorm = (float)gyroMeanNorm;
+  g_calibrationAccelMean = (float)accelMean;
+  g_calibrationAccelStd = (float)accelStd;
+  if (gyroMeanNorm > GYRO_CAL_MAX_MEAN_RAD_S ||
+      gyroStdMax > GYRO_CAL_MAX_STD_RAD_S ||
+      accelMean < GYRO_CAL_ACCEL_MEAN_MIN_G ||
+      accelMean > GYRO_CAL_ACCEL_MEAN_MAX_G ||
+      accelStd > GYRO_CAL_ACCEL_MAX_STD_G) {
+    return false;
+  }
+
+  g_gyroBiasX = (float)meanX;
+  g_gyroBiasY = (float)meanY;
+  g_gyroBiasZ = (float)meanZ;
+  g_calibrationValid = true;
+  return true;
+}
+
+void resetFilterAfterCalibration() {
+  madgwick.reset();
+  const uint32_t nowUs = micros();
+  g_lastFilterUs = nowUs;
+  g_lastTxUs = nowUs;
+}
+
+void printCalibrationStatus(bool attemptValid) {
+  Serial.printf(
+      "#CAL,status=%s,active_valid=%u,valid_samples=%u,"
+      "gyro_mean_norm_rad_s=%.6f,gyro_std_max_rad_s=%.6f,"
+      "accel_mean_g=%.6f,accel_std_g=%.6f,"
+      "gyro_bias=%.6f,%.6f,%.6f\n",
+      attemptValid ? "PASS" : "FAIL_STATIONARY_CHECK",
+      g_calibrationValid ? 1U : 0U,
+      g_calibrationValidSamples,
+      g_calibrationGyroMeanNorm,
+      g_calibrationGyroStdMax,
+      g_calibrationAccelMean,
+      g_calibrationAccelStd,
+      g_gyroBiasX,
+      g_gyroBiasY,
+      g_gyroBiasZ);
 }
 
 void handleSerialCommands() {
@@ -177,11 +319,12 @@ void handleSerialCommands() {
       g_serialCmd.toUpperCase();
 
       if (g_serialCmd == "CAL" || g_serialCmd == "RECAL") {
-        calibrateGyroBias();
-        Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
+        const bool calibrationAttemptValid = calibrateGyroBias();
+        resetFilterAfterCalibration();
+        printCalibrationStatus(calibrationAttemptValid);
       } else if (g_serialCmd == "INFO") {
         Serial.printf("#SENSOR:MPU6050 addr=0x%02X\n", g_mpuAddr);
-        Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
+        printCalibrationStatus(g_calibrationValid);
       }
       g_serialCmd = "";
       continue;
@@ -193,23 +336,18 @@ void handleSerialCommands() {
   }
 }
 
-// NOTA: RH_ASK::send() retorna false únicamente si el payload supera
-// RH_ASK_MAX_MESSAGE_LEN (60 bytes). TelemetryPacket mide 41 bytes, por lo que
-// en condiciones normales send() nunca falla y los reintentos no se activan.
-// Los errores de canal RF (interferencia, alcance) resultan en paquetes perdidos
-// detectados por el receptor mediante gaps de secuencia, no por retorno false aquí.
-bool sendWithRetries(const TelemetryPacket &pkt) {
+// La transferencia RH_ASK es asincrona. No se usa waitPacketSent(): el filtro
+// de 100 Hz debe continuar mientras los bits salen por interrupciones.
+uint8_t tryStartTransmit(const TelemetryPacket &pkt) {
+  if (ask.mode() == RHGenericDriver::RHModeTx) {
+    return TX_BUSY;
+  }
   const uint8_t *payload = reinterpret_cast<const uint8_t *>(&pkt);
   const uint8_t size = sizeof(TelemetryPacket);
 
-  for (uint8_t attempt = 0; attempt < 3; ++attempt) {
-    if (ask.send(payload, size)) {
-      ask.waitPacketSent();
-      return true;
-    }
-    delay(8);
-  }
-  return false;
+  // send() only starts the interrupt-driven transfer. Channel loss is measured
+  // at RX with boot_id/sequence gaps; it is not observable from this return.
+  return ask.send(payload, size) ? TX_STARTED : TX_REJECTED;
 }
 
 void setup() {
@@ -221,6 +359,7 @@ void setup() {
 
   Serial.println("Telemetry TX starting...");
 
+  g_bootId = esp_random();
 
   Wire.begin(PIN_SDA, PIN_SCL);
 
@@ -232,13 +371,14 @@ void setup() {
     Serial.println("ERR: MPU6050 init fail");
   }
 
-  calibrateGyroBias();
-
-  g_lastFilterUs = micros();
-  g_lastTxUs = g_lastFilterUs;
+  const bool calibrationAttemptValid = calibrateGyroBias();
+  resetFilterAfterCalibration();
 
   Serial.printf("#SENSOR:MPU6050 addr=0x%02X\n", g_mpuAddr);
-  Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
+  Serial.printf("#BOOT,id=%08lX packet_version=%u rf_rate_hz=2\n",
+                (unsigned long)g_bootId,
+                PACKET_VERSION);
+  printCalibrationStatus(calibrationAttemptValid);
   Serial.println("Telemetry TX ready");
 }
 
@@ -252,8 +392,8 @@ void loop() {
   }
 
   // FRAME NOTE: pkt.ax/ay/az/gx/gy/gz contienen datos en frame SENSOR (raw ADC,
-  // sin aplicar BODY_Ax_SIGN). El quaternion pkt.q0..q3 está en frame BODY
-  // (con remapeo BODY_Ax_SIGN aplicado antes de Madgwick).
+  // sin aplicar SENSOR_TO_BODY). El quaternion pkt.q0..q3 está en frame BODY
+  // (con la matriz SENSOR_TO_BODY aplicada antes de Madgwick).
   // El dashboard grafica IMU en sensor frame y orientación en body frame.
   // Esto es intencional: los raw IMU sirven para diagnóstico de hardware;
   // el quaternion representa la actitud del cuerpo del satélite.
@@ -286,6 +426,13 @@ void loop() {
   pkt.magic = PACKET_MAGIC;
   pkt.version = PACKET_VERSION;
   pkt.sensor_type = SENSOR_TYPE_MPU6050;
+  pkt.quality_flags = g_calibrationValid ? QUALITY_IMU_VALID : 0;
+  const float accelNormG = sqrtf(axBody * axBody + ayBody * ayBody + azBody * azBody);
+  if (g_calibrationValid &&
+      accelNormG >= 0.5f && accelNormG <= 1.5f) {
+    pkt.quality_flags |= QUALITY_ACCEL_REFERENCE_VALID;
+  }
+  pkt.boot_id = g_bootId;
   pkt.q0 = madgwick.q0();
   pkt.q1 = madgwick.q1();
   pkt.q2 = madgwick.q2();
@@ -306,12 +453,22 @@ void loop() {
     return;
   }
 
-  g_lastPacket.seq = g_seq++;
-  bool ok = sendWithRetries(g_lastPacket);
+  g_lastPacket.seq = g_seq;
+  const uint8_t txResult = tryStartTransmit(g_lastPacket);
+  if (txResult == TX_BUSY) {
+    g_txBusySkips++;
+    return;
+  }
+
   g_lastTxUs = nowUs;
-  Serial.printf("TX seq=%lu status=%s q=[%.3f %.3f %.3f %.3f] dt=%ums\n",
+  if (txResult == TX_STARTED) {
+    g_seq++;
+  }
+  Serial.printf("TX boot=%08lX seq=%lu status=%s busy_skips=%lu q=[%.3f %.3f %.3f %.3f] dt=%ums\n",
+                (unsigned long)g_lastPacket.boot_id,
                 (unsigned long)g_lastPacket.seq,
-                ok ? "ok" : "fail",
+                txResult == TX_STARTED ? "started" : "rejected_local",
+                (unsigned long)g_txBusySkips,
                 g_lastPacket.q0,
                 g_lastPacket.q1,
                 g_lastPacket.q2,

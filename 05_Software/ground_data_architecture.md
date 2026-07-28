@@ -1,191 +1,105 @@
-# Arquitectura de Datos de Software de Tierra — DIY Nanosat
+# AUSTRALIS ground data architecture
 
-**Revisión:** 2026-03-13
-**Estado:** Proposed (arquitectura objetivo; implementación TBD)
-**Trazabilidad:** `05_Software/software_framework_mvp22.md`, `00_MVP/MVP v2.2.md` §14
+**Revision:** 2026-07-27
+**Status:** Partially implemented; not Gate-closure evidence by itself
 
-> Este documento define la **arquitectura objetivo** de persistencia y manejo de datos del software de tierra (Ground Segment SW). No describe la implementación actual del dashboard (`05_Software/GroundTelemetryDashboard/`), que actualmente opera con estado en memoria como principal fuente de datos.
->
-> **El estado en memoria no debe ser la única fuente de verdad del sistema de banco.** Este documento define la arquitectura que debe implementarse para soportar trazabilidad, replay y análisis post-sesión.
+## Implemented path
 
----
-
-## 1) Contexto
-
-El dashboard de telemetría actual (`.NET 8 + Blazor Server + SignalR`) opera con:
-- Lectura de COM serial (banco 433 MHz) o futura entrada RF orbital.
-- Visualización en tiempo real (3D, CSV, plots).
-- Estado en memoria durante la sesión.
-
-**Problema:** sin persistencia estructurada, los datos de banco se pierden al cerrar la sesión y no hay trazabilidad de evidencia reproducible.
-
-**Objetivo:** definir una arquitectura de datos que permita:
-- Log raw append-only durante la sesión.
-- Almacenamiento persistente de muestras parseadas.
-- Replay de sesiones pasadas.
-- Export a CSV/JSON para análisis externo.
-- Registro de eventos de operación.
-- Separación entre cache de UI y persistencia real.
-
----
-
-## 2) Principios de diseño
-
-1. **Raw log primero:** todo dato que llega del hardware se loguea en forma cruda antes de cualquier parseado. Si el parser falla, el raw log permite recuperar.
-2. **Append-only:** los logs raw no se modifican. Solo se puede agregar.
-3. **Sesión como unidad:** cada sesión de operación (conexión → desconexión) tiene su propia estructura de datos y metadata.
-4. **Separación de responsabilidades:** la UI usa un cache en memoria actualizado por eventos; la persistencia es independiente y no depende del estado de la UI.
-5. **Trazabilidad de evidencia:** cada sesión debe poder citarse como evidencia reproducible en la compliance matrix.
-
----
-
-## 3) Componentes de la arquitectura objetivo
-
-### 3.1 Raw Log por sesión (append-only)
-
-- Un archivo de log raw por sesión, con nombre basado en timestamp de inicio: `session_YYYYMMDD_HHMMSS.raw.log`.
-- Cada línea: `[timestamp_iso] [source] <raw_data>`.
-- Nunca se sobreescribe; solo append.
-- Ubicación sugerida: `data/sessions/YYYYMMDD/`.
-
-### 3.2 Almacenamiento persistente de muestras parseadas
-
-- Base de datos liviana (SQLite o archivos JSON/CSV indexados).
-- Estructura por sesión: `session_id`, `timestamp`, `seq`, campos del frame (ax, ay, az, gx, gy, gz, q0-q3 si aplica), flags de parseo.
-- Las muestras parsadas son inmutables (append-only).
-- En caso de error de parseo: registrar raw + flag de error; no descartar.
-
-### 3.3 Metadata de sesión
-
-Por cada sesión, un archivo de metadata: `session_YYYYMMDD_HHMMSS.meta.json`.
-
-Campos mínimos:
-```json
-{
-  "session_id": "YYYYMMDD_HHMMSS",
-  "start_time_iso": "...",
-  "end_time_iso": "...",
-  "source": "COM3 / 115200 | UDP:<ip>:<port> | ...",
-  "frame_type": "legacy_csv_8 | quaternion_csv_12 | ...",
-  "total_frames": 0,
-  "parse_errors": 0,
-  "notes": ""
-}
+```text
+serial input
+  -> append-only raw evidence
+  -> structural frame parser
+  -> independent link and scientific-quality dispositions
+  -> append-only classified evidence
+  -> session-aware statistics using a host monotonic clock
+  -> bounded UI series containing forward samples only
 ```
 
-### 3.4 Replay de sesiones
+Each application run creates:
 
-- Capacidad de cargar una sesión pasada (por session_id) y reproducirla en la UI como si fuera en tiempo real.
-- Usar los datos parseados almacenados, no el raw log.
-- Velocidad de replay: configurable (1x, 5x, 10x o instantáneo).
+- `manifest.json`: run ID, host/runtime, claimed source commit and chain rules;
+- `configuration.json`: recoverable non-secret Serial/Evidence configuration;
+- `evidence.jsonl`: raw/rejected/classified frames, acquisition-session IDs,
+  connection transitions and runtime errors;
+- `bundle_seal.json`: record count, final record hash, manifest hash and
+  complete evidence-file hash, emitted only on orderly close.
 
-### 3.5 Export a CSV/JSON
+During acquisition the verifier can only report `ACTIVE_PREFIX_VALID`. That
+state cannot prove that the tail was not truncated. A completed bundle must
+contain `run_started`, `run_closed`, the manifest anchor and a matching local
+seal. It can then detect modification, deletion/reordering and truncation
+relative to that seal.
 
-- Export a CSV con headers compatibles con los formatos soportados (legacy 8 cols, quaternion 12 cols).
-- Export a JSON con la sesión completa (metadata + muestras).
-- Activado por UI (botón) o por CLI.
+This is local tamper evidence, not a signature or trusted timestamp. A 40/64
+hex `source_commit_claim` is recorded but is not proof that the executable was
+built from that object. External signing/anchoring, operator identity and
+off-host immutable archival remain open.
 
-### 3.6 Registro de eventos de operación
+## Frame and quality model
 
-Además de las muestras de telemetría, registrar eventos:
-- Reconexión del puerto serie.
-- Errores de parseo (con raw data).
-- Notas manuales del operador (campo libre).
-- Power-cycle del hardware (detectable por pérdida de heartbeat).
-- Cambios de modo o configuración.
+The preferred V4 bench CSV is:
 
-Formato: `events_YYYYMMDD_HHMMSS.log` junto a la sesión.
-
-### 3.7 Separación cache de UI / persistencia
-
-```
-[Hardware / Serial / UDP]
-        ↓
-[Raw Log Writer (append-only)] ──→ session_*.raw.log
-        ↓
-[Frame Parser]
-        ↓
-[Sample Writer (append-only)] ──→ DB / JSON / CSV persistente
-        ↓
-[In-Memory Cache] ──→ [SignalR / Blazor UI]
+```text
+version,boot_id,seq,t_ms,sensor_type,quality_flags,ax,ay,az,gx,gy,gz,q0,q1,q2,q3,dt_ms
 ```
 
-La UI accede solo al cache en memoria. La persistencia es independiente y no bloquea la UI.
+The RX normalizes V1–V3 into the same 17-column envelope and retains
+`sensor_type`/`dt_ms` when those fields exist. Raw legacy 8/12-column lines
+remain accepted for diagnostics. All V1–V3 samples are `DIAGNOSTIC_ONLY`
+because they lack V4 session/quality semantics.
 
----
+For V4 the structural parser requires:
 
-## 4) Formatos de frame soportados (actual)
+- exact supported field/version layout;
+- parseable counters and finite sensor fields in their transport ranges.
 
-| Nombre | Campos | Descripción |
-|---|---|---|
-| `legacy_csv_8` | `seq,t_ms,ax,ay,az,gx,gy,gz` | Formato original del banco 433 MHz |
-| `quaternion_csv_12` | `seq,t_ms,ax,ay,az,gx,gy,gz,q0,q1,q2,q3` | Con quaternion Madgwick |
+It deliberately retains a structurally valid frame when `IMU_VALID` is clear
+or another scientific-quality check fails. This preserves its sequence number
+for RF-link statistics. Scientific admission separately requires MPU6050
+`sensor_type`, no unknown quality bits, `IMU_VALID`, nonzero bounded `dt_ms`
+and:
+- quaternion norm within 0.9–1.1.
 
-Formatos futuros (TBD cuando se tenga hardware RF orbital):
-- Frame UHF BEACON
-- Frame UHF LORA_LOG
-- Frame UHF SCIENCE_SUMMARY
+`BENCH_SENSOR_VALID_UNCALIBRATED` means only that the frame passed those
+checks. It is not evidence of calibration, physical units or uncertainty.
 
----
+## PER and series admission
 
-## 5) Estado de implementación
+Link statistics distinguish unique forward packets, gaps, duplicates,
+out-of-order frames, reboot/session changes and uint32 wrap.
+A V4 `boot_id` change starts a new window and does not create false loss.
+Legacy packets use a conservative joint time/sequence rollback heuristic.
 
-| Componente | Estado |
-|---|---|
-| Raw log append-only | No implementado (TBD) |
-| DB/persistencia de muestras | No implementado (TBD) |
-| Metadata de sesión | No implementado (TBD) |
-| Replay de sesiones | No implementado (TBD) |
-| Export CSV/JSON | No implementado (TBD) |
-| Registro de eventos | No implementado (TBD) |
-| Cache en memoria (UI actual) | Implementado (Blazor/SignalR) |
+Link PER is `lost / (unique_received + lost)`. An unset estimate is reported
+as `N/A`, never as an invented 0% PER. Scientific yield is independently
+`admitted / (admitted + quality_or_time_rejected)`. A frame received with
+invalid sensor quality therefore lowers scientific yield but does not become
+RF loss. Device-time regressions also reject scientific admission without
+rewinding the link sequence tracker. Window eviction uses `Stopwatch`
+monotonic ticks, so UTC/NTP corrections cannot alter duration. Duplicates,
+out-of-order, quality-invalid and time-regressed frames remain in evidence but
+are excluded from the chart/scientific series.
 
-> **Nota:** el dashboard actual opera correctamente para el caso de uso de banco en tiempo real. Esta arquitectura objetivo es el siguiente paso para soportar trazabilidad de evidencia y análisis post-sesión.
+## Security and connection truth
 
----
+- The application rejects non-loopback requests even if Kestrel is bound
+  broadly.
+- Connect/disconnect require a 256-bit same-origin control token in a custom
+  header; cross-origin form POSTs cannot operate the bench.
+- Serial state is explicit: `REQUESTED` → `OPENING` → `OPEN` or `FAULT`.
+  The UI reports connected only after `SerialPort.Open` succeeds.
+- A connection generation forces close/reopen when port or baud changes.
+- Browser dependencies are local and versioned; runtime does not need a CDN.
 
-## 6) Relación con compliance y validación
+## Still open
 
-- La evidencia de ensayos de banco (T1-T10 EPS, uplink P1 LoRa, FlatSat) debe quedar como sesiones persistentes exportables.
-- La compliance matrix (`01_Mission/compliance_matrix.md`) referencia evidencia de sesiones de banco.
-- La arquitectura aquí definida es el habilitador para el evidence pack del plan de validación (`01_Mission/validation_plan_and_stage_gates.md`).
+- replay UI and signed/controlled export;
+- repository-resolved build provenance and dependency/SBOM binding;
+- operator signature/role authentication and external hash/signature anchor;
+- off-host/WORM archive and trusted UTC;
+- calibration metadata, instrument traceability and RF RSSI/SNR/CFO;
+- hardware end-to-end execution after firmware compilation;
+- evidence-pack procedure, reviewer sign-off and VCRM linkage.
 
----
-
-## 7) Referencias
-
-- `05_Software/GroundTelemetryDashboard/docs/README.md`
-- `01_Mission/compliance_matrix.md`
-- `01_Mission/validation_plan_and_stage_gates.md`
-- `00_MVP/MVP v2.2.md` §14 (Addendum software de banco)
-
----
-
-## 8) Gap actual y criterio de Gate B
-
-### 8.1 Brecha entre documentación y software real
-
-> **Brecha explícita:** esta arquitectura está completamente especificada como objetivo, pero **no está implementada** en el dashboard actual (`05_Software/GroundTelemetryDashboard/`). El estado en memoria sigue siendo la única fuente de verdad del sistema de banco.
-
-Impactos concretos de este gap:
-- Los ensayos de banco actuales **no generan raw logs persistentes** ni muestras parseadas recuperables post-sesión.
-- No es posible citar sesiones de ensayo como **evidencia reproducible** para la compliance matrix (`01_Mission/compliance_matrix.md` CX-SW-03, CX-EP-01).
-- Sin persistencia estructurada, los criterios de éxito de Gate B no pueden cerrarse.
-
-Estado actual del dashboard: opera correctamente para visualización en tiempo real (caso de uso de banco inmediato). No es un problema funcional hoy, pero es un bloqueador para trazabilidad de evidencia.
-
-### 8.2 Criterio obligatorio en Gate B
-
-> **Gate B (Cierre uplink P1) no puede cerrarse** sin implementación funcional de los siguientes componentes de esta arquitectura:
-
-| Componente | Obligatorio para Gate B |
-|---|---|
-| Raw log append-only por sesión (§3.1) | **Sí** |
-| Almacenamiento persistente de muestras parseadas (§3.2) | **Sí** |
-| Metadata de sesión (§3.3) | **Sí** |
-| Export CSV/JSON básico (§3.5) | **Sí** |
-| Separación cache UI / persistencia (§3.7) | **Sí** |
-| Replay de sesiones (§3.4) | Deseable; puede diferirse a Gate E |
-| Registro de eventos de operación (§3.6) | Deseable; puede diferirse a Gate E |
-
-**Owner:** Ground SW. Ver `01_Mission/validation_plan_and_stage_gates.md` Gate B.
+The implementation removes the RAM-only blocker. It does not close Gate B or
+any flight requirement without an executed and independently reviewed test.
