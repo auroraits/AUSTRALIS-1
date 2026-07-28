@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <RH_ASK.h>
+#include <esp_system.h>
 
 #include "../../common/filters/MadgwickAHRS.h"
 
@@ -29,15 +30,19 @@ static const float GYRO_DEG_TO_RAD = 0.01745329251994f;
 
 static const float MADGWICK_BETA = 0.12f;
 static const uint32_t FILTER_DT_US = 10000UL;        // 100 Hz filtro
-static const uint32_t TX_DT_US = 50000UL;            // 20 Hz RF
+static const uint32_t TX_DT_US = 500000UL;           // 2 Hz RF, con margen de airtime
 static const uint16_t GYRO_CAL_SAMPLES = 400;
 
-static const int8_t BODY_AX_SIGN = +1;
-static const int8_t BODY_AY_SIGN = -1;
-static const int8_t BODY_AZ_SIGN = +1;
-static const int8_t BODY_GX_SIGN = +1;
-static const int8_t BODY_GY_SIGN = -1;
-static const int8_t BODY_GZ_SIGN = +1;
+// SENSOR_TO_BODY debe ser una rotacion cartesiana derecha. Identidad es el
+// unico baseline permitido hasta medir la orientacion fisica del sensor.
+static constexpr int8_t M00 = 1, M01 = 0, M02 = 0;
+static constexpr int8_t M10 = 0, M11 = 1, M12 = 0;
+static constexpr int8_t M20 = 0, M21 = 0, M22 = 1;
+static_assert(
+    M00 * (M11 * M22 - M12 * M21)
+      - M01 * (M10 * M22 - M12 * M20)
+      + M02 * (M10 * M21 - M11 * M20) == 1,
+    "SENSOR_TO_BODY must have determinant +1");
 
 // RH_ASK en 2000 bps (OOK/ASK)
 RH_ASK ask(2000, 255, TX_PIN, 255, false);
@@ -48,6 +53,8 @@ struct TelemetryPacket {
   uint8_t magic;
   uint8_t version;
   uint8_t sensor_type;
+  uint8_t quality_flags;
+  uint32_t boot_id;
   uint32_t seq;
   uint32_t t_ms;
   int16_t ax;
@@ -64,15 +71,30 @@ struct TelemetryPacket {
 };
 #pragma pack(pop)
 
+static_assert(
+    sizeof(TelemetryPacket) <= RH_ASK_MAX_MESSAGE_LEN,
+    "TelemetryPacket exceeds RadioHead ASK message limit");
+static constexpr uint32_t ASK_ESTIMATED_FRAME_BITS =
+    (sizeof(TelemetryPacket) + 7UL) * 12UL + 48UL;
+static constexpr uint32_t ASK_ESTIMATED_AIRTIME_US =
+    ASK_ESTIMATED_FRAME_BITS * 1000000UL / 2000UL;
+static_assert(
+    TX_DT_US >= ASK_ESTIMATED_AIRTIME_US * 5UL / 4UL,
+    "TX period must retain at least 25 percent airtime margin");
+
 enum : uint8_t {
   PACKET_MAGIC = 'T',
-  PACKET_VERSION = 3,
-  SENSOR_TYPE_MPU6050 = 1
+  PACKET_VERSION = 4,
+  SENSOR_TYPE_MPU6050 = 1,
+  QUALITY_IMU_VALID = 1 << 0,
+  QUALITY_ACCEL_REFERENCE_VALID = 1 << 1
 };
 
 static uint32_t g_seq = 0;
+static uint32_t g_bootId = 0;
 static uint32_t g_lastFilterUs = 0;
 static uint32_t g_lastTxUs = 0;
+static uint32_t g_txBusySkips = 0;
 static TelemetryPacket g_lastPacket = {};
 static uint8_t g_mpuAddr = MPU_ADDR_DEFAULT;
 static float g_gyroBiasX = 0.0f;
@@ -135,13 +157,18 @@ bool readImu(int16_t &ax, int16_t &ay, int16_t &az, int16_t &gx, int16_t &gy, in
   return true;
 }
 
+void mapVectorToBody(float &x, float &y, float &z) {
+  const float sensorX = x;
+  const float sensorY = y;
+  const float sensorZ = z;
+  x = M00 * sensorX + M01 * sensorY + M02 * sensorZ;
+  y = M10 * sensorX + M11 * sensorY + M12 * sensorZ;
+  z = M20 * sensorX + M21 * sensorY + M22 * sensorZ;
+}
+
 void mapAxes(float &ax, float &ay, float &az, float &gx, float &gy, float &gz) {
-  ax *= BODY_AX_SIGN;
-  ay *= BODY_AY_SIGN;
-  az *= BODY_AZ_SIGN;
-  gx *= BODY_GX_SIGN;
-  gy *= BODY_GY_SIGN;
-  gz *= BODY_GZ_SIGN;
+  mapVectorToBody(ax, ay, az);
+  mapVectorToBody(gx, gy, gz);
 }
 
 void calibrateGyroBias() {
@@ -193,23 +220,24 @@ void handleSerialCommands() {
   }
 }
 
-// NOTA: RH_ASK::send() retorna false únicamente si el payload supera
-// RH_ASK_MAX_MESSAGE_LEN (60 bytes). TelemetryPacket mide 41 bytes, por lo que
-// en condiciones normales send() nunca falla y los reintentos no se activan.
-// Los errores de canal RF (interferencia, alcance) resultan en paquetes perdidos
-// detectados por el receptor mediante gaps de secuencia, no por retorno false aquí.
-bool sendWithRetries(const TelemetryPacket &pkt) {
+// La transferencia RH_ASK es asincrona. No se usa waitPacketSent(): el filtro
+// de 100 Hz debe continuar mientras los bits salen por interrupciones.
+enum TxStartResult : uint8_t {
+  TX_STARTED,
+  TX_BUSY,
+  TX_REJECTED
+};
+
+TxStartResult tryStartTransmit(const TelemetryPacket &pkt) {
+  if (ask.mode() == RHModeTx) {
+    return TX_BUSY;
+  }
   const uint8_t *payload = reinterpret_cast<const uint8_t *>(&pkt);
   const uint8_t size = sizeof(TelemetryPacket);
 
-  for (uint8_t attempt = 0; attempt < 3; ++attempt) {
-    if (ask.send(payload, size)) {
-      ask.waitPacketSent();
-      return true;
-    }
-    delay(8);
-  }
-  return false;
+  // send() only starts the interrupt-driven transfer. Channel loss is measured
+  // at RX with boot_id/sequence gaps; it is not observable from this return.
+  return ask.send(payload, size) ? TX_STARTED : TX_REJECTED;
 }
 
 void setup() {
@@ -221,6 +249,7 @@ void setup() {
 
   Serial.println("Telemetry TX starting...");
 
+  g_bootId = esp_random();
 
   Wire.begin(PIN_SDA, PIN_SCL);
 
@@ -238,6 +267,9 @@ void setup() {
   g_lastTxUs = g_lastFilterUs;
 
   Serial.printf("#SENSOR:MPU6050 addr=0x%02X\n", g_mpuAddr);
+  Serial.printf("#BOOT,id=%08lX packet_version=%u rf_rate_hz=2\n",
+                (unsigned long)g_bootId,
+                PACKET_VERSION);
   Serial.printf("#CAL,gyro_bias=%.6f,%.6f,%.6f\n", g_gyroBiasX, g_gyroBiasY, g_gyroBiasZ);
   Serial.println("Telemetry TX ready");
 }
@@ -252,8 +284,8 @@ void loop() {
   }
 
   // FRAME NOTE: pkt.ax/ay/az/gx/gy/gz contienen datos en frame SENSOR (raw ADC,
-  // sin aplicar BODY_Ax_SIGN). El quaternion pkt.q0..q3 está en frame BODY
-  // (con remapeo BODY_Ax_SIGN aplicado antes de Madgwick).
+  // sin aplicar SENSOR_TO_BODY). El quaternion pkt.q0..q3 está en frame BODY
+  // (con la matriz SENSOR_TO_BODY aplicada antes de Madgwick).
   // El dashboard grafica IMU en sensor frame y orientación en body frame.
   // Esto es intencional: los raw IMU sirven para diagnóstico de hardware;
   // el quaternion representa la actitud del cuerpo del satélite.
@@ -286,6 +318,12 @@ void loop() {
   pkt.magic = PACKET_MAGIC;
   pkt.version = PACKET_VERSION;
   pkt.sensor_type = SENSOR_TYPE_MPU6050;
+  pkt.quality_flags = QUALITY_IMU_VALID;
+  const float accelNormG = sqrtf(axBody * axBody + ayBody * ayBody + azBody * azBody);
+  if (accelNormG >= 0.5f && accelNormG <= 1.5f) {
+    pkt.quality_flags |= QUALITY_ACCEL_REFERENCE_VALID;
+  }
+  pkt.boot_id = g_bootId;
   pkt.q0 = madgwick.q0();
   pkt.q1 = madgwick.q1();
   pkt.q2 = madgwick.q2();
@@ -306,12 +344,22 @@ void loop() {
     return;
   }
 
-  g_lastPacket.seq = g_seq++;
-  bool ok = sendWithRetries(g_lastPacket);
+  g_lastPacket.seq = g_seq;
+  const TxStartResult txResult = tryStartTransmit(g_lastPacket);
+  if (txResult == TX_BUSY) {
+    g_txBusySkips++;
+    return;
+  }
+
   g_lastTxUs = nowUs;
-  Serial.printf("TX seq=%lu status=%s q=[%.3f %.3f %.3f %.3f] dt=%ums\n",
+  if (txResult == TX_STARTED) {
+    g_seq++;
+  }
+  Serial.printf("TX boot=%08lX seq=%lu status=%s busy_skips=%lu q=[%.3f %.3f %.3f %.3f] dt=%ums\n",
+                (unsigned long)g_lastPacket.boot_id,
                 (unsigned long)g_lastPacket.seq,
-                ok ? "ok" : "fail",
+                txResult == TX_STARTED ? "started" : "rejected_local",
+                (unsigned long)g_txBusySkips,
                 g_lastPacket.q0,
                 g_lastPacket.q1,
                 g_lastPacket.q2,

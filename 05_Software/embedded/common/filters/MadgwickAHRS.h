@@ -3,7 +3,9 @@
 #include <Arduino.h>
 #include <math.h>
 
-// Minimal Madgwick IMU implementation (gyro + accel, no magnetometer).
+// Minimal terrestrial bench Madgwick IMU implementation (gyro + accel).
+// It is not an orbital ADCS estimator: in free fall the accelerometer does not
+// provide a gravity reference, and without an absolute vector yaw also drifts.
 // Quaternion convention: q0=w, q1=x, q2=y, q3=z.
 class MadgwickAHRS {
  public:
@@ -23,7 +25,10 @@ class MadgwickAHRS {
     float qDot4 = 0.5f * (q0_ * gz + q1_ * gy - q2_ * gx);
 
     const float accNorm = sqrtf(ax * ax + ay * ay + az * az);
-    if (accNorm > 1e-6f) {
+    // Inputs are in g. Only apply the terrestrial gravity correction when the
+    // norm is plausible; never normalize near-zero free-fall noise.
+    const bool terrestrialGravityReference = accNorm >= 0.5f && accNorm <= 1.5f;
+    if (terrestrialGravityReference) {
       ax /= accNorm;
       ay /= accNorm;
       az /= accNorm;
