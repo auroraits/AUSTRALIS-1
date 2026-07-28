@@ -3,6 +3,7 @@
 **Revisión:** 2026-07-27
 **Estado:** Draft — ejecución radiada bloqueada por `REG-LORA-915`
 **Trazabilidad:** `04_Communications/uplink_lora_slotted_protocol.md`, `04_Communications/link_budget_lora_uplink_preliminary.md`
+**ProcedureID:** `PROC-RF-002`, `PROC-DATA-001`, `PROC-REG-001`
 
 ## 1) Propósito
 
@@ -70,6 +71,20 @@ El canal usado en coax es una frecuencia de test. No se lo presenta como canal
 orbital.
 
 ## 6) Matriz de ensayos
+
+| TestID | ReqID principal |
+|---|---|
+| `LORA-01` | COMMS-UL-06 |
+| `LORA-02` | MIS-REQ-04, COMMS-UL-01/06 |
+| `LORA-03` | COMMS-UL-03/06 |
+| `LORA-04` | COMMS-UL-06 |
+| `LORA-05` | MIS-REQ-04, COMMS-UL-06 |
+| `LORA-06` | COMMS-UL-02/03 |
+| `LORA-07` | MIS-REQ-05/20 |
+| `LORA-08` | MIS-REQ-04 |
+| `LORA-09` | MIS-REQ-04 |
+| `LORA-10` | MIS-REQ-02/04 |
+| `LORA-11` | MIS-REQ-05/09, COMMS-UL-04/05 |
 
 ### LORA-01 — Configuración y ToA
 

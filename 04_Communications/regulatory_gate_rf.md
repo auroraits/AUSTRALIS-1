@@ -2,7 +2,7 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Active — gates abiertos; no constituye asesoramiento legal
-**Trazabilidad:** ENACOM, IARU, UIT y `04_Communications/rf_subsystem_overview.md`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, ENACOM, IARU y UIT
 
 ## 1) Regla de operación
 

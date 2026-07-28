@@ -2,7 +2,7 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Proposed — requisito de seguridad; suite criptográfica y encoding TBD
-**Trazabilidad:** `04_Communications/regulatory_gate_rf.md`, `04_Communications/rf_subsystem_overview.md`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/regulatory_gate_rf.md`
 
 ## 1) Propósito y límites
 
@@ -231,4 +231,3 @@ Los casos críticos exigen 100 % de rechazo correcto; no se admiten mismatches
 - mecanismo de rotación y contingencia;
 - impacto regulatorio escrito;
 - ProcedureID y EvidenceID de la campaña.
-

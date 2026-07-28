@@ -2,7 +2,7 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Active — tamaños, tasas y cuotas pendientes de medición
-**Trazabilidad:** `04_Communications/rf_subsystem_overview.md`, `04_Communications/uhf_command_security_protocol.md`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/uhf_command_security_protocol.md`
 
 ## 1) Principio
 

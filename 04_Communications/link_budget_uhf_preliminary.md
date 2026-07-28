@@ -2,7 +2,7 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Preliminary — cálculo de factibilidad, no evidencia de hardware
-**Trazabilidad:** `04_Communications/rf_subsystem_overview.md`, `04_Communications/regulatory_gate_rf.md`, `docs/COMMS/rf_calculations.py`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/regulatory_gate_rf.md`, `docs/COMMS/rf_calculations.py`
 
 ## 1) Alcance y límites
 

@@ -3,6 +3,7 @@
 **Revisión:** 2026-07-27
 **Estado:** Draft
 **Trazabilidad:** `04_Communications/ground_station_dual_use_satnogs_australis.md`
+**ProcedureID:** `PROC-GND-001`, `PROC-SEC-001`, `PROC-DATA-001`
 
 ## 1) Objetivo
 
@@ -27,23 +28,23 @@ Cada TestID fija antes de ejecutar:
 
 ## 3) Matriz
 
-| TestID | Objetivo | Fallas/estímulo | Hard-fail |
-|---|---|---|---|
-| `GS-01` | Aislamiento SatNOGS | scan USB/red, requests maliciosos | host RX obtiene capacidad TX |
-| `GS-02` | Secuencia T/R | kill proceso/red/power en cada paso | PTT queda activo o LNA expuesto |
-| `GS-03` | Protección RF | SWR alto, no load, sensor fail | TX no se corta |
-| `GS-04` | Armado | sin llave, permiso expirado, rol inválido | cualquier RF TX |
-| `GS-05` | Command security | tag/replay/epoch/schema adversos | comando produce efecto |
-| `GS-06` | Orbit data | wrong object, rollback, stale, corrupt | TX/track aceptado fuera de budget |
-| `GS-07` | Tiempo/rotor | GNSS/NTP fail, encoder error, viento | TX fuera de ventana/pointing |
-| `GS-08` | Persistencia | disk full, power cut, reboot | evidencia aceptada sin raw |
-| `GS-09` | Replay | dataset conocido | resultado no reproducible |
-| `GS-10` | Red/UI | LAN no autenticada, session hijack | connect/PTT/config modificable |
-| `GS-11` | Operación offline | Internet/CDN/DNS down | adquisición/seguridad fallan |
-| `GS-12` | UPS/watchdog | mains fail, process hang | estado no vuelve seguro |
-| `GS-13` | Clima | viento/lluvia/sensor invalid | track/TX no se inhiben |
-| `GS-14` | SatNOGS RX | observación pública | no decodifica schema publicado |
-| `GS-15` | End-to-end | frame→OBC sim→ACK→storage | falta correlación o autenticidad |
+| TestID | ReqID | Objetivo | Fallas/estímulo | Hard-fail |
+|---|---|---|---|---|
+| `GS-01` | MIS-REQ-21 | Aislamiento SatNOGS | scan USB/red, requests maliciosos | host RX obtiene capacidad TX |
+| `GS-02` | MIS-REQ-03/21 | Secuencia T/R | kill proceso/red/power en cada paso | PTT queda activo o LNA expuesto |
+| `GS-03` | MIS-REQ-03 | Protección RF | SWR alto, no load, sensor fail | TX no se corta |
+| `GS-04` | MIS-REQ-21 | Armado | sin llave, permiso expirado, rol inválido | cualquier RF TX |
+| `GS-05` | MIS-REQ-11/18/20 | Command security | tag/replay/epoch/schema adversos | comando produce efecto |
+| `GS-06` | COMMS-UL-03 | Orbit data | wrong object, rollback, stale, corrupt | TX/track aceptado fuera de budget |
+| `GS-07` | MIS-REQ-22/COMMS-UL-03 | Tiempo/rotor | GNSS/NTP fail, encoder error, viento | TX fuera de ventana/pointing |
+| `GS-08` | MIS-REQ-05/17 | Persistencia | disk full, power cut, reboot | evidencia aceptada sin raw |
+| `GS-09` | MIS-REQ-05/17 | Replay | dataset conocido | resultado no reproducible |
+| `GS-10` | MIS-REQ-21 | Red/UI | LAN no autenticada, session hijack | connect/PTT/config modificable |
+| `GS-11` | MIS-REQ-21 | Operación offline | Internet/CDN/DNS down | adquisición/seguridad fallan |
+| `GS-12` | MIS-REQ-22 | UPS/watchdog | mains fail, process hang | estado no vuelve seguro |
+| `GS-13` | MIS-REQ-22 | Clima | viento/lluvia/sensor invalid | track/TX no se inhiben |
+| `GS-14` | MIS-REQ-19 | SatNOGS RX | observación pública | no decodifica schema publicado |
+| `GS-15` | MIS-REQ-11/19/20 | End-to-end | frame→OBC sim→ACK→storage | falta correlación o autenticidad |
 
 ## 4) GS-01 — frontera RX-only
 
@@ -221,4 +222,3 @@ La estación no está ready hasta:
 - seguridad y anti-replay verificados;
 - RF/link/OTA/EMC cerrados;
 - procedimiento operacional y de emergencia ensayado.
-

@@ -2,7 +2,7 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Proposed / regulatory-blocked
-**Trazabilidad:** `04_Communications/regulatory_gate_rf.md`, `04_Communications/link_budget_lora_uplink_preliminary.md`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/regulatory_gate_rf.md`
 
 ## 1) Estado operacional
 

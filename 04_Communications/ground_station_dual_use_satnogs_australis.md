@@ -2,7 +2,7 @@
 
 **Revision:** 2026-07-27
 **Estado:** Draft
-**Trazabilidad:** `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/satnogs_public_beacon_architecture.md`, `04_Communications/rf_subsystem_overview.md`
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/satnogs_public_beacon_architecture.md`, `04_Communications/rf_subsystem_overview.md`
 
 ---
 

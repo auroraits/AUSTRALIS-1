@@ -2,7 +2,7 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, `04_Communications/regulatory_gate_rf.md`, documentos de link budget de este subsistema
+**Trazabilidad:** `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`, `04_Communications/regulatory_gate_rf.md`, documentos de link budget de este subsistema
 
 ## 1) Arquitectura RF y estado real
 

@@ -3,6 +3,7 @@
 **Revisión:** 2026-07-27
 **Estado:** Draft — criterios numéricos pendientes de asignación previa al test
 **Trazabilidad:** `04_Communications/link_budget_uhf_preliminary.md`, `04_Communications/rf_subsystem_overview.md`
+**ProcedureID:** `PROC-RF-001`, `PROC-RF-002`, `PROC-REG-001`, `PROC-SEC-001`
 
 ## 1) Objetivo
 
@@ -47,20 +48,20 @@ la pérdida medida de cada cable/fixture.
 
 ## 4) Matriz de pruebas
 
-| ID | Prueba | Método | Criterio a congelar | Evidencia |
-|---|---|---|---|---|
-| UHF-01 | Potencia TX y EIRP | Conducted + patrón | min/nom/max por V/T | CSV, espectro, calibración |
-| UHF-02 | Sensibilidad RX | Potencia escalonada | PER/BER objetivo e IC | frames y curva PER |
-| UHF-03 | Uplink completo | Ground TX→orbital RX | PER y ACK autenticado | raw frames/logs |
-| UHF-04 | Downlink completo | Orbital TX→ground RX | PER por nivel | raw frames/logs |
-| UHF-05 | Doppler | Rampa ±envolvente | adquisición y PER | perfil aplicado + logs |
-| UHF-06 | Error de reloj | Doppler + ppm + V/T | margen de adquisición | frecuencia medida |
-| UHF-07 | Espectro | TX peor caso | máscara/armónicos/espurias | screenshots + CSV |
-| UHF-08 | OTA patrón | Satélite integrado | realized gain/polarización | patrón 3D |
-| UHF-09 | Coexistencia | Matriz de agresores | degradación asignada | NF/PER/espectro |
-| UHF-10 | Half-duplex | TX/RX switching | protección + tiempo | power/SWR/event log |
-| UHF-11 | Seguridad | comandos válidos/adversos | 100 % reglas críticas | corpus y verdicts |
-| UHF-12 | End-to-end | OBC↔RF↔ground | producto+ACK persistidos | evidence bundle |
+| ID | ReqID | Prueba | Método | Criterio a congelar | Evidencia |
+|---|---|---|---|---|---|
+| UHF-01 | MIS-REQ-03 | Potencia TX y EIRP | Conducted + patrón | min/nom/max por V/T | CSV, espectro, calibración |
+| UHF-02 | MIS-REQ-03/19 | Sensibilidad RX | Potencia escalonada | PER/BER objetivo e IC | frames y curva PER |
+| UHF-03 | MIS-REQ-11 | Uplink completo | Ground TX→orbital RX | PER y ACK autenticado | raw frames/logs |
+| UHF-04 | MIS-REQ-19 | Downlink completo | Orbital TX→ground RX | PER por nivel | raw frames/logs |
+| UHF-05 | MIS-REQ-03 | Doppler | Rampa ±envolvente | adquisición y PER | perfil aplicado + logs |
+| UHF-06 | MIS-REQ-03 | Error de reloj | Doppler + ppm + V/T | margen de adquisición | frecuencia medida |
+| UHF-07 | MIS-REQ-03 | Espectro | TX peor caso | máscara/armónicos/espurias | screenshots + CSV |
+| UHF-08 | MIS-REQ-03 | OTA patrón | Satélite integrado | realized gain/polarización | patrón 3D |
+| UHF-09 | MIS-REQ-03 | Coexistencia | Matriz de agresores | degradación asignada | NF/PER/espectro |
+| UHF-10 | MIS-REQ-03/21 | Half-duplex | TX/RX switching | protección + tiempo | power/SWR/event log |
+| UHF-11 | MIS-REQ-11/18/20 | Seguridad | comandos válidos/adversos | 100 % reglas críticas | corpus y verdicts |
+| UHF-12 | MIS-REQ-19/21 | End-to-end | OBC↔RF↔ground | producto+ACK persistidos | evidence bundle |
 
 ## 5) Sensibilidad, BER y PER
 
