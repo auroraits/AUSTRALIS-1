@@ -1,6 +1,6 @@
 # License scope and file classification
 
-Status: **Interim / legal review open**  
+Status: **Interim / legal review open**
 Effective date: 2026-07-27
 
 This file provides deterministic repository-level classification while

@@ -1,6 +1,6 @@
 # Artifact provenance and reproducibility register
 
-Status: **Active control / records incomplete**  
+Status: **Active control / records incomplete**
 Effective date: 2026-07-27
 
 This register defines the minimum provenance required before an artifact may be

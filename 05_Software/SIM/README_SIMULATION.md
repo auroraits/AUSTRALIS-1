@@ -34,6 +34,7 @@ Correcciones incluidas:
   corriente, estado de carga ni charge-inhibit;
 - temperatura inicial, substep y clamps numéricos se exportan como hipótesis
   y requieren prueba de convergencia;
+- cualquier `NumericalClampHit=true` invalida el resultado térmico;
 - no hay correlación thermal balance/TVAC.
 
 Por ello, el simulador exporta todos los casos en orden de entrada, sin

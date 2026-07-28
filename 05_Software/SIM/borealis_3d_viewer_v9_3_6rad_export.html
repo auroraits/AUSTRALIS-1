@@ -1290,6 +1290,7 @@ try {
     const battMaxAllValues = allRadiatorResults.map(r => r.battMaxAllC);
     const battMinSunlitValues = allRadiatorResults.map(r => r.battMinSunlitC);
     const energyValues = allRadiatorResults.map(r => r.panelElectricalWhPerDay);
+    const numericalClampHit = allRadiatorResults.some(r => r.numericalClampHit);
 
     return {
       ...candidate,
@@ -1308,6 +1309,7 @@ try {
       battMaxAllCRange: [Math.min(...battMaxAllValues), Math.max(...battMaxAllValues)],
       battMinSunlitCRange: [Math.min(...battMinSunlitValues), Math.max(...battMinSunlitValues)],
       panelElectricalWhPerDayRange: [Math.min(...energyValues), Math.max(...energyValues)],
+      numericalClampHit,
       allRadiators: allRadiatorResults
     };
   }
@@ -1369,6 +1371,7 @@ try {
     let battMinSunlitC = 1e9;
     let battMinAllC = 1e9;
     let battMaxAllC = -1e9;
+    let numericalClampHit = false;
     const panelFaceEnergyWh = new Array(6).fill(0);
     let netPanelWh = 0;
 
@@ -1517,6 +1520,11 @@ try {
           numericalMinK,
           numericalMaxK
         );
+        numericalClampHit = numericalClampHit
+          || T_face.some(t => t <= numericalMinK || t >= numericalMaxK)
+          || T_frame <= numericalMinK || T_frame >= numericalMaxK
+          || T_cm5 <= numericalMinK || T_cm5 >= numericalMaxK
+          || T_batt <= numericalMinK || T_batt >= numericalMaxK;
 
         const cm5C = T_cm5 - K0;
         const battC = T_batt - K0;
@@ -1552,6 +1560,7 @@ try {
       battMinSunlitC,
       battMinAllC,
       battMaxAllC,
+      numericalClampHit,
       panelElectricalWh: netPanelWh,
       panelElectricalWhPerDay,
       panelFaceEnergyWh,
@@ -1697,7 +1706,7 @@ try {
       </div>`;
     document.getElementById('bestSummary').innerHTML = summary;
 
-    let html = '<table><thead><tr><th>Caso</th><th>Actitud ideal</th><th>i SSO</th><th>alt</th><th>LTAN</th><th>drift LTAN</th><th>Pases BA</th><th>Eclipse</th><th>Wh/día (rango 6 rad)</th><th>Tmax CM5 all (rango)</th><th>T batt all (rango global)</th><th>Tmin batt sunlit (proxy carga)</th><th>Tmin batt eclipse</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Caso</th><th>Actitud ideal</th><th>i SSO</th><th>alt</th><th>LTAN</th><th>drift LTAN</th><th>Pases BA</th><th>Eclipse</th><th>Wh/día (rango 6 rad)</th><th>Tmax CM5 all (rango)</th><th>T batt all (rango global)</th><th>Tmin batt sunlit (proxy carga)</th><th>Tmin batt eclipse</th><th>Clamp numérico</th></tr></thead><tbody>';
     rows.slice(0,20).forEach((r,idx)=>{
       html += `<tr>
         <td>${idx+1}</td>
@@ -1713,6 +1722,7 @@ try {
         <td>${fmtNum(r.battMinAllCRange[0],1,'°C')}–${fmtNum(r.battMaxAllCRange[1],1,'°C')}</td>
         <td>${fmtNum(r.battMinSunlitCRange[0],1,'°C')}–${fmtNum(r.battMinSunlitCRange[1],1,'°C')}</td>
         <td>${fmtNum(r.battMinEclipseCRange[0],1,'°C')}–${fmtNum(r.battMinEclipseCRange[1],1,'°C')}</td>
+        <td>${r.numericalClampHit ? 'HIT — inválido' : 'no'}</td>
       </tr>`;
     });
     html += '</tbody></table>';
@@ -1868,7 +1878,7 @@ try {
     const header = [
       'Case','ModelVersion','SourceRevision','EpochUTC','Hours','Dt_s',
       'AttitudeIdeal','IncSSO_deg','Alt_km','LTAN_h','LTANDrift_h_per_year',
-      'Passes_BA','Visible_min','Eclipse_pct','ModelStatus'
+      'Passes_BA','Visible_min','Eclipse_pct','NumericalClampHit','ModelStatus'
     ];
     faces.forEach(f => header.push(
       `Rad${f}_Wh_per_day`, `Rad${f}_Tcm5max_C`,
@@ -1885,7 +1895,7 @@ try {
         r.incDeg.toFixed(6), r.altKm.toFixed(3), r.ltanHours.toFixed(4),
         r.ltanDriftHoursPerYear.toFixed(6), r.passCount,
         r.totalVisibleMin.toFixed(3), (r.eclipseFraction*100).toFixed(4),
-        MODEL_STATUS
+        r.numericalClampHit, MODEL_STATUS
       ];
       if(r.allRadiators && r.allRadiators.length === 6){
         for(let fi=0; fi<6; fi++){

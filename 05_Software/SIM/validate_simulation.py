@@ -43,6 +43,7 @@ def main() -> int:
         "CM5 all-state maximum": "hotMaxC = Math.max(hotMaxC, cm5C)",
         "sunlit battery metric": "battMinSunlitC",
         "numerical assumptions": "numericalSubstepMax_s",
+        "numerical clamp flag": "numericalClampHit",
         "manifest": "csvSha256",
         "incomplete status": "INCOMPLETE_NOT_FOR_DESIGN_DECISIONS",
     }

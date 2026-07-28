@@ -1,6 +1,6 @@
 # Repository governance
 
-Status: **Active**  
+Status: **Active**
 Effective date: 2026-07-27
 
 ## Authority
