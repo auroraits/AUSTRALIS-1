@@ -8,7 +8,7 @@
 		(title "05_Power_Gating")
 	)
 	(lib_symbols)
-	(text "Bloques de switch de carga: entrada, salida y enable."
+	(text "NO FABRICAR: switches high-side y estados seguros no están diseñados."
 		(exclude_from_sim no)
 		(at 20 15 0)
 		(effects
@@ -18,48 +18,8 @@
 		)
 		(uuid "790a4cc3-3fd7-4fc4-abb0-0be584daa170")
 	)
-	(wire
-		(pts
-			(xy 20 62) (xy 180 62)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "a94ee559-ec46-4d3a-a947-e162818a0236")
-	)
-	(wire
-		(pts
-			(xy 60 70) (xy 180 70)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "ae3a014a-363b-4d54-a839-34511a51b966")
-	)
-	(wire
-		(pts
-			(xy 130 78) (xy 180 78)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "c774ea2b-6c65-4968-9205-702963b5ec63")
-	)
-	(wire
-		(pts
-			(xy 20 52) (xy 180 52)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "e80c9bff-af07-49b4-b04a-56100a6ccff0")
-	)
 	(hierarchical_label "SW_5V_RF_EN"
-		(shape output)
+		(shape input)
 		(at 180 70 0)
 		(effects
 			(font
@@ -89,7 +49,7 @@
 		(uuid "806e7e91-f5e6-4cad-b53e-024275458cdc")
 	)
 	(hierarchical_label "SW_3V3_OBC_EN"
-		(shape output)
+		(shape input)
 		(at 180 78 0)
 		(effects
 			(font

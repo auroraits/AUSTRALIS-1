@@ -8,7 +8,7 @@
 		(title "03_Battery_BMS_2S")
 	)
 	(lib_symbols)
-	(text "Salida protegida del pack por BMS_P/BMS_N hacia bus VBAT."
+	(text "NO FABRICAR: BMS, protecciones y pack 2S no están implementados."
 		(exclude_from_sim no)
 		(at 20 20 0)
 		(effects
@@ -18,7 +18,7 @@
 		)
 		(uuid "2ca755de-4016-43af-9727-1c965bd5c09f")
 	)
-	(text "BMS (Battery Management System) 2S de banco con pines funcionales B+, BM, B-."
+	(text "Pines de interfaz deliberadamente desconectados; no existe salida protegida."
 		(exclude_from_sim no)
 		(at 20 15 0)
 		(effects
@@ -27,36 +27,6 @@
 			)
 		)
 		(uuid "3c87ba6a-773b-4076-ad60-9b4285e65fd6")
-	)
-	(wire
-		(pts
-			(xy 20 64) (xy 180 64)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "0fd59da8-636f-48da-8a7b-8e6f4fe222a2")
-	)
-	(wire
-		(pts
-			(xy 20 56) (xy 180 56)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "396ea9fd-c3b3-46e1-b92a-8af55c2062eb")
-	)
-	(wire
-		(pts
-			(xy 65 72) (xy 180 72)
-		)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(uuid "c3a2649d-f1e3-4b35-8d6c-17732fb37bfd")
 	)
 	(global_label "B+"
 		(shape bidirectional)

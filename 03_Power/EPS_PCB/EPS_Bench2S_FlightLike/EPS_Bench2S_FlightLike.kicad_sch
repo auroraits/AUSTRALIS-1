@@ -5,8 +5,8 @@
 	(uuid "00000000-0000-0000-0000-000000000001")
 	(paper "A4")
 	(title_block
-		(title "EPS Bench 2S Flight-Like")
-		(comment 1 "Raíz del proyecto")
+		(title "EPS 2S NON-FABRICABLE PLACEHOLDER")
+		(comment 1 "NO FABRICAR / NO CONECTAR BATERIA")
 	)
 	(lib_symbols)
 	(sheet

@@ -8,7 +8,7 @@
 		(title "06_Telemetry_TestPoints")
 	)
 	(lib_symbols)
-	(text "Breakouts INA219 con SDA, SCL, VIN+, VIN-."
+	(text "NO FABRICAR: telemetría y test points deliberadamente desconectados."
 		(exclude_from_sim no)
 		(at 20 15 0)
 		(effects
