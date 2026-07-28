@@ -19,6 +19,8 @@ radiativas, volumen, masa, centro de gravedad e inercia.
 3. No se congelan por esta ADR todas las demás cotas: rieles, tabs, keep-outs,
    protrusiones, accesos, rugosidad, masa y centro de gravedad se tomarán del
    dibujo completo CDS y del Interface Control Document (ICD) del integrador.
+   La masa máxima típica CDS de referencia para 1.5U es `3.00 kg`; no sustituye
+   el límite contractual del dispenser.
 4. Todo modelo basado en `150 mm` queda **invalidado para cierre** hasta ser
    regenerado con la geometría completa.
 5. Un fit-check físico con el integrador es obligatorio antes de readiness.

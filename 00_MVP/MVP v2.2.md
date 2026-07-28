@@ -103,11 +103,16 @@ sean TBD no puede declararse cumplido el objetivo primario.
 
 - Clase: CubeSat 1.5U.
 - Longitud externa de referencia CDS Rev. 14.1: `170.2 ± 0.1 mm`.
+- Masa máxima típica de referencia CDS: `3.00 kg`; el ICD/dispenser puede
+  imponer un límite más restrictivo.
 - La simplificación histórica `100 × 100 × 150 mm` queda invalidada.
 - Envolvente completa, rails, keep-outs, protrusiones, masa, CG e interfaz:
   CDS + ICD del integrador.
 - CAD conforme, stack, harness, load path, modos propios, FEA, stowage de
   antena y fit-check: `TBD`.
+- Mínimos de launch safety: deployment switch sobre funciones powered, RBF,
+  tres inhibits RF, tres inhibits de deployables, despliegue no antes de 30 min
+  y transmisión no antes de 45 min; el ICD puede endurecerlos.
 
 ## 7. Órbita y ADCS
 
@@ -180,6 +185,8 @@ Cada evento debe correlacionar:
 - Topología de referencia: batería 2S + MPPT.
 - Celda, capacidad, paralelo, BMS, cargador, secondary protection, fusible,
   balanceo, charge inhibit y rails: TBD.
+- El KiCad actual no implementa un BMS/cargador funcional; las referencias a
+  ICs son candidatos de trade, no una solución de pack.
 - El proyecto KiCad actual es placeholder/no fabricable; fabricación bloqueada.
 - El power budget deberá usar el período orbital real del caso, todos los modos,
   min/nom/max, inrush, quiescent, conversiones, BOL/EOL e incertidumbre.

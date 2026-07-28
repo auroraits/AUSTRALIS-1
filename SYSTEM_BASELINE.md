@@ -37,8 +37,14 @@ pisos de datos, no prueba suficiente de utilidad o seguridad.
 
 - Formato: CubeSat **1.5U**.
 - Longitud externa de referencia: `170.2 ± 0.1 mm`, CDS Rev. 14.1.
+- Masa máxima típica de referencia CDS para 1.5U: `3.00 kg`; el límite
+  contractual aplicable será el más restrictivo del ICD/dispenser.
 - Envolvente completa, masa, CG, rails/keep-outs e interfaces: ICD integrador
   `TBD`.
+- El baseline de seguridad incluye, como mínimos CDS sujetos a endurecimiento
+  por ICD: deployment switch que desconecta funciones powered, RBF, tres
+  inhibiciones independientes de RF, tres de deployables, espera de despliegue
+  de al menos 30 min y ausencia de transmisión durante al menos 45 min.
 - Boot y fallback: `MISSION_MODE = SAFE`.
 - Estados: `MISSION_MODE = SAFE | NOMINAL | DOWNLINK_WINDOW`;
   `EPS_STATE = CRIT | LOW | NOMINAL | HIGH`.
@@ -62,6 +68,8 @@ pisos de datos, no prueba suficiente de utilidad o seguridad.
   punto de máxima potencia.
 - Capacidad, celda, BMS, cargador, rails, MPPT por cara/string y hardware final:
   TBD.
+- El esquema actual no implementa BMS/cargador funcional; ningún IC aislado
+  constituye por sí mismo una arquitectura de pack aceptada.
 - El KiCad flight-like actual no es fabricable; fabricación bloqueada hasta
   revisión de esquema, ERC, BOM, DRC y liberación controlada.
 - Límites de carga/descarga/supervivencia y heater dependen de la celda/BMS y de

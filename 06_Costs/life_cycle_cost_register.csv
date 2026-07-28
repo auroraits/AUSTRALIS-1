@@ -1,0 +1,21 @@
+WBSID,CostElement,Stage,Low,MostLikely,High,Currency,BasisOfEstimate,Source,QuoteDate,FXDate,OwnerRole,Gate,Status,RiskID
+LCC-01,Systems engineering and project management,Program,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Systems,SRR,Open,RSK-PROG-01
+LCC-02,Quality configuration and product assurance,Program,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,QA,SRR,Open,RSK-CONF-01
+LCC-03,Structure thermal and mechanisms,Flight-Like/Flight,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Structure,PDR,Open,RSK-MECH-01
+LCC-04,EPS solar and battery,Flight-Like/Flight,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,EPS,PDR,Open,RSK-EPS-01
+LCC-05,OBC storage and flight software,Flight-Like/Flight,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,FSW/OBC,PDR,Open,RSK-FSW-01
+LCC-06,COMMS RF and antennas,Flight-Like/Flight,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,COMMS,PDR,Open,RSK-RF-01
+LCC-07,ADCS sensors actuators and software,Flight-Like/Flight,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,ADCS,PDR,Open,RSK-ADCS-01
+LCC-08,Science sensors,Flight-Like/Flight,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Science,PDR,Open,RSK-CONF-01
+LCC-09,AI payload hardware model data and compute,Bench/Flight-Like,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AI,PDR,Open,RSK-AI-01
+LCC-10,Ground station and site works,EGSE/Operations,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Ground,PDR,Open,RSK-GND-01
+LCC-11,EGSE fixtures and calibrated metrology,EGSE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT,PDR,Open,RSK-ENV-01
+LCC-12,Engineering qualification and acceptance articles,AIT,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
+LCC-13,Environmental EMC and RF laboratory tests,AIT,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
+LCC-14,Radiation analysis screening and tests,AIT,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Radiation,CDR,Open,RSK-RAD-01
+LCC-15,Regulatory coordination legal and insurance,Program,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Regulatory/Legal,PDR,Open,RSK-REG-02
+LCC-16,Launch service deployer and integration,Launch,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Integration,PDR,Open,RSK-LAUNCH-01
+LCC-17,Transport import taxes customs and FX,Program,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Procurement,PDR,Open,RSK-SUP-01
+LCC-18,Spares rework and contingency,Program,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Procurement,PDR,Open,RSK-COST-01
+LCC-19,Operations data hosting and staffing,Operations,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Operations,PDR,Open,RSK-COST-01
+LCC-20,End of life and disposal activities,Operations,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Operations/Systems,PDR,Open,RSK-ORB-01
