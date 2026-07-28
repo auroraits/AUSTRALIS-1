@@ -3,6 +3,7 @@
 **Revisión:** 2026-07-27
 **Estado:** Preliminary / NOT RELEASED
 **Trazabilidad:** `03_Power/Power Budget.md`,
+`03_Power/LAUNCH_ELECTRICAL_SAFETY_PRELIMINARY.md`,
 `02_Structure/STRUCTURE_BASELINE_PRELIMINARY.md`; topología 2S sujeta a la ADR
 vigente y a su revisión correctiva
 
@@ -155,9 +156,12 @@ El esquema futuro debe definir:
 | heaters | OFF | control independiente y límites hardware |
 
 Antes de la eyección, todas las funciones powered deben permanecer apagadas
-según el CDS/ICD aplicable. El diseño debe incluir RBF, deployment switch e
-inhibiciones de RF/desplegables; cantidades e interfaces finales se confirman
-con el integrador, pero no pueden omitirse del esquema y la BOM.
+según el CDS/ICD aplicable. El diseño debe incluir RBF, deployment switch y,
+como base mínima, tres inhibiciones RF independientes y tres inhibiciones para
+cada función desplegable. Las interfaces finales se confirman con el
+integrador, pero esos mínimos no pueden omitirse del esquema y la BOM. La
+trazabilidad completa se controla en
+`03_Power/LAUNCH_ELECTRICAL_SAFETY_PRELIMINARY.md`.
 
 Cada rail requiere min/nom/max, eficiencia, estabilidad, compensación, layout,
 retorno, caída, inrush, corriente de falla, PGOOD/FAULT, telemetría y
