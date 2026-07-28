@@ -108,6 +108,13 @@ def gross_capacity_bytes(
     return bitrate_bps * contact_s * tx_duty / 8.0
 
 
+def slotted_single_attempt_success_probability(nodes: int, slots: int) -> float:
+    """Modelo ideal: probabilidad de que un intento no comparta slot."""
+    if nodes <= 0 or slots <= 0:
+        raise ValueError("nodes and slots must be positive")
+    return (1.0 - 1.0 / slots) ** (nodes - 1)
+
+
 def wilson_interval(successes: int, trials: int, z: float = 1.95996398454) -> tuple[float, float]:
     """Intervalo Wilson bilateral; por defecto, 95 %."""
     if trials <= 0 or successes < 0 or successes > trials:
@@ -154,6 +161,11 @@ def run_self_test() -> None:
         abs_tol=1e-9,
     )
     assert gross_capacity_bytes(1200, 8 * 60, 0.30) == 21_600
+    assert math.isclose(
+        slotted_single_attempt_success_probability(100, 125),
+        0.4515,
+        abs_tol=0.0001,
+    )
 
 
 def print_reference() -> None:

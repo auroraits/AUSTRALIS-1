@@ -1,174 +1,185 @@
-# SatNOGS Public Beacon Architecture
+# SatNOGS public beacon architecture
 
-**Revision:** 2026-07-04
+**Revisión:** 2026-07-27
 **Estado:** Active
-**Trazabilidad:** `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`, `04_Communications/rf_subsystem_overview.md`, `04_Communications/uplink_data_products_and_downlink_policy.md`
-
----
+**Trazabilidad:** `04_Communications/regulatory_gate_rf.md`, `04_Communications/rf_subsystem_overview.md`
 
 ## 1) Objetivo
 
-Definir como se incorpora SatNOGS al segmento terreno de AUSTRALIS-1 sin cambiar el principio de seguridad operacional:
+Incorporar SatNOGS como red receive-only para evidencia pública sin entregar
+control del satélite ni presentar un enlace amateur como confidencial.
 
-- SatNOGS recibe beacon publico y telemetria minima.
-- El payload downlink completo queda privado/controlado.
-- El uplink de comandos queda privado/controlado.
-- La estacion terrena propia sigue siendo el camino de TTC operacional.
+SatNOGS aporta:
 
----
+- recepción distribuida del beacon;
+- observaciones independientes;
+- publicación de frecuencia/waveform/decoder cuando estén coordinados;
+- mediciones comunitarias de cobertura.
 
-## 2) Rol de SatNOGS
+SatNOGS no aporta:
 
-SatNOGS se usa como red global receive-only para observaciones publicas del satelite.
+- licencia o coordinación;
+- uplink;
+- autenticación de comandos;
+- estación propia para TTC;
+- autorización para publicar o transmitir datos sensibles.
 
-Uso previsto:
+## 2) Perfiles
 
-- recepcion distribuida de beacon UHF,
-- confirmacion independiente de presencia orbital,
-- mediciones de cobertura/recepcion por estaciones externas,
-- publicacion de transmisor en SatNOGS DB,
-- soporte comunitario para telemetria publica no sensible.
+| Perfil | Dirección | Operación | Contenido |
+|---|---|---|---|
+| `PUBLIC_BEACON` | Satélite→tierra | Público/SatNOGS | identificación y salud mínima |
+| `CONTROLLED_DOWNLINK` | Satélite→tierra | Programado por estación autorizada | payload/dumps permitidos |
+| `PRIVATE_UPLINK` | Tierra→satélite | Solo operador autorizado | comandos y objetos autenticados |
+| `LORA_USER_UPLINK` | Tierra→satélite | Bloqueado regulatoriamente | experimento de nodos |
 
-No se usa para:
+Los nombres `CONTROLLED` y `PRIVATE` describen quién opera, no secreto del
+canal. Si se usa amateur-satellite:
 
-- uplink de comandos,
-- control de modo,
-- carga de prompts IA,
-- seleccion de imagenes o dumps,
-- transferencia de payload privado,
-- reemplazo de estacion terrena propia.
+- cualquier receptor puede observar las emisiones;
+- identificación, waveform, framing y decoder se publican cuando lo exija el
+  régimen;
+- no se presupone cifrado ni confidencialidad;
+- datos incompatibles con ese marco no se transmiten.
 
----
+## 3) Frecuencia y hardware
 
-## 3) Perfiles de enlace
+No se agrega una radio solo para SatNOGS. El candidato es un único TRX UHF con:
 
-| Perfil | Direccion | Visibilidad | Contenido | Estacion |
-|---|---|---|---|---|
-| `PUBLIC_BEACON` | Satelite -> tierra | Publica | ID, tiempo/contador, modo, EPS/OBC/RF minimo, flags publicos | SatNOGS + propia |
-| `CONTROLLED_DOWNLINK` | Satelite -> tierra | Privada/controlada | `PHOTO_DEMO`, `AI_BEHAVIOR_LOG` detallado, performance IA, `SCIENCE`, `LORA_LOG`, dumps | Propia/autorizada |
-| `PRIVATE_UPLINK` | Tierra -> satelite | Privada/controlada | comandos TTC, prompts IA, cuotas, seleccion de dumps, abort/safe | Propia/autorizada |
-| `LORA_USER_UPLINK` | Nodos -> satelite | Operacional RX-only | paquetes LoRa de nodos terrestres | Nodos LoRa, no SatNOGS |
+- asignación coordinada `TBD` dentro de 435–438 MHz;
+- 2-FSK 1200 bit/s como perfil de ingeniería, no waveform cerrada;
+- modo beacon públicamente decodificable;
+- downlink controlado y receptor TTC;
+- TCXO/referencia, PA, filtros y switch T/R por seleccionar;
+- antena compartida con patrón integrado por verificar.
 
-Nota: "privada/controlada" significa que no es producto publico SatNOGS ni interfaz comunitaria. No implica confidencialidad criptografica por si sola; cualquier emision RF puede ser capturada.
+`435.000 MHz` no es centro de diseño. El hardware final sigue `TBD`.
 
----
+## 4) Identificación
 
-## 4) Impacto en hardware de vuelo
+No basta poner callsign en el beacon. **Toda emisión UHF** debe cumplir la
+identificación y periodicidad exigidas por su autorización, incluidos:
 
-No se requiere una radio adicional solo para SatNOGS.
+- beacon;
+- payload/dumps;
+- ACK/NACK;
+- emisiones de prueba;
+- uplink desde tierra.
 
-La arquitectura esperada usa un unico UHF TRX de TTC, preferentemente derivado de OpenLST o equivalente, con:
+El callsign no se inventa ni se fija antes de la asignación. El frame reserva
+un campo de identificación versionado y el scheduler debe impedir emisiones
+que no puedan satisfacer la regla aplicable.
 
-- frecuencia coordinada en UHF amateur-satellite o banda aprobada,
-- modo robusto de baja tasa para beacon publico,
-- modo de downlink controlado para payload,
-- receptor de uplink para estaciones propias,
-- TCXO o referencia estable,
-- front-end UHF con PA, filtrado y switching TX/RX adecuados,
-- antena UHF compartida por beacon, downlink controlado y uplink.
+## 5) Contenido del beacon
 
-El hardware final sigue TBD. Esta decision fija la capacidad arquitectonica, no el MPN final del transceptor ni del PA.
+Campos candidatos:
 
----
+- callsign/identificación asignada;
+- `protocol_version`;
+- spacecraft/mission ID;
+- boot counter y contador de frame;
+- timestamp o tiempo relativo con quality flag;
+- `MISSION_MODE` y `EPS_STATE`;
+- batería/temperatura resumidas;
+- health flags agregados;
+- versión pública de firmware;
+- CRC.
 
-## 5) Requisitos de compatibilidad SatNOGS
+No contiene:
 
-Para que SatNOGS aporte valor real, el `PUBLIC_BEACON` debe tener:
+- claves, tags reutilizables o material de provisioning;
+- prompts;
+- raw AI inputs/outputs;
+- paquetes LoRa crudos o identificadores personales;
+- dumps de memoria;
+- información cuya publicación comprometa seguridad;
+- contenido no permitido por el expediente.
 
-- frecuencia publicada,
-- modo/modulacion publicado,
-- baudrate publicado,
-- frame schema publico,
-- CRC o integridad simple,
-- identificador de mision/satelite,
-- decoder disponible o compatible con tooling existente,
-- documentacion suficiente para SatNOGS DB.
+El schema, ejemplos y decoder deben publicarse antes de operación.
 
-Preferencia tecnica:
+## 6) Downlink controlado
 
-1. Modo publicamente decodificable con tooling existente.
-2. Si se usa framing OpenLST-derived, publicar decoder solo para el `PUBLIC_BEACON`.
-3. Mantener el beacon corto y robusto; no depender de estaciones con enlace excelente.
+Puede transportar, si el régimen lo permite:
 
----
+- `AI_BEHAVIOR_LOG`;
+- `LORA_LOG`;
+- `SCIENCE`;
+- `OPTIONAL_PAYLOAD`;
+- catálogos y dumps solicitados.
 
-## 6) Datos publicos vs privados/controlados
+No se usa un “decoder cerrado” como mecanismo de privacidad. Si un producto
+necesita confidencialidad, se omite o se migra a un servicio/autorización que
+la permita.
 
-### Publico
+El downlink conserva prioridad, cuota, fragmentación, CRC/FEC y metadata
+públicamente documentables. Los ACK relacionados con comandos están
+autenticados según `04_Communications/uhf_command_security_protocol.md`.
 
-Permitido en `PUBLIC_BEACON`:
+## 7) Uplink autorizado, no secreto
 
-- callsign/identificacion coordinada,
-- contador de boot/pasada,
-- timestamp o contador relativo,
-- `MISSION_MODE`,
-- `EPS_STATE`,
-- bateria/temperatura resumida,
-- flags de salud agregados,
-- version publica de firmware/protocolo,
-- checksum/CRC.
+`PRIVATE_UPLINK` se redefine operativamente como uplink de un **operador
+autorizado**:
 
-### Privado/controlado
+- comando y argumentos en claro;
+- MAC/firma sobre envelope completo;
+- contador anti-replay persistente;
+- roles y schemas derivados localmente por OBC;
+- ACK/NACK autenticado;
+- nada de control por SatNOGS.
 
-No va en el beacon publico por defecto:
+CRC/hash sin clave no autentican. La suite exacta necesita revisión técnica y
+confirmación regulatoria.
 
-- imagenes `PHOTO_DEMO`,
-- datos completos o crudos del payload IA,
-- `AI_BEHAVIOR_LOG` detallado,
-- prompts/policy prompts,
-- paquetes LoRa crudos o identificables,
-- datos detallados de Science Pack,
-- respuestas de comando completas,
-- dumps de memoria/logs operativos,
-- estado interno de seguridad que facilite abuso.
+## 8) Separación SatNOGS/TX
 
----
+La estación dual-use debe mantener una frontera física:
 
-## 7) Regulacion y seguridad
+- SDR/host SatNOGS dedicado y RX-only;
+- sin credenciales, claves, GPIO, PTT ni dispositivo TX accesible;
+- controlador TX separado;
+- hardware arm y PTT gate;
+- switch T/R fail-safe a RX;
+- IPC mínimo, autenticado y allow-listed desde operaciones AUSTRALIS;
+- logs independientes.
 
-SatNOGS no reemplaza coordinacion ni licencias.
+Compartir rotor/antena/scheduler no otorga al cliente SatNOGS una ruta de TX.
+Diseño: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
 
-Pendientes regulatorios:
+## 9) Evidencia de compatibilidad
 
-- ENACOM / administracion nacional,
-- coordinacion IARU si se usa amateur-satellite,
-- filings/encuadre ITU segun aplique,
-- definicion de contenido permitido en el downlink,
-- tratamiento de cifrado/autenticacion para uplink y downlink controlado.
+Antes de registro operacional en SatNOGS:
 
-La arquitectura separa perfiles, pero la politica exacta de cifrado queda TBD hasta cierre regulatorio. En particular, si el encuadre final es amateur-satellite, se debe verificar que cualquier mecanismo de confidencialidad sea aceptable.
+- frecuencia y callsign coordinados;
+- transmitter entry preparada;
+- waveform/framing documentados;
+- decoder reproducible con test vectors;
+- beacon recibido localmente por SDR;
+- Doppler/frequency error dentro del rango demostrado;
+- paquete de licencia/coordinación referenciado;
+- revisión de contenido público;
+- prueba de que SatNOGS no puede activar TX.
 
----
+Gate end-to-end:
 
-## 8) Verificacion
+- captura IQ/raw;
+- frame decodificado con versión;
+- persistencia y hash;
+- timestamp/time quality;
+- correlación con transmisión conducida o autorizada;
+- repetición por tercero a partir de documentación pública.
 
-Gate C debe demostrar, como minimo:
+## 10) Estado regulatorio
 
-- beacon UHF transmitido por hardware candidato,
-- recepcion local con SDR/estacion propia,
-- decodificacion reproducible del frame publico,
-- medicion de frecuencia/deriva suficiente para el modo elegido,
-- evidencia de que el beacon no contiene datos privados/controlados,
-- plan de publicacion SatNOGS DB preparado.
+Todos los gates permanecen abiertos a la fecha de revisión. Ver
+`04_Communications/regulatory_gate_rf.md`.
 
-Gate E/F deben demostrar:
+SatNOGS DB y una coordinación IARU no reemplazan la autorización ENACOM ni el
+trámite UIT. No se publica una frecuencia como operacional antes del cierre.
 
-- operacion de estacion propia con comandos privados/controlados,
-- separacion entre productos publicos y controlados,
-- politica de uplink autenticado,
-- procedimiento para abort/safe sin depender de SatNOGS.
+## 11) Referencias
 
----
-
-## 9) Estacion terrena propia dual-use
-
-La incorporacion de SatNOGS no implica construir una estacion separada. La estacion propia puede operar como estacion dual-use si se disena desde el inicio con:
-
-- modo SatNOGS receive-only para observaciones publicas;
-- modo AUSTRALIS propio para downlink controlado y uplink privado;
-- rotor/antena UHF compartidos;
-- switch T/R digital fail-safe;
-- bloqueo explicito de cualquier acceso SatNOGS al transmisor;
-- logs y evidencia propios para operaciones AUSTRALIS.
-
-Diseno de referencia: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
+- `04_Communications/regulatory_gate_rf.md`
+- `04_Communications/rf_subsystem_overview.md`
+- `04_Communications/uhf_command_security_protocol.md`
+- `04_Communications/ground_station_dual_use_satnogs_australis.md`
+- `04_Communications/uplink_data_products_and_downlink_policy.md`
