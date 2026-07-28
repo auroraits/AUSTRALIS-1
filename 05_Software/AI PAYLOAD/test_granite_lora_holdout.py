@@ -2,15 +2,16 @@
 
 import json
 import os
-import torch
 from pathlib import Path
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import PeftModel
 
 if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
     raise SystemExit(
         "Refusing invalidated legacy holdout. It is contaminated and has no oracle."
     )
+
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import PeftModel
 
 BASE_MODEL = "ibm-granite/granite-3.1-2b-instruct"
 ADAPTER_PATH = "granite_cubesat_lora"

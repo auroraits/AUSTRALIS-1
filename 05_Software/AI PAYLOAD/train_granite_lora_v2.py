@@ -1,11 +1,6 @@
 """INVALIDATED legacy Granite 3.1 2B experiment; not validation evidence."""
 
 import os
-import torch
-from datasets import load_dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig
-from trl import SFTTrainer, SFTConfig
 
 # This script uses 2B, not Granite 350M. Its legacy dataset is contaminated.
 if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
@@ -13,6 +8,12 @@ if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
         "Refusing invalidated legacy training. "
         "Set AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI=1 only for provenance work."
     )
+
+import torch
+from datasets import load_dataset
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import LoraConfig
+from trl import SFTTrainer, SFTConfig
 
 model_id = "ibm-granite/granite-3.1-2b-instruct"
 data_file = "cubesat_granite_v3_1800.jsonl"

@@ -1,8 +1,11 @@
 # AUSTRALIS-1 AI Agent Protocol
 
-**Revision:** 2026-07-23
+**Revision:** 2026-07-27
 **Estado:** Proposed
-**Trazabilidad:** `AGENTS.md`, `SYSTEM_BASELINE.md`, `05_Software/ai_payload_architecture.md`, `05_Software/software_framework_mvp22.md`, `04_Communications/uplink_data_products_and_downlink_policy.md`, `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`, `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`, `08_Decisions/ADR-20260314-eps-state-4-levels.md`, `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`
+**Trazabilidad:** `AGENTS.md`, `SYSTEM_BASELINE.md`, `05_Software/ai_payload_architecture.md`, `05_Software/software_framework_mvp22.md`, `04_Communications/uplink_data_products_and_downlink_policy.md`, `08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`, `08_Decisions/ADR-20260727-mission-scientific-experiment-baseline.md`, `08_Decisions/ADR-20260314-eps-state-4-levels.md`, `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`
+
+La ADR CM5+SmolLM2 de 2026-03-14 es un antecedente `Superseded`; no es la
+decisión activa de modelo.
 
 > Este documento propone el contrato operacional para evaluar modelos base como candidatos a ajuste fino. No cambia el baseline de vuelo ni declara modelo final. El OBC deterministico conserva autoridad final en todo momento.
 
@@ -308,7 +311,18 @@ Reglas:
   el schema exacto de esa tool, sin campos extra.
 - La clase de seguridad efectiva la asigna el catalogo OBC. El valor emitido por
   el modelo se compara contra el catalogo y nunca otorga privilegios.
-- No se acepta JSON envuelto en prosa, markdown o comentarios.
+- Fechas, ventanas, duraciones, elevaciones, conteos, cuotas y orden de colas se
+  validan semanticamente; cumplir solo el tipo JSON no es suficiente.
+- No se acepta JSON envuelto en prosa, markdown o comentarios, claves
+  duplicadas ni constantes no finitas (`NaN`, `Infinity`, `-Infinity`) en
+  ningun nivel.
+- `downlink_priority` siempre comienza con `HOUSEKEEPING`, `COMMAND_ACK`,
+  contiene solo colas conocidas y no admite duplicados.
+- El supervisor contrasta IDs de comando/pasada, duraciones con horizonte y
+  tiempo de contacto, cola de cada item, estado EPS/modo/eclipses y coherencia
+  del nivel de riesgo. Las afirmaciones del propio modelo no son un oraculo.
+- Acciones contradictorias dentro del mismo envelope (por ejemplo `ON` y `OFF`
+  para el mismo rail, o `SAFE` y `NOMINAL`) son fallo duro.
 - `confidence` es un autorreporte no calibrado entre 0 y 1; no puede utilizarse
   para autorizar una accion ni como evidencia de seguridad.
 - `constraints_checked` debe contener codigos verificables, no prosa libre solamente.
@@ -425,16 +439,91 @@ No se expone control directo continuo de magnetorquers al modelo. El loop de con
 
 ### 7.1 Transporte inicial
 
-Para Gate IA-2 se propone UART JSONL como transporte de banco:
+El transporte de banco es `AIA-UART/1`, **Proposed** hasta ejecutar
+`PROC-AI-002`. No es todavía una interfaz flight-like. Se abandona JSONL sin
+framing porque no permite resincronizacion inequívoca frente a truncado o bytes
+corruptos.
 
-- un frame por linea;
-- UTF-8;
-- `seq`, `type`, `payload`, `crc32`;
-- timeout por request;
-- limite de bytes por frame;
-- idempotencia por `decision_id` + `call_id`.
+Configuracion candidata de banco: UART 115200 bit/s, 8N1, sin flow control. Un
+frame usa este layout, con enteros big-endian:
 
-En flight-like puede migrar a framing binario/CBOR, pero el contrato logico debe mantenerse.
+```text
+magic[2] = A1 5A
+version[1] = 01
+flags[1] = 00
+session_id[4]
+sequence[4]
+message_type[1]
+payload_length[2]
+payload[payload_length] = UTF-8 JSON object, sin BOM
+crc32c[4]
+```
+
+El CRC-32C cubre desde `version` hasta el ultimo byte de `payload`. Usa
+Castagnoli, init/xorout `0xffffffff`, forma reflejada `0x82f63b78`; el vector
+`123456789` shall producir `0xe3069283`. `payload_length` shall estar entre 2 y
+8192 bytes. JSON shall ser estricto: objeto superior, UTF-8 valido, sin claves
+duplicadas, `NaN`/infinito, trailing bytes ni tipos desconocidos.
+
+Tipos numericos V1:
+
+```text
+01 CONTEXT_SNAPSHOT
+02 AGENT_DECISION
+03 SUPERVISOR_RESULT
+04 TOOL_RESULT
+05 HEALTH_PING
+06 HEALTH_PONG
+07 SHUTDOWN_REQUEST
+08 SHUTDOWN_ACK
+09 TRANSPORT_ERROR
+```
+
+Reglas de sesion y entrega:
+
+- `session_id` cambia en cada boot/reinicio de cualquiera de los extremos;
+- `sequence` comienza en cero y crece por frame; antes de wrap se abre una
+  nueva sesion;
+- la clave de idempotencia de transporte es `(session_id, sequence)`, y la de
+  accion sigue siendo `(decision_id, call_id)`;
+- un duplicado byte-identico recibe el resultado cacheado y nunca reejecuta una
+  accion; mismo `(session_id, sequence)` con bytes distintos se rechaza;
+- un frame fuera de orden, tipo desconocido, CRC/longitud invalida o sesion
+  vieja se registra y se rechaza;
+- el parser busca el magic con un buffer acotado y nunca reserva segun una
+  longitud no validada.
+
+El OBC espera hasta 2 s por respuesta y puede retransmitir como maximo dos veces
+el mismo frame, sin cambiar sequence ni contenido. Tras tres intentos totales,
+declara `AI_LINK_TIMEOUT`, inhibe nuevas acciones IA para ese ciclo y continua
+con su logica deterministica. Reiniciar o cortar energia al CM5 no habilita
+acciones pendientes.
+
+`auth` no es una afirmacion del modelo ni un byte confiable recibido desde la
+IA. Es estado derivado por el verificador de comandos del OBC y solo aparece en
+un `CONTEXT_SNAPSHOT` generado por el OBC. El modelo no puede crearlo,
+promoverlo ni invalidarlo. En banco no se adopta autenticacion criptografica
+para este bus local: el OBC trata toda respuesta IA como no confiable y aplica
+schema, catalogo de tools, supervisor e idempotencia. Si el analisis de amenazas
+flight-like muestra acceso al bus, se agregara integridad/autenticacion de enlace
+sin retirar esos controles. Esto es independiente de la autenticacion y
+anti-replay RF de `SEC-REQ-01`.
+
+Aceptacion minima de `PROC-AI-002`:
+
+- vector CRC conocido y round-trip de cada tipo;
+- payload minimo/maximo y rechazo en 8193 bytes;
+- byte corrupto, magic falso, frame truncado y concatenado;
+- clave duplicada, no-finito, tipo desconocido y longitud maliciosa;
+- duplicado identico, duplicado conflictivo, reorder, sesion vieja, reboot y
+  limite de wrap;
+- timeout/reintentos y corte de energia en cada frontera;
+- fuzz con memoria acotada y cero tool calls ejecutadas desde frames rechazados;
+- evidencia correlacionada frame -> decision -> supervisor -> accion/resultado.
+
+En flight-like puede migrar a CBOR u otro bus mediante nueva revision/ADR, pero
+debe preservar o endurecer estas propiedades. Trazabilidad:
+`IA-REQ-12`, `PROC-AI-002`, `RSK-AI-03` and `RSK-FSW-02`.
 
 ### 7.2 Tipos de mensaje
 
@@ -628,8 +717,9 @@ considerarse evidencia reproducible.
 6. Ejecutar `gemma4:e2b` en CM5 con alimentacion estable y registrar memoria,
    latencia, energia y termica sin extrapolar desde otro host.
 
-El runner v1 ya aplica JSON estricto, schema completo por tool, clase de
-seguridad derivada del catalogo, supervisor deterministico, oraculos de
-postcondicion y fallo duro por accion necesaria ausente. Sus pruebas unitarias
+El runner v1 ya aplica JSON estricto (incluidos duplicados/no finitos), schema
+completo por tool, clase de seguridad derivada del catalogo, validacion
+contextual, supervisor deterministico, oraculos de postcondicion y fallo duro
+por accion necesaria ausente o contradictoria. Sus pruebas unitarias
 adversariales son obligatorias, pero el runner sigue siendo una herramienta de
 banco propuesta, no software de vuelo.

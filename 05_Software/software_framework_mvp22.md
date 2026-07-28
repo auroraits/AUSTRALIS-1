@@ -1,8 +1,8 @@
 # Software Framework MVP 2.2 — Downlink/Fault/Commands
 
-**Revisión:** 2026-03-14 (misión AUSTRALIS-1, `EPS_STATE` 4 niveles y `AI_BEHAVIOR_LOG` repriorizado)
+**Revisión:** 2026-07-27 (`EPS_STATE` 4 niveles, `AI_BEHAVIOR_LOG` y candidato IA reconciliados)
 **Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, `08_Decisions/ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`
+**Trazabilidad:** `00_MVP/MVP v2.2.md`, `08_Decisions/ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`, `08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
 
 ## 1) Servicios permanentes de vuelo
 
@@ -113,6 +113,8 @@ Para arquitectura detallada, flujo OBC↔IA, estados operativos y riesgos del pa
 - `04_Communications/uplink_data_products_and_downlink_policy.md`
 - `05_Software/ai_payload_architecture.md`
 - `08_Decisions/ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`
+- `08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
 - `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`
+  (antecedente `Superseded`)
 - `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`
 - `08_Decisions/ADR-20260314-eps-state-4-levels.md`
