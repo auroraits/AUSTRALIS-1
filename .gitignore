@@ -502,6 +502,15 @@ FodyWeavers.xsd
 *.ckpt
 *.onnx
 *.bin
+*.gguf
+*.ggml
+*.tflite
+*.h5
+*.keras
+**/.ollama/
+**/ollama-models/
+**/.pio/
+**/.platformio/
 
 # Binary reference material and editable office exports are not vendored publicly.
 99_References/**/*.pdf
