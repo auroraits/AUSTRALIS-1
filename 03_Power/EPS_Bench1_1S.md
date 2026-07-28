@@ -2,7 +2,8 @@
 
 **Revision:** 2026-04-03
 **Estado:** Active - Bench Only
-**Trazabilidad:** `08_Decisions/ADR-20260218-eps-bench1s-cots-to-custom-flight-pcb.md`, `08_Decisions/ADR-20260313-eps-separacion-bench-flightlike-flight.md`, `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`
+**Trazabilidad vigente:** `08_Decisions/ADR-20260218-eps-bench1s-cots-to-custom-flight-pcb.md`, `08_Decisions/ADR-20260313-eps-separacion-bench-flightlike-flight.md`, `08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`  
+**Antecedente histórico:** `ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md` (`Superseded`)
 **Scope:** `EPS_Bench1_1S` extendido para Gate IA-2: FPM bench + rail IA bench-only + inyeccion externa de 5V para CM5 real
 **Archivo de diseño:** artefacto Fritzing legacy removido del árbol público; ver `03_Power/EPS_PCB/EPS_Bench1S/README.md`.
 
