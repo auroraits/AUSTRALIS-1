@@ -1,7 +1,7 @@
 # Seguridad eléctrica de lanzamiento preliminar — AUSTRALIS-1
 
-**Revisión:** 2026-07-27  
-**Estado:** Preliminary / NOT IMPLEMENTED  
+**Revisión:** 2026-07-27
+**Estado:** Preliminary / NOT IMPLEMENTED
 **Fuente:** CubeSat Design Specification Rev. 14.1, §§2.3–2.4; sujeto a
 requisitos adicionales del ICD del integrador
 

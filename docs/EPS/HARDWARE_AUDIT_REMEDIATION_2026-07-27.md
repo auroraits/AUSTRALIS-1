@@ -1,7 +1,7 @@
 # Trazabilidad de remediación — hardware, EPS, estructura y simulación
 
-**Fecha:** 2026-07-27  
-**Rama:** `audit/remediation-2026-07-27`  
+**Fecha:** 2026-07-27
+**Rama:** `audit/remediation-2026-07-27`
 **Estado:** revisión técnica de cierre del frente; no equivale a hardware
 Flight-Ready
 

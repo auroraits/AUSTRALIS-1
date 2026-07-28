@@ -1,7 +1,7 @@
 # Diseño térmico preliminar — AUSTRALIS-1
 
-**Revisión:** 2026-07-27  
-**Estado:** Preliminary / NOT RELEASED  
+**Revisión:** 2026-07-27
+**Estado:** Preliminary / NOT RELEASED
 **Trazabilidad:** `05_Software/SIM/README_SIMULATION.md`,
 `02_Structure/ENVIRONMENTAL_VERIFICATION_PRELIMINARY.md`
 
