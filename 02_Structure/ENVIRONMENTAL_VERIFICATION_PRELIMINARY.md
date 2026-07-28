@@ -2,7 +2,8 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Preliminary
-**Trazabilidad:** niveles, artículo y secuencia sujetos al ICD del integrador
+**Trazabilidad:** CubeSat Design Specification Rev. 14.1 §§3.1–3.5; niveles,
+artículo y secuencia sujetos al ICD del integrador
 
 ## 1. Dictamen
 
@@ -10,6 +11,19 @@ La verificación ambiental no es opcional para declarar readiness. La frase
 histórica “si aplica/si está disponible” no puede cerrar un artículo de vuelo.
 Los niveles numéricos siguen `TBD` hasta recibir el ICD y congelar masa,
 estructura, mecanismos y configuración.
+
+Fuente primaria consultada:
+
+- *CubeSat Design Specification Rev. 14.1*, Cal Poly SLO, pp. 16–17.
+- <https://static1.squarespace.com/static/5418c831e4b0fa4ecac1bacd/t/62193b7fc9e72e0053f00910/1645820809779/CDS+REV14_1+2022-02-09.pdf>
+- SHA-256:
+  `221fbbbd4f632b16f3e219d1a5e2c2b04e1998c12025b793e6dfc6181af66b5d`.
+
+El CDS remite random vibration (§3.1), thermal-vacuum bakeout (§3.2), shock
+según el Launch Provider (§3.3), inspección (§3.4) y una ruta
+qualification/protoflight (§3.5). Los ensayos adicionales de la matriz
+siguiente son requisitos de ingeniería preliminares de AUSTRALIS-1 y deben
+conciliarse con el plan aprobado por el integrador.
 
 ## 2. Filosofía de artículos
 

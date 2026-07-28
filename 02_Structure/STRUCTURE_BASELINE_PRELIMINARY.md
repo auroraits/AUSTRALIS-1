@@ -43,7 +43,28 @@ el área total ideal aumenta 10.10%. Esas diferencias obligan a repetir los
 análisis dependientes de superficie; no deben aplicarse como un factor de
 corrección a resultados antiguos.
 
-## 3. Requisitos mecánicos no cerrados
+## 3. Controles CDS que la caja ideal no representa
+
+La geometría `100 × 100 × 170.2 mm` no constituye por sí sola un modelo
+conforme. La revisión del CDS Rev. 14.1 identificó, entre otros:
+
+| Cláusula | Control | Estado AUSTRALIS-1 |
+|---|---|---|
+| §2.2.2 | Inserción con cara `−Z` primero | CAD/ICD `TBD` |
+| §2.2.3 | Protrusión máxima 6.5 mm en lados sombreados del dibujo | envelope/keep-outs `TBD` |
+| §2.2.5 | Ancho mínimo de rail 8.5 mm hasta la primera protrusión | CAD `TBD` |
+| §2.2.6 | Rugosidad de rail recomendada menor a 1.6 µm | proceso/inspección `TBD` |
+| §2.2.7 | Radio de borde de rail recomendado ≥1 mm | CAD `TBD` |
+| §2.2.8 | Contacto mínimo 6.5 × 6.5 mm en extremos de rails `±Z` | CAD `TBD` |
+| §2.2.9 | Al menos 75% de cada rail en contacto con el dispenser | tolerancias `TBD` |
+| tabla 1 | Masa típica máxima 1.5U 3.00 kg | roll-up `TBD`; ICD prevalece |
+| tabla 2 | CG desde centro geométrico: X/Y ±2 cm, Z ±3 cm | roll-up `TBD`; ICD prevalece |
+| §2.2.13 | Superficies externas de aluminio que contactan rails hard-anodized | material/proceso `TBD` |
+
+Esta tabla no sustituye la auditoría completa de la especificación, los
+dibujos de Appendix B, el CIFP ni el ICD del dispenser.
+
+## 4. Requisitos mecánicos no cerrados
 
 Permanecen `TBD` hasta disponer del diseño y del ICD aplicable:
 
@@ -62,7 +83,7 @@ Permanecen `TBD` hasta disponer del diseño y del ICD aplicable:
 El valor de 3.00 kg de la tabla 1 del CDS es una referencia típica máxima
 para 1.5U, no un límite de misión. El ICD del integrador prevalecerá.
 
-## 4. Hipótesis de actitud y ADCS
+## 5. Hipótesis de actitud y ADCS
 
 El repositorio no contiene todavía una arquitectura ADCS (Attitude
 Determination and Control System) implementable ni presupuesto de sensores,
@@ -75,7 +96,7 @@ actuadores, potencia o masa. Por lo tanto:
   inicial, detumbling, modo degradado y actitud segura, con valores `TBD`
   hasta cerrar el CONOPS ADCS.
 
-## 5. Plan de verificación mecánica
+## 6. Plan de verificación mecánica
 
 | ID | Verificación | Criterio de aceptación | Evidencia |
 |---|---|---|---|
