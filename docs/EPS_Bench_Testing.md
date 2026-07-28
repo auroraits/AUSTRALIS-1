@@ -1,22 +1,28 @@
 # EPS Bench Testing
 
+**Revisión:** 2026-07-27
+**Estado:** Draft — Bench 1S exploratory only
+
 ## Objetivo
-Definir un procedimiento corto y repetible para validar en banco el arreglo solar de prototipo (2×1.2 W), protecciones y sensado con INA219.
+Definir un procedimiento repetible para caracterizar el arreglo de banco
+(dos paneles nominales de 1.2 W), sus protecciones y el sensado INA219. Este
+procedimiento no valida el array, cargador, batería, BMS ni EPS de vuelo.
 
 ## Bench COTS Policy (validation scope)
-- Bench setup in this document is COTS and for validation workflow only.
-- Architecture alignment is mandatory: voltage topology, battery chemistry, and charging philosophy must match planned flight EPS.
-- Migration path is required from bench module to custom flight-grade PCB; bench modules are not flight-ready unless explicitly qualified.
+- El banco COTS 1S existe para desarrollar método, logging y fault handling.
+- No tiene que replicar la topología 2S de vuelo y no recibe crédito de
+  compatibilidad, heritage ni calificación.
+- Toda extrapolación exige nueva asignación de requisitos, análisis y ensayo
+  sobre la configuración Flight-Like exacta.
 
 ### Component Selection Rule
-- Bench Option (COTS)
-- Flight Architecture Equivalent
-- Migration Path
+- identificar módulo/lote y configuración Bench;
+- registrar magnitud medida, incertidumbre y limitaciones;
+- no designar un “equivalente de vuelo” sin trade y ADR independientes.
 
-> Alcance: este procedimiento aplica a banco. El cargador CN3065 se usa como cargador lineal de prueba (no MPPT). La arquitectura de vuelo recomendada sigue siendo MPPT.
-> Bench MPPT modules (e.g., BQ24650 boards, CN3791 modules) are used for rapid prototyping.
-> Final flight EPS will transition to custom PCB implementations derived from the same controller IC families.
-> No bench module is considered flight-ready unless explicitly qualified.
+> El CN3065 y cualquier módulo MPPT COTS se usan solo como instrumentos de
+> prototipado. No seleccionan familia de controlador ni camino de migración.
+> Cargador, MPPT por cara/string, celdas, BMS y PCB Flight-Like permanecen TBD.
 
 ## 1) Medición inicial de paneles (ambiental)
 1. Colocar cada panel en condiciones de iluminación estables (sol o lámpara fija).
@@ -30,10 +36,14 @@ Definir un procedimiento corto y repetible para validar en banco el arreglo sola
 3. Unir negativos de paneles al retorno común **GND**.
 4. Verificar polaridad y caída en diodo antes de conectar el cargador.
 
-## 3) Ubicación del fusible 1 A T
-1. Colocar el fusible plástico **1 A T** en serie sobre la línea positiva principal desde **SOLAR_BUS+** hacia la entrada del cargador/control de banco.
-2. Instalarlo lo más cerca posible de la fuente (nodo de salida de paneles en paralelo).
-3. Validar continuidad del portafusible y repuesto disponible antes de energizar.
+## 3) Selección y ubicación de protección de corriente
+1. Calcular fuse/current-limit desde Isc medido, corriente admisible de
+   cableado/conectores y límites del cargador; registrar tolerancia y rationale.
+2. Un fusible **1 A T** es solo una opción de banco y no se instala sin que el
+   cálculo anterior demuestre coordinación.
+3. Colocar la protección seleccionada en serie sobre la línea positiva principal desde **SOLAR_BUS+** hacia la entrada del cargador/control de banco.
+4. Instalarla lo más cerca posible de la fuente (nodo de salida de paneles en paralelo).
+5. Validar continuidad y repuesto antes de energizar.
 
 ## 4) Instrumentación con INA219
 1. Instalar un INA219 en la rama solar para medir voltaje/corriente de entrada al banco.

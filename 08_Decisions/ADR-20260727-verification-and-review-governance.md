@@ -14,8 +14,9 @@ con bloqueantes y ensayos ambientales opcionales.
 
 1. Gate A se reabre y queda `Open`.
 2. Se adopta una VCRM (Verification Cross-Reference Matrix) machine-readable:
-   `ReqID → método → criterio → ProcedureID → configuración → EvidenceID/hash
-   → estado → riesgo → gate`.
+   `ReqID → lifecycle → método → criterio → ProcedureID → configuración
+   → EvidenceID/hash → estado → riesgo → gate`. El lifecycle distingue
+   requisitos activos de propuestas trazadas aún no adoptadas.
 3. Estados de verificación permitidos:
    `Open | Planned | Implemented | Verified | Waived | Blocked by Integrator`.
    Solo `Verified` significa requisito cerrado; `Waived` exige autoridad,

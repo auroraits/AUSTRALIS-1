@@ -1,8 +1,8 @@
-# Consolida documentaci�n/texto y c�digo fuente en 2 archivos:
+# Consolida documentación/texto y código fuente en 2 archivos:
 #  - CONSOLIDADO.md
 #  - CODIGO_FUENTE.txt
 # Robusto contra locks: escribe en .tmp y luego reemplaza (rename/overwrite).
-# Evita archivos > 1MB. Excluye carpetas indeseables. Heur�stica de texto plano.
+# Evita archivos > 1MB. Excluye carpetas indeseables. Heurística de texto plano.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -27,7 +27,7 @@ $ExcludedDirNames = @(
   "__pycache__", ".pytest_cache", ".mypy_cache",
   ".gradle",".m2",".ivy2",
   ".terraform",".serverless",".cache",".tmp","tmp",
-  "target","venv",
+  "target","venv",".ollama","ollama-models","gemma_model","gemma4",
   # Arduino/PlatformIO/ESP-IDF builds (excluir outputs, incluir sketch/src/lib)
   ".pio",".platformio",".arduinoIDE","build-arduino","cmake-build-debug","cmake-build-release",
   "CMakeFiles",".espressif","managed_components","granite_model", "granite_cubesat_lora"
@@ -50,6 +50,11 @@ $CodeExt = @(
 $DocsExt = @(
   ".md",".txt",".log",".rst",".adoc",".org",
   ".csv",".tsv"
+)
+
+$ModelArtifactExt = @(
+  ".safetensors",".pt",".pth",".ckpt",".onnx",".bin",
+  ".gguf",".ggml",".tflite",".h5",".keras"
 )
 
 function Test-IsProbablyBinary {
@@ -80,6 +85,7 @@ function Get-FileBucket {
 
   $extLower = $File.Extension.ToLowerInvariant()
 
+  if ($ModelArtifactExt -contains $extLower) { return "skip" }
   if ($File.Name -eq "Makefile" -or $File.Name.ToLowerInvariant().EndsWith(".mk")) { return "code" }
   if ($CodeExt -contains $extLower) { return "code" }
   if ($DocsExt -contains $extLower) { return "docs" }
@@ -88,7 +94,7 @@ function Get-FileBucket {
   return "skip"
 }
 
-# Escribe un texto a un archivo con retry por locks (por si el tmp tambi�n lo engancha algo)
+# Escribe un texto a un archivo con retry por locks (por si el tmp también lo engancha algo)
 function Write-AllTextWithRetry {
   param(
     [Parameter(Mandatory)][string]$Path,
@@ -115,7 +121,7 @@ function Write-AllTextWithRetry {
   }
 }
 
-# Reemplaza destino por tmp, con retry (lock t�pico por editor/preview)
+# Reemplaza destino por tmp, con retry (lock típico por editor/preview)
 function Replace-FileWithRetry {
   param(
     [Parameter(Mandatory)][string]$Tmp,
@@ -153,17 +159,18 @@ PRECEDENCIA ESTRICTA (ante contradicción, prevalece el nivel más alto):
   1. ADR Accepted  (08_Decisions/ADR-*.md, estado: Accepted)         ← máxima autoridad
   2. 00_MVP/MVP v2.2.md                                               ← baseline consolidado vigente
   3. SYSTEM_BASELINE.md                                               ← resumen de baseline
-  4. Documentación activa por subsistema (Estado: Active/Baseline)
-  5. Documentos Draft / Proposed / Preliminary                        ← contexto técnico; NO normativo
-  6. Histórico / Superseded / Historical Snapshot                     ← solo trazabilidad
+  4. Requisitos y VCRM activos                                         ← obligaciones y estado V&V
+  5. Documentación activa por subsistema (Estado: Active/Baseline)
+  6. Documentos Draft / Proposed / Preliminary                        ← contexto técnico; NO normativo
+  7. Histórico / Superseded / Historical Snapshot                     ← solo trazabilidad
 
 REGLAS DE USO DE ESTE BUNDLE:
   - Un documento Draft, Proposed o Preliminary NO sobreescribe un ADR Accepted ni el baseline.
   - Los snapshots históricos y versiones viejas del MVP (v1, v2.0, v2.1) NO son fuente normativa.
   - "SCIENCE MODE" como tercer modo operativo es nomenclatura SUPERSEDADA. Usar MISSION_MODE=NOMINAL.
   - HV/Geiger fue REMOVIDO del MVP (ADR-20260218-geiger-removed-from-mvp.md). No reactivar.
-  - BW definitivo del uplink LoRa sigue TBD. BW250 es candidato preferente; BW125 requiere evidencia.
-  - CONF-01 (pico EPS) sigue abierto. No resolver sin medición de hardware TX real.
+  - Banda, autorización, frecuencia, BW y PHY definitivos del uplink terrestre siguen TBD.
+  - Los picos RF/EPS siguen abiertos bajo RSK-RF-01 y el Power Budget; no cerrar sin medición.
   - Hardware RF orbital (PCB TTC UHF + LoRa RX) NO existe todavía. Documentación es diseño objetivo.
   - OpenLST es candidato técnico/análisis. NO es baseline TTC final. RFFM6403 es EOL.
 
@@ -189,7 +196,8 @@ foreach ($f in $files) {
   $sb = if ($bucket -eq "code") { $codeSb } else { $docsSb }
 
   [void]$sb.AppendLine($sep1)
-  [void]$sb.AppendLine("FILE: " + $f.FullName)
+  $relativePath = [System.IO.Path]::GetRelativePath($root, $f.FullName).Replace("\", "/")
+  [void]$sb.AppendLine("FILE: " + $relativePath)
   [void]$sb.AppendLine($sep2)
 
   try {
@@ -211,4 +219,4 @@ Replace-FileWithRetry -Tmp $docsTmp -Dest $docsOut
 Replace-FileWithRetry -Tmp $codeTmp -Dest $codeOut
 
 Write-Host "OK -> Docs/Texto: $docsOut"
-Write-Host "OK -> C�digo:     $codeOut"
+Write-Host "OK -> Código:     $codeOut"

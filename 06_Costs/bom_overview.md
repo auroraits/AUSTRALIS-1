@@ -5,13 +5,13 @@
 
 ## 1. Estado cuantitativo
 
-`BOM_master.csv` contiene 74 filas:
+`BOM_master.csv` contiene 83 filas:
 
 | Stage | Filas |
 |---|---:|
 | Bench | 22 |
 | Flight-Like | 40 |
-| EGSE | 12 |
+| EGSE | 21 |
 | Flight | 0 |
 
 Brechas estructurales:
@@ -29,6 +29,7 @@ procurement.
 
 Cada fila registra:
 
+- `ItemID` estable;
 - subsistema y stage;
 - clase de ítem, candidato y alternativa;
 - fabricante/MPN/cantidad;
@@ -42,6 +43,13 @@ Cada fila registra:
 `TBD` es válido; una celda vacía o `ROM` usado como precio no lo es. Un precio
 solo es válido con fuente, fecha, moneda, cantidad y condiciones.
 
+`Status` describe madurez técnica de la fila: `Proposed`, `Open`, `Partial` o
+`Closed`. `Partial` significa que existe un candidato o artículo de banco, pero
+que su configuración/evidencia todavía no satisface el requisito asociado; no
+significa verificado. `ProcurementState` describe exclusivamente disponibilidad,
+cotización, autorización de compra y estado de adquisición. Ambos campos no son
+intercambiables.
+
 ## 3. Disposiciones de configuración
 
 - Estructura usa CDS 1.5U con `Z=170.2 ±0.1 mm` y referencia de masa máxima
@@ -52,6 +60,9 @@ solo es válido con fuente, fecha, moneda, cantidad y condiciones.
   candidato. Hardware flight-like/flight TBD.
 - UHF: frecuencia, PA, filtro, antena y LNA dependen de coordinación/trade.
 - LoRa: concentrator vs receptor simple reabierto.
+- Ground: rotor, T/R e interlock PTT, PA, filtros/limiter, metrología RF,
+  terminaciones, protección eléctrica, UPS/PDU y timebase tienen placeholders
+  explícitos y permanecen abiertos.
 - Solar/radiador/TIM: layout, cantidad, propiedades y selección reabiertos.
 - Ninguna parte sin MPN/evidencia se clasifica de bajo riesgo.
 

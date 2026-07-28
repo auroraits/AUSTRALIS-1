@@ -14,11 +14,16 @@ El MVP requería reglas permanentes para arbitrar downlink entre subsistemas, co
 
 ## Decisión
 Adoptar framework permanente en OBC/EPS:
-1. **Downlink Manager** con colas `HOUSEKEEPING`, `COMMAND_ACK`, `LORA_LOG`, `SCIENCE`, `OPTIONAL_PAYLOAD`.
-2. **Prioridad estricta** para housekeeping/comandos en todos los modos.
+1. **Downlink Manager** con colas `HOUSEKEEPING`, `COMMAND_ACK`,
+   `AI_BEHAVIOR_LOG`, `LORA_LOG`, `SCIENCE`, `OPTIONAL_PAYLOAD`.
+2. **Precedencia de servicio** para `HOUSEKEEPING` y `COMMAND_ACK`, seguida por
+   `AI_BEHAVIOR_LOG` como mayor prioridad científica best-effort. Cuotas
+   mínimas, aging, retención y límites por cola impiden starvation de productos
+   obligatorios.
 3. **Fault/Power Manager** con health mínimo (`PGOOD_x`, `EN_x`, `FAULT_x`, `HB_x`) + contadores de resets/faults.
 4. **Aislamiento automático**: apagado inmediato, reintentos acotados y lockout hasta uplink/timeout.
-5. **Uplink mínimo**: `SET_MODE`, `POWER_SET`, `DL_SELECT`, `DL_SET_LIMITS`, `REQUEST_STATUS`, `ABORT`.
+5. **Uplink mínimo autenticado y protegido contra replay**: `SET_MODE`,
+   `POWER_SET`, `DL_SELECT`, `DL_SET_LIMITS`, `REQUEST_STATUS`, `ABORT`.
 
 ## Alternativas consideradas
 1. Scheduler por prioridad fija sin colas por tipo.

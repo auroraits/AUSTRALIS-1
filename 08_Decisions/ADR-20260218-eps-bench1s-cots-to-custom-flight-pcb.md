@@ -3,18 +3,28 @@
 - **Fecha:** 2026-02-18
 - **Estado:** Accepted
 
+> **Alcance aclarado 2026-07-27:** el banco 1S valida únicamente objetivos de
+> aprendizaje y medición locales. No constituye precursor eléctrico equivalente
+> del EPS 2S, no transfiere evidencia de compliance y no obliga a conservar
+> familias de IC/topologías. El diseño flight-like se deriva independientemente
+> de sus requisitos, análisis de seguridad y review.
+
 ## Contexto
 Se requiere consolidar una arquitectura EPS de banco 1S (`EPS_Bench1_1S`) para validar funciones eléctricas básicas con componentes COTS disponibles, manteniendo coherencia con la evolución a PCB custom en KiCad.
 
 ## Decisión
 Adoptar de forma explícita la estrategia:
-**COTS for Validation → Custom Flight PCB**.
+**COTS for Bench Learning → Independent Flight-Like Design**.
 
 Para `EPS_Bench1_1S`:
 - Usar CN3065 + BMS 1S + Boost 5V + Buck 3V3 como banco funcional.
 - Tratar el banco como plataforma de validación, no como diseño de vuelo.
-- Exigir mapeo de cada módulo COTS a IC/topología equivalente para migración futura.
-- Definir roadmap evolutivo: `EPS_Bench1_1S` → `EPS_Flight_Like` → `EPS_Flight`.
+- Mapear cada módulo COTS a una función, objetivo de medición y limitación del
+  banco. Una comparación con funciones futuras puede orientar el trade, pero
+  nunca acredita equivalencia eléctrica, topológica, ambiental o de vuelo.
+- Definir rutas de madurez separadas: `EPS_Bench1_1S` aporta aprendizaje;
+  `EPS_Flight_Like` nace de requisitos 2S y reviews propios; `EPS_Flight`
+  requiere configuración, calificación y aceptación independientes.
 
 ## Alternativas consideradas
 1. **Mantener banco COTS sin roadmap formal**

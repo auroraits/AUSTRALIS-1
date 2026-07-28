@@ -22,7 +22,10 @@ aprobarse antes de TRR. Este índice no es evidencia de ejecución.
 | PROC-AI-001 | manifest, dataset y benchmark del modelo | digests + blind/adversarial results | PDR/TRR |
 | PROC-AI-002 | integración IA/supervisor/kill/recursos | hardware logs + fault injection | TRR |
 | PROC-PH-001 | aislamiento PHOTO_DEMO | failure/saturation tests | TRR si se incluye |
+| PROC-PWR-001 | ledger integrado de potencia/energía BOL/EOL | inputs medidos + modes/worst-case/uncertainty | PDR/CDR |
 | PROC-ADCS-001 | detumble, pointing y HIL | error budget + Monte Carlo + HIL | PDR/TRR |
+| PROC-ORB-001 | órbita, lifetime, debris, fin de vida y reentry | propagación/uncertainty + compliance report | PDR/FRR |
+| PROC-SENSOR-001 | selección y calibración de Science Pack | trade + calibration/raw/product report | PDR/TRR |
 | PROC-THR-001 | modelo térmico, interfaces y TVAC | correlated model + raw chamber data | CDR/QAR |
 | PROC-MAT-001 | materiales, venting y outgassing | declaration + datasheets/tests | PDR/CDR |
 | PROC-RAD-001 | TID/DDD/SEE/SEL | environment + mitigation/test report | PDR/CDR |

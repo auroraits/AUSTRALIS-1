@@ -111,7 +111,8 @@ inválidos, boot/unknown y precedencia de fallas.
 - recepción pública compatible con SatNOGS, RX-only;
 - estación de control AUSTRALIS autorizada y aislada;
 - repositorio de evidencia raw/metadata/replay/export;
-- weather/health inputs requeridos según diseño físico de estación.
+- weather/health inputs candidatos, no requisito adoptado: sensores y umbrales
+  dependen de hazard analysis y una ADR `Accepted` (`MIS-REQ-22`, Proposed).
 
 ### Usuario experimental
 

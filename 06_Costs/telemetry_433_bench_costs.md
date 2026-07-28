@@ -1,5 +1,8 @@
 # Telemetry 433 Bench Costs (Preliminar)
 
+**Revisión:** 2026-07-27
+**Estado:** Preliminary — Bench only
+
 Moneda de referencia: USD.
 Fecha de referencia: 2026-02-12.
 
@@ -15,4 +18,6 @@ Fecha de referencia: 2026-02-12.
 ## Notas
 - No se inventan precios: completar con cotizaciones reales y fuente.
 - Este costo es de banco de pruebas, no costo de vuelo.
-- Referencia de decisión: `08_Decisions/ADR-20260212-telemetry-bench-433mhz.md`.
+- Decisión vigente: `08_Decisions/ADR-20260727-telemetry-bench-433-v4.md`.
+- `ADR-20260212-telemetry-bench-433mhz.md` se conserva solo como antecedente
+  `Superseded`.

@@ -288,7 +288,7 @@ Bloqueantes actuales:
 2. geometría 1.5U errónea propagada;
 3. EPS no fabricable y batería sin protección completa;
 4. experimento IA sin protocolo/benchmark limpio;
-5. órbita/SSO y modelos físicos no validados;
+5. órbita/SSO, debris/reentry y modelos físicos no validados;
 6. ADCS inexistente;
 7. RF/regulación/seguridad TTC abiertos;
 8. ausencia de budgets integrados;
@@ -312,7 +312,8 @@ Ver `01_Mission/validation_plan_and_stage_gates.md`.
 
 - requisitos: `01_Mission/requirements_matrix.md`;
 - VCRM: `01_Mission/verification_cross_reference_matrix.csv`;
-- compliance: `01_Mission/compliance_matrix.md`;
+- compliance: `01_Mission/compliance_matrix.md` y
+  `01_Mission/compliance_cross_reference_matrix.csv`;
 - costs/BOM: `06_Costs/`;
 - riesgos: `07_Risk/`;
 - ADRs: `08_Decisions/INDEX.md`.

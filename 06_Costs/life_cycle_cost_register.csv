@@ -1,21 +1,50 @@
-WBSID,CostElement,Stage,CostType,Low,MostLikely,High,Currency,BasisOfEstimate,Source,QuoteDate,FXDate,OwnerRole,Gate,Status,RiskID
-LCC-01,Systems engineering and project management,Program,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Systems,SRR,Open,RSK-PROG-01
-LCC-02,Quality configuration and product assurance,Program,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,QA,SRR,Open,RSK-CONF-01
-LCC-03,Structure thermal and mechanisms,Flight-Like/Flight,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Structure,PDR,Open,RSK-MECH-01
-LCC-04,EPS solar and battery,Flight-Like/Flight,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,EPS,PDR,Open,RSK-EPS-01
-LCC-05,OBC storage and flight software,Flight-Like/Flight,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,FSW/OBC,PDR,Open,RSK-FSW-01
-LCC-06,COMMS RF and antennas,Flight-Like/Flight,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,COMMS,PDR,Open,RSK-RF-01
-LCC-07,ADCS sensors actuators and software,Flight-Like/Flight,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,ADCS,PDR,Open,RSK-ADCS-01
-LCC-08,Science sensors,Flight-Like/Flight,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Science,PDR,Open,RSK-CONF-01
-LCC-09,AI payload hardware model data and compute,Bench/Flight-Like,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AI,PDR,Open,RSK-AI-01
-LCC-10,Ground station and site works,EGSE/Operations,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Ground,PDR,Open,RSK-GND-01
-LCC-11,EGSE fixtures and calibrated metrology,EGSE,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT,PDR,Open,RSK-ENV-01
-LCC-12,Engineering qualification and acceptance articles,AIT,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
-LCC-13,Environmental EMC and RF laboratory tests,AIT,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
-LCC-14,Radiation analysis screening and tests,AIT,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Radiation,CDR,Open,RSK-RAD-01
-LCC-15,Regulatory coordination legal and insurance,Program,NRE+Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Regulatory/Legal,PDR,Open,RSK-REG-02;RSK-LEGAL-01
-LCC-16,Launch service deployer and integration,Launch,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Integration,PDR,Open,RSK-LAUNCH-01
-LCC-17,Transport import taxes customs and FX,Program,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Procurement,PDR,Open,RSK-SUP-01
-LCC-18,Spares rework and contingency,Program,Recurring+Reserve,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Procurement,PDR,Open,RSK-COST-01
-LCC-19,Operations data hosting and staffing,Operations,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Operations,PDR,Open,RSK-COST-01
-LCC-20,End of life and disposal activities,Operations,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Operations/Systems,PDR,Open,RSK-ORB-01
+WBSID,ParentWBSID,CostElement,Stage,CostType,Low,MostLikely,High,Currency,BasisOfEstimate,Source,QuoteDate,FXDate,OwnerRole,Gate,Status,RiskID
+LCC-01-NRE,LCC-01,Systems engineering and project management,Program,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Systems,SRR,Open,RSK-PROG-01
+LCC-01-REC,LCC-01,Systems engineering and project management,Program,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Systems,SRR,Open,RSK-PROG-01
+LCC-02-NRE,LCC-02,Quality configuration and product assurance,Program,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,QA,SRR,Open,RSK-CONF-01
+LCC-02-REC,LCC-02,Quality configuration and product assurance,Program,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,QA,SRR,Open,RSK-CONF-01
+LCC-03-FL-NRE,LCC-03,Structure thermal and mechanisms,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Structure,PDR,Open,RSK-MECH-01
+LCC-03-FL-REC,LCC-03,Structure thermal and mechanisms,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Structure,PDR,Open,RSK-MECH-01
+LCC-03-F-NRE,LCC-03,Structure thermal and mechanisms,Flight,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Structure,PDR,Open,RSK-MECH-01
+LCC-03-F-REC,LCC-03,Structure thermal and mechanisms,Flight,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Structure,PDR,Open,RSK-MECH-01
+LCC-04-FL-NRE,LCC-04,EPS solar and battery,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,EPS,PDR,Open,RSK-EPS-01;RSK-PWR-01
+LCC-04-FL-REC,LCC-04,EPS solar and battery,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,EPS,PDR,Open,RSK-EPS-01;RSK-PWR-01
+LCC-04-F-NRE,LCC-04,EPS solar and battery,Flight,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,EPS,PDR,Open,RSK-EPS-01;RSK-PWR-01
+LCC-04-F-REC,LCC-04,EPS solar and battery,Flight,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,EPS,PDR,Open,RSK-EPS-01;RSK-PWR-01
+LCC-05-FL-NRE,LCC-05,OBC storage and flight software,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,FSW/OBC,PDR,Open,RSK-FSW-01
+LCC-05-FL-REC,LCC-05,OBC storage and flight software,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,FSW/OBC,PDR,Open,RSK-FSW-01
+LCC-05-F-NRE,LCC-05,OBC storage and flight software,Flight,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,FSW/OBC,PDR,Open,RSK-FSW-01
+LCC-05-F-REC,LCC-05,OBC storage and flight software,Flight,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,FSW/OBC,PDR,Open,RSK-FSW-01
+LCC-06-FL-NRE,LCC-06,COMMS RF and antennas,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,COMMS,PDR,Open,RSK-RF-01
+LCC-06-FL-REC,LCC-06,COMMS RF and antennas,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,COMMS,PDR,Open,RSK-RF-01
+LCC-06-F-NRE,LCC-06,COMMS RF and antennas,Flight,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,COMMS,PDR,Open,RSK-RF-01
+LCC-06-F-REC,LCC-06,COMMS RF and antennas,Flight,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,COMMS,PDR,Open,RSK-RF-01
+LCC-07-FL-NRE,LCC-07,ADCS sensors actuators and software,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,ADCS,PDR,Open,RSK-ADCS-01
+LCC-07-FL-REC,LCC-07,ADCS sensors actuators and software,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,ADCS,PDR,Open,RSK-ADCS-01
+LCC-07-F-NRE,LCC-07,ADCS sensors actuators and software,Flight,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,ADCS,PDR,Open,RSK-ADCS-01
+LCC-07-F-REC,LCC-07,ADCS sensors actuators and software,Flight,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,ADCS,PDR,Open,RSK-ADCS-01
+LCC-08-FL-NRE,LCC-08,Science sensors,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Science,PDR,Open,RSK-SCI-01
+LCC-08-FL-REC,LCC-08,Science sensors,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Science,PDR,Open,RSK-SCI-01
+LCC-08-F-NRE,LCC-08,Science sensors,Flight,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Science,PDR,Open,RSK-SCI-01
+LCC-08-F-REC,LCC-08,Science sensors,Flight,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Science,PDR,Open,RSK-SCI-01
+LCC-09-B-NRE,LCC-09,AI payload hardware model data and compute,Bench,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AI,PDR,Open,RSK-AI-01
+LCC-09-B-REC,LCC-09,AI payload hardware model data and compute,Bench,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AI,PDR,Open,RSK-AI-01
+LCC-09-FL-NRE,LCC-09,AI payload hardware model data and compute,Flight-Like,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AI,PDR,Open,RSK-AI-01
+LCC-09-FL-REC,LCC-09,AI payload hardware model data and compute,Flight-Like,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AI,PDR,Open,RSK-AI-01
+LCC-10-EGSE-NRE,LCC-10,Ground station and site works,EGSE,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Ground,PDR,Open,RSK-GND-01
+LCC-10-EGSE-REC,LCC-10,Ground station and site works,EGSE,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Ground,PDR,Open,RSK-GND-01
+LCC-10-OPS-NRE,LCC-10,Ground station and site works,Operations,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Ground,PDR,Open,RSK-GND-01
+LCC-10-OPS-REC,LCC-10,Ground station and site works,Operations,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Ground,PDR,Open,RSK-GND-01
+LCC-11-NRE,LCC-11,EGSE fixtures and calibrated metrology,EGSE,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT,PDR,Open,RSK-ENV-01
+LCC-12-NRE,LCC-12,Engineering qualification and acceptance articles,AIT,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
+LCC-12-REC,LCC-12,Engineering qualification and acceptance articles,AIT,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
+LCC-13-NRE,LCC-13,Environmental EMC and RF laboratory tests,AIT,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,AIT/QA,CDR,Open,RSK-ENV-01
+LCC-14-NRE,LCC-14,Radiation analysis screening and tests,AIT,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Radiation,CDR,Open,RSK-RAD-01
+LCC-15-NRE,LCC-15,Regulatory coordination legal and insurance,Program,NRE,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Regulatory/Legal,PDR,Open,RSK-REG-02;RSK-LEGAL-01
+LCC-15-REC,LCC-15,Regulatory coordination legal and insurance,Program,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Regulatory/Legal,PDR,Open,RSK-REG-02;RSK-LEGAL-01
+LCC-16-REC,LCC-16,Launch service deployer and integration,Launch,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Integration,PDR,Open,RSK-LAUNCH-01
+LCC-17-REC,LCC-17,Transport import taxes customs and FX,Program,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Procurement,PDR,Open,RSK-SUP-01
+LCC-18-REC,LCC-18,Spares and rework,Program,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Procurement,PDR,Open,RSK-COST-01
+LCC-18-RES,LCC-18,Technical schedule and program contingency,Program,Reserve,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,PM/Procurement,PDR,Open,RSK-COST-01
+LCC-19-REC,LCC-19,Operations data hosting and staffing,Operations,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Operations,PDR,Open,RSK-COST-01
+LCC-20-REC,LCC-20,End of life and disposal activities,Operations,Recurring,TBD,TBD,TBD,TBD,TBD,TBD,TBD,TBD,Operations/Systems,PDR,Open,RSK-DEBRIS-01

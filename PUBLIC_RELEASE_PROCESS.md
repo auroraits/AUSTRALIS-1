@@ -41,7 +41,7 @@ Run these checks in the clean mirror before publication:
 
 ```powershell
 git ls-files -ci --exclude-standard
-git ls-files | rg -i '\.(pdf|docx|xlsx|zip|fzz|3mf|safetensors|dll|so|dylib|exe|pdb|nupkg|7z|rar)$'
+git ls-files | rg -i '\.(pdf|docx|xlsx|zip|fzz|3mf|safetensors|pt|pth|ckpt|onnx|bin|gguf|ggml|tflite|h5|keras|dll|so|dylib|exe|pdb|nupkg|7z|rar)$'
 rg -n -i --hidden --glob '!/.git/**' --glob '!PUBLIC_RELEASE_PROCESS.md' --glob '!PUBLICATION_AUDIT.md' '((api[_-]?key|client[_-]?secret|password|private[_-]?key)\s*[:=]\s*\S+|BEGIN [A-Z ]*PRIVATE KEY)'
 rg -n -i --hidden --glob '!/.git/**' --glob '!PUBLIC_RELEASE_PROCESS.md' --glob '!PUBLICATION_AUDIT.md' '(C:\\Users|/home/|/Users/|aurorarig|@auroraits|@gmail|@hotmail)'
 dotnet build '05_Software/GroundTelemetryDashboard/GroundTelemetryDashboard.sln'

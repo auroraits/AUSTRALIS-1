@@ -23,6 +23,9 @@ Gate A → SRR → subsystem evidence gates → PDR → CDR → TRR
 
 Semántica VCRM:
 
+- `RequirementLifecycle` se copia de la matriz de requisitos. Una fila
+  `Proposed` conserva trazabilidad y trabajo de decisión, pero no es una
+  obligación activa ni puede contarse como incumplimiento del baseline;
 - `Open`: falta definición o plan verificable;
 - `Planned`: procedimiento/gate asignado, sin implementación acreditada;
 - `Implemented`: existe diseño/artefacto inspeccionable, pero no evidencia de
@@ -286,7 +289,7 @@ plan referencia el universo completo:
   `MIS-REQ-21`, `MIS-REQ-22`, `MIS-REQ-23`, `MIS-REQ-24`;
 - uplink:
   `COMMS-UL-01`, `COMMS-UL-02`, `COMMS-UL-03`, `COMMS-UL-04`,
-  `COMMS-UL-05`, `COMMS-UL-06`;
+  `COMMS-UL-05`, `COMMS-UL-06`, `COMMS-UL-07`;
 - compliance:
   `COMP-REQ-01`, `COMP-REQ-02`, `COMP-REQ-03`, `COMP-REQ-04`,
   `COMP-REQ-05`, `COMP-REQ-06`;
@@ -301,8 +304,9 @@ plan referencia el universo completo:
   `THR-REQ-04`;
 - assurance:
   `SYS-REQ-01`, `SYS-REQ-02`, `SYS-REQ-03`, `SYS-REQ-04`, `SYS-REQ-05`,
-  `SYS-REQ-06`, `SYS-REQ-07`, `EPS-REQ-01`, `EPS-REQ-02`,
-  `ADCS-REQ-01`, `ADCS-REQ-02`, `DATA-REQ-01`, `DATA-REQ-02`,
+  `SYS-REQ-06`, `SYS-REQ-07`, `EPS-REQ-01`, `EPS-REQ-02`, `PWR-REQ-01`,
+  `ADCS-REQ-01`, `ADCS-REQ-02`, `ORB-REQ-01`, `SCI-REQ-01`,
+  `DATA-REQ-01`, `DATA-REQ-02`,
   `SEC-REQ-01`, `SEC-REQ-02`, `RAD-REQ-01`, `ENV-REQ-01`.
 
 ## 13. Resumen de estado

@@ -18,13 +18,19 @@ La documentación existente (en particular `04_Communications/link_budget_lora_u
 
 ## Decisión
 
-El "nodo típico LoRa terrestre" para el uplink del MVP se define como **clase de nodo**, no como SKU de mercado específico.
+El "nodo típico LoRa terrestre" usado como artículo de banco para trade se
+define como **clase de nodo**, no como SKU de mercado específico. Los valores
+siguientes son una envolvente candidata de capacidad para ensayos conducidos o
+terrestres autorizados; no son bandplan, potencia radiada autorizada ni
+configuración operacional adoptada.
 
-**Clase de nodo:**
-- Banda terrestre objetivo: `915–928 MHz` (AU915 o equivalente)
+**Envolvente candidata de banco:**
+- Capacidad de radio a evaluar: `915–928 MHz` (AU915 o equivalente); cualquier
+  emisión intencional requiere encuadre/autorización previa
 - Radio: clase `SX1262` o `SX1276` o equivalente
 - Microcontrolador: clase `ESP32-S3` o equivalente
-- Potencia TX típica: `+20 a +21 dBm`
+- Capacidad TX típica del módulo: hasta `+20 a +21 dBm`; el setpoint de ensayo
+  y toda EIRP quedan limitados por autorización, seguridad del banco y protocolo
 - Antena: simple, `0–2 dBi`; sin antena direccional
 - Cristal: comercial típico, `±10 ppm`
 - Sin PA (Power Amplifier) externo
@@ -35,13 +41,21 @@ El "nodo típico LoRa terrestre" para el uplink del MVP se define como **clase d
 
 **Parámetros TBD (no cerrados por esta ADR):**
 - Elevación mínima operativa.
-- Canalización exacta dentro de 915–928 MHz.
+- Banda/canalización autorizada.
 - BW definitivo (125 vs 250 kHz).
 - Criterio numérico final de aceptación de uplink.
 
-**Baseline operativo mantenido:**
-- Modo B2 slotted / pass-aware.
-- Predicción de pasadas con TLE + SGP4.
+**Fuera del alcance de esta ADR:**
+
+- modo B1/B2, slotting y política de reintentos;
+- fuente de tiempo, autenticidad/edad de TLE y algoritmo de pasada;
+- banda operacional, autorización, canal, BW, setpoint/EIRP y criterio de
+  aceptación.
+
+B2 y TLE+SGP4 pueden estudiarse como candidatos, pero no quedan adoptados por
+esta decisión de clase de hardware. Su promoción exige el gate regulatorio,
+protocolo preregistrado y V&V definidos por
+`ADR-20260727-rf-regulatory-command-security-baseline.md`.
 
 ---
 

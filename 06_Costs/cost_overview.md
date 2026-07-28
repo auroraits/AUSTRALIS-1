@@ -32,6 +32,10 @@ El registro `life_cycle_cost_register.csv` cubre:
 - launch service/deployer/integrator;
 - operaciones, data/hosting y end-of-life.
 
+Cada fila es atómica en `Stage` y `CostType`. Los 20 `ParentWBSID` se
+descomponen en 49 filas; no se permite `NRE+Recurring`, stages combinados ni
+reserva mezclada con costo recurring.
+
 ## 3. Criterio de madurez
 
 | Review | Costo requerido |

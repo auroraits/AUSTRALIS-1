@@ -6,6 +6,9 @@
 Este documento cubre normas, regulación e interfaces externas. La verificación
 de requisitos internos se controla en
 `verification_cross_reference_matrix.csv`.
+La trazabilidad ejecutable de cada fila `CX-*` hacia requisito padre, método,
+procedimiento, gate, owner, riesgo, configuración y evidencia se controla en
+`compliance_cross_reference_matrix.csv`.
 
 Estados permitidos:
 
@@ -63,19 +66,26 @@ aceptación.
 | CX-RF-09 | Comandos/prompts tienen autenticación, integridad y anti-replay. | SEC-REQ-01 | threat model + negative test suite | Open | CRC/hash simple no autentica. |
 | CX-RF-10 | SatNOGS permanece receive-only y sin PTT/claves. | MIS-REQ-21 | physical/logical isolation tests | Planned | No sustituye licencia ni estación de control. |
 | CX-RF-11 | Link budgets uplink/downlink y patrón integrado están verificados. | MIS-REQ-03 | measured EIRP/G/T/sensitivity/PER + uncertainty | Open | ADRs de link/máscara anteriores superseded. |
+| CX-RF-12 | Frames de sensores tienen autenticación y anti-replay; CRC/node ID no prueban origen. | COMMS-UL-07 | spoof/replay/reset/wrap negative tests + provisioning record | Open | La procedencia física requiere ground log controlado además de la credencial. |
 
-## 4. EPS, térmico, radiación y ambiente
+## 4. Órbita, debris y reentry
+
+| ID | Requirement | Source | Verification/Evidence | Status | Disposición |
+|---|---|---|---|---|---|
+| CX-ORB-01 | Órbita, vida, mitigación de debris, fin de vida y reentry cumplen los requisitos aplicables. | ORB-REQ-01; jurisdicción/ICD TBD | validated propagation + uncertainty + compliance/reentry disposition | Open | No congelar órbita ni prometer deorbit hasta identificar autoridad, estándar e inputs as-built. |
+
+## 5. EPS, térmico, radiación y ambiente
 
 | ID | Requirement | Source | Verification/Evidence | Status | Disposición |
 |---|---|---|---|---|---|
 | CX-EPS-01 | Arquitectura de referencia 2S; protección/carga completas. | MIS-REQ-06/COMP-REQ-06 | reviewed schematic + battery tests | Open | No fabricar el diseño placeholder. |
 | CX-EPS-02 | Límites de carga/descarga/supervivencia de celda final implementados. | THR-REQ-03 | datasheet allocation + TVAC/fault tests | Open | Incluir no-charge cold/hot interlock. |
-| CX-EPS-03 | Power/energy budget BOL/EOL cerrado. | ADR-20260727 thermal/power | ledger + measurements + uncertainty | Open | No existe margen confirmado. |
+| CX-EPS-03 | Power/energy budget BOL/EOL cerrado. | PWR-REQ-01 | ledger + measurements + uncertainty | Open | No existe margen confirmado. |
 | CX-THR-01 | Thermal model correlacionado y límites verificados. | THR-REQ-01..04 | thermal balance/TVAC + model correlation | Open | Radiador/heater/coating TBD. |
 | CX-RAD-01 | TID/DDD/SEE/SEL analizados y mitigados. | RAD-REQ-01 | environment/parts/mitigation/test report | Open | Watchdog no mitiga SEL/TID por sí solo. |
 | CX-ENV-01 | Programa ambiental ejecutado sobre artículo/configuración controlados. | ENV-REQ-01; ICD | vibration/TVAC/EMC/deployment/pre-post | Blocked by Integrator | Niveles finales dependen del ICD; programa no es opcional. |
 
-## 5. Evidencia, reviews y readiness
+## 6. Evidencia, reviews y readiness
 
 | ID | Requirement | Source | Verification/Evidence | Status | Disposición |
 |---|---|---|---|---|---|
@@ -85,16 +95,31 @@ aceptación.
 | CX-EP-04 | Waivers registran autoridad y riesgo residual. | SYS-REQ-07 | waiver/NCR register | Planned | No existen waivers aprobados. |
 | CX-AI-01 | Experimento IA tiene protocolo, manifest y benchmark limpio. | SYS-REQ-01/IA-REQ-10 | preregistration + digests + results | Open | `gemma4:e2b` es candidato no validado. |
 
-## 6. Fuentes primarias
+## 7. Fuentes primarias
 
 - CDS Rev.14.1:
   <https://static1.squarespace.com/static/5418c831e4b0fa4ecac1bacd/t/62193b7fc9e72e0053f00910/1645820809779/CDS+REV14_1+2022-02-09.pdf>
+  SHA-256 de la copia consultada:
+  `221fbbbd4f632b16f3e219d1a5e2c2b04e1998c12025b793e6dfc6181af66b5d`.
 - ENACOM Resolución 3635-E/2017:
-  <https://www.enacom.gob.ar/multimedia/normativas/2017/res3635%20(octubre).pdf>
+  <https://www.enacom.gob.ar/multimedia/noticias/archivos/201711/archivo_20171107072645_3234.pdf>
+  SHA-256 de la copia consultada:
+  `53067093cd8cb9b9792a44ca5c5a8890a4d4e44b865c389a4758448ab7ae239a`.
+- Modificación ENACOM 1186/2024:
+  <https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-1186-2024-406719/texto>
+- CABFRA edición 2024, actualización 21-10-2025, pp. 151, 159 y
+  182–188:
+  <https://www.enacom.gob.ar/multimedia/noticias/archivos/202511/archivo_20251104082327_1428.pdf>
+  SHA-256 de la copia consultada:
+  `5240087c31abb8563e04bc5a32f4d600d0925ee0cba94559afe4255a952aa597`.
 - IARU:
   <https://www.iaru.org/wp-content/uploads/2019/12/short_info_paper.pdf>
+  SHA-256 de la copia consultada:
+  `791a9c681c99ac1bbc9d5e2d5ee16e90d1c2a00ca57de375d81a85b270392e74`.
 - ITU-R small satellite support:
   <https://www.itu.int/en/ITU-R/space/support/smallsat/Pages/default.aspx>
 
-Las citas deberán confirmarse contra la revisión controlada del documento antes
-de SRR. El ICD del integrador prevalecerá cuando sea más restrictivo.
+Las copias se consultaron el 2026-07-27. Las citas deberán reconfirmarse contra
+la revisión vigente y con especialista/autoridad antes de SRR o filing; esta
+matriz no es asesoramiento legal. El ICD del integrador prevalecerá cuando sea
+más restrictivo.

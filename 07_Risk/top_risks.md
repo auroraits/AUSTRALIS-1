@@ -40,7 +40,9 @@ fecha sin inventarlos en esta revisión.
 | RSK-EPS-01 | Esquema EPS placeholder con cortos/sin BMS/charger → daño o batería insegura | 5 | 5 | 25 | EPS/QA | fabricación o sourcing antes de design review/ERC | bloquear fabricación; reconstruir esquema, ERC/BOM/DRC/tests | Gate D | Open |
 | RSK-EPS-02 | Celda/BMS/temperatura no definidos → plating, runaway o pérdida de energía | 4 | 5 | 20 | EPS/Safety | carga fuera de datasheet o sin sensor/interlock | celda/lote, full BMS, charge inhibit, TVAC/fault tests | CDR/QAR | Open |
 | RSK-EPS-03 | State machine sin thresholds/histéresis → chatter/mode unsafe | 4 | 4 | 16 | EPS/FSW | transición no determinista en límites/sensor inválido | spec completa y boundary/noise/fault tests | CDR/TRR | Open |
+| RSK-PWR-01 | Ledger incompleto o margen nominal falso → brownout/pérdida de misión | 5 | 5 | 25 | EPS/Systems | falta carga/pérdida/BOL-EOL/simultaneidad/incertidumbre o input medido | ledger por modo con medición exacta y worst-case/Monte Carlo | PDR/CDR | Open |
 | RSK-ORB-01 | Barrido no heliosincrónico y artefactos incoherentes → órbita/budgets erróneos | 5 | 4 | 20 | Mission/Analysis | drift LTAN o resultado no reproducible | derivar SSO, manifest, validación Orekit/GMAT equivalente | PDR | Open |
+| RSK-DEBRIS-01 | Lifetime/debris/reentry sin demostrar → rechazo regulatorio/integrador o fin de vida inseguro | 4 | 5 | 20 | Mission/Regulatory | candidato orbital carece de evaluación aprobada | matriz normativa aplicable, propagación con incertidumbre, disposición/reentry y review de autoridad/integrador | PDR/FRR | Open |
 | RSK-ADCS-01 | Actitud perfecta asumida sin ADCS → energía/térmica/RF no alcanzables | 5 | 5 | 25 | ADCS/Systems | budget depende de LVLH perfecto | CONOPS, detumble, hardware, HIL/Monte Carlo y degraded cases | Gate G/TRR | Open |
 | RSK-THR-01 | Modelo viola balance físico/geometría → temperaturas/radiador falsos | 5 | 5 | 25 | Thermal | energy residual/test de regresión falla | modelo conservativo, CAD/BOM provenance y correlation | CDR/QAR | Open |
 | RSK-THR-02 | Conductancia/interfaces no caracterizadas → sobretemperatura IA | 4 | 4 | 16 | Thermal/Structure | ΔT/G medidos fuera de allocation | stack térmico real + calorimetría/TVAC | QAR | Open |
@@ -59,6 +61,7 @@ fecha sin inventarlos en esta revisión.
 | RSK-REG-02 | UHF/IARU/ITU/ENACOM incompletos → no operar/aceptar misión | 4 | 5 | 20 | Operations/Regulatory | bandplan congelado sin dossier | responsable habilitado, coordination/filing/licensing | PDR/FRR | Open |
 | RSK-SEC-01 | TTC/prompts sin auth/replay → spoofing/DoS/ciencia corrupta | 5 | 5 | 25 | Security/FSW | CRC/hash simple o contador no persistente | MAC/signature TBD, counter/key epoch/roles/recovery tests | CDR/TRR | Open |
 | RSK-SEC-02 | Threat model/key lifecycle incompletos → mitigación ineficaz | 4 | 4 | 16 | Security | key compromise/reset/recovery no cubierto | threat model review, provisioning/rotation/revocation | CDR | Open |
+| RSK-SEC-03 | CRC/node ID se acepta como origen de sensor → spoof/replay y evidencia científica falsa | 4 | 4 | 16 | Security/Node/Science | frame suplantado o repetido entra al dataset | identidad/versiones, MIC, key/boot epoch, anti-replay y ground provenance test | Gate B/TRR | Open |
 | RSK-COMMS-01 | Link LoRa sin margen robusto → cero paquetes orbitales | 4 | 4 | 16 | COMMS | calibrated worst-case margin/PDR bajo threshold | link budget + OTA/PDR + fallback mission | Gate B | Open |
 | RSK-COMMS-02 | CFO/Doppler/ToA/slots mal modelados → colisiones/demod failure | 4 | 4 | 16 | COMMS/Node | ramp/collision test bajo threshold | correct ToA, Doppler ramp, Monte Carlo, measured clocks | Gate B | Open |
 | RSK-COMMS-03 | TLE/time source falso/viejo → ventanas erróneas | 3 | 4 | 12 | Node FW/Ground | age/error excede budget o rollback aceptado | signed source, object ID, expiry, error-based fallback | Gate B | Open |
@@ -71,6 +74,7 @@ fecha sin inventarlos en esta revisión.
 | RSK-LEGAL-01 | Titularidad/licencias/provenance ambiguas → distribución o licencia no autorizada | 4 | 5 | 20 | Legal/Configuration | release sin chain of title, textos exactos, SPDX/manifest o contacto autorizado | revisión profesional, manifest de provenance/licencias y sign-off de release | Before release | Open |
 | RSK-PROG-01 | Owner/authority/schedule indefinidos → acciones nunca cierran | 4 | 4 | 16 | PM/QA | review sin responsable nominal/due date | assign names at SRR, action register and reserves | SRR/each review | Open |
 | RSK-PH-01 | PHOTO_DEMO deriva a EO/legal/privacy scope → compliance/schedule impact | 2 | 4 | 8 | Payload/Legal | targeting, products, tasking or commercialization | keep optional/off; capability review with specialist/authority | PDR if included | Open |
+| RSK-SCI-01 | Sensor Science Pack sin propósito/calibración → datos no interpretables | 3 | 4 | 12 | Science/Systems | componente entra a BOM sin range/accuracy/calibration/product definition | trade y calibration chain por sensor exacto | PDR/TRR | Open |
 
 ## 3. Disposiciones específicas
 

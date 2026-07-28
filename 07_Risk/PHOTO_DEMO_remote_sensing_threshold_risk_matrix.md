@@ -159,12 +159,12 @@ Si cualquiera de estos se cumple, **se considera que `PHOTO_DEMO` dejó de ser u
 
 ### 6.2 Tabla
 
-| ID | Riesgo | P | I | S | Drivers (qué lo dispara) | Mitigación (diseño/ops) | Trigger (acción) |
-|---|---|---:|---:|---:|---|---|---|
-| PH-REG-01 | “De facto EO”: se interpreta como satélite de observación/teledetección por **capacidad** (no por intención) | 3 | 4 | 12 | GSD bajo + óptica narrow + pipeline de productos | PH‑GUARD‑01/02/03 + no multispectral + documentación explícita “demo” | TRG‑01/03 ⇒ **freeze** cambios + revisión legal/partner |
-| PH-REG-02 | Se interpreta como “servicio satelital” (prestación a terceros / comercial) | 2 | 5 | 10 | tasking, SLAs, clientes, monetización | PH‑GUARD‑07 + política “no service” | TRG‑05/06 ⇒ stop + rediseño de objetivos |
-| PH-REG-03 | Incumplimiento de reglas de servicio de radioaficionados por satélite por uso “no amateur” (p.ej. comercial) | 2 | 4 | 8 | monetización, contenido comercial, operación fuera de reglas | Operación estricta amateur + apoyo de radioclub + compliance ENACOM/IARU | TRG‑06 ⇒ detener emisión / re‑encuadrar |
-| PH-REG-04 | Aumento de escrutinio por lanzamiento/registro por declarar payload óptico (paperwork extra, demoras) | 3 | 3 | 9 | documentación insuficiente, ambigüedad de propósito/capacidad | ICD + “capability statement” limitado + guardrails medibles | Si partner pide info ⇒ entregar “capability pack” (Anexo A) |
+| ID | ParentRiskID | Riesgo | P | I | S | Owner role | Drivers (qué lo dispara) | Mitigación (diseño/ops) | Trigger (acción) | Due gate |
+|---|---|---|---:|---:|---:|---|---|---|---|---|
+| PH-REG-01 | RSK-PH-01 | “De facto EO”: se interpreta como satélite de observación/teledetección por **capacidad** (no por intención) | 3 | 4 | 12 | Payload/Legal | GSD bajo + óptica narrow + pipeline de productos | PH‑GUARD‑01/02/03 + no multispectral + documentación explícita “demo” | TRG‑01/03 ⇒ **freeze** cambios + revisión legal/partner | PDR if included |
+| PH-REG-02 | RSK-PH-01; RSK-LEGAL-01 | Se interpreta como “servicio satelital” (prestación a terceros / comercial) | 2 | 5 | 10 | Payload/Legal | tasking, SLAs, clientes, monetización | PH‑GUARD‑07 + política “no service” | TRG‑05/06 ⇒ stop + rediseño de objetivos | PDR if included |
+| PH-REG-03 | RSK-PH-01; RSK-REG-02 | Incumplimiento de reglas de servicio de radioaficionados por satélite por uso “no amateur” (p.ej. comercial) | 2 | 4 | 8 | Payload/Regulatory | monetización, contenido comercial, operación fuera de reglas | Operación estricta amateur + apoyo de radioclub + compliance ENACOM/IARU | TRG‑06 ⇒ detener emisión / re‑encuadrar | PDR if included |
+| PH-REG-04 | RSK-PH-01; RSK-PROG-01 | Aumento de escrutinio por lanzamiento/registro por declarar payload óptico (paperwork extra, demoras) | 3 | 3 | 9 | Payload/PM/Legal | documentación insuficiente, ambigüedad de propósito/capacidad | ICD + “capability statement” limitado + guardrails medibles | Si partner pide info ⇒ entregar “capability pack” (Anexo A) | PDR if included |
 
 ---
 
@@ -172,10 +172,10 @@ Si cualquiera de estos se cumple, **se considera que `PHOTO_DEMO` dejó de ser u
 
 > Aunque un CubeSat “context camera” con GSD deliberadamente alto **no** debería captar personas identificables, el riesgo “legal/social” aparece por publicación irresponsable o por malentendidos. En Argentina hay jurisprudencia reciente y recurrente sobre privacidad/imagen en contextos de captura/publicación (no espacial), que sirve como señal de sensibilidad social/judicial.
 
-| ID | Riesgo | P | I | S | Drivers | Mitigación | Trigger |
-|---|---|---:|---:|---:|---|---|---|
-| PH-DATA-01 | Publicación de imagen que se interpreta como invasiva (personas/propiedad/instalación sensible) | 1 | 4 | 4 | publicación automática, sin revisión humana | PH‑GUARD‑08 + revisión humana + delay | Cualquier reporte/queja ⇒ retirar + post‑mortem |
-| PH-DATA-02 | Percepción pública “vigilancia” aunque técnicamente no lo sea (riesgo reputacional / bloqueo de partners) | 3 | 3 | 9 | comunicación ambigua (“spy satellite”), demos virales | framing educativo + “capability statement” | Viralización negativa ⇒ pausa publicación |
+| ID | ParentRiskID | Riesgo | P | I | S | Owner role | Drivers | Mitigación | Trigger | Due gate |
+|---|---|---|---:|---:|---:|---|---|---|---|---|
+| PH-DATA-01 | RSK-PH-01; RSK-LEGAL-01 | Publicación de imagen que se interpreta como invasiva (personas/propiedad/instalación sensible) | 1 | 4 | 4 | Payload/Legal | publicación automática, sin revisión humana | PH‑GUARD‑08 + revisión humana + delay | Cualquier reporte/queja ⇒ retirar + post‑mortem | PDR if included |
+| PH-DATA-02 | RSK-PH-01 | Percepción pública “vigilancia” aunque técnicamente no lo sea (riesgo reputacional / bloqueo de partners) | 3 | 3 | 9 | Payload/Communications | comunicación ambigua (“spy satellite”), demos virales | framing educativo + “capability statement” | Viralización negativa ⇒ pausa publicación | PDR if included |
 
 Referencias (sensibilidad privacidad):
 - Nota/jurisprudencia pública sobre Street View (ejemplo de estándar social de intimidad):  
