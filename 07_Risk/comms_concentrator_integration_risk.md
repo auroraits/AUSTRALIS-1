@@ -1,26 +1,24 @@
-# COMMS — Riesgo: integración de LoRa concentrator en vuelo (potencia/EMI/complexidad)
+# COMMS — Riesgo de receptor LoRa concentrator
 
-**Review date:** 2026-06-15
+**Revisión:** 2026-07-27
+**Estado:** Active — selección reabierta
 
-## Resumen
-Se eligió explorar un RX orbital tipo **LoRa concentrator** para mejorar probabilidad de uplink con nodos típicos.
-Esto incrementa complejidad, consumo y riesgo de integración (EMI con EPS/UHF, thermal, software).
+Un concentrator multicanal/multi-SF puede aportar capacidad, pero no demuestra
+por sí mismo mejor sensibilidad que un receptor simple y agrega potencia,
+masa, software, térmica y EMI. SX1302/SX1303 y el front-end completo deberán
+compararse contra alternativas con hardware medido.
 
-La referencia cuantitativa de sizing incorporada al power budget es un COTS de clase SX1303 HAT:
-- RX con GNSS ON: **99 mA @ 5 V ≈ 0.495 W**.
-- Sleep COTS con GPS OFF: **41 mA @ 5 V ≈ 0.205 W**; no aceptarlo como sustituto de OFF real.
-- TX LoRa COTS: del orden de **3.55 W**; permanece prohibido en el CONOPS MVP.
-
-Estos valores son de especificación y no reemplazan medición de banco integrada.
-
-## Risk matrix
-
-| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger condition |
+| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger |
 |---|---|---|---|---|---|
-| COMMS-RX-01 | El concentrator excede presupuesto de potencia/EMI o no integra bien en stack 1.5U | Media | Alta | Selección con mediciones de consumo; power-gating con OFF real; layout/filtrado; pruebas en FlatSat; modo degradado (single-channel) | Medición en banco muestra consumo/ruido fuera de margen; fallas en UHF o EPS durante RX |
-| COMMS-RX-02 | El COTS concentrator queda en sleep en vez de OFF real y consume energía residual significativa | Media | Media | Rail switchable medido; requerir corriente OFF/fuga compatible con SAFE; validar secuencia de apagado | Corriente fuera de ventana comparable a sleep COTS (~0.205 W) o caída de margen energético |
-| COMMS-RX-03 | Simultaneidad UHF TX + concentrator RX + microSD write causa brownout o ruido acoplado | Media | Alta | Política inicial de no simultaneidad; prueba FlatSat con peor caso; fallback single-channel | Reset, `PGOOD_RF` falso, pérdida de frames UHF o corrupción de logs |
+| COMMS-RX-01 | Concentrator excede allocations o no aporta ventaja RF | Alta | Alta | Trade study medido: sensibilidad/PDR, CFO/Doppler, blocking, consumo, masa y software | no supera receptor simple o excede budget |
+| COMMS-RX-02 | Sleep COTS se confunde con OFF seguro | Media | Alta | rail power-gated, leakage/boot/backfeed medidos | corriente OFF supera allocation |
+| COMMS-RX-03 | UHF/EPS/CM5 desensibilizan RX | Alta | Alta | mode matrix, aislamiento, filtros y blocker/EMC tests | noise floor/PDR varía por modo |
+| COMMS-RX-04 | BOM/documentos mezclan SX1302/SX1303 | Media | Media | congelar módulo/front-end/reloj por ConfigurationID | evidencia usa hardware distinto |
+
+La ADR histórica del concentrator está superseded. Selección y parámetros
+permanecen TBD hasta Gate B.
 
 ## Referencias
-- `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-rx.md`
-- `03_Power/Power Budget.md`
+
+- `../08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`
+- `../01_Mission/verification_cross_reference_matrix.csv`

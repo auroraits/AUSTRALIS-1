@@ -1,16 +1,12 @@
-# COMMS/OPS — Riesgo: TLE desactualizado degrada predicción de pasadas (modo B2)
+# COMMS/OPS — Riesgo de TLE y predicción de pasadas
 
-**Review date:** 2026-02-20
+**Revisión:** 2026-07-27
+**Estado:** Active
 
-## Resumen
-El modo B2 (pass-aware) depende de predicción de pasadas con TLE+SGP4. Si el TLE está desactualizado, la ventana calculada puede correrse y reducir la probabilidad de uplink.
-
-## Risk matrix
-
-| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger condition |
+| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger |
 |---|---|---|---|---|---|
-| OPS-TLE-01 | TLE viejo desplaza la ventana uplink y baja la tasa de recepción | Media | Alta | Ventanas más anchas al inicio; elevación mínima conservadora; disciplina de actualización TLE out-of-band; fallback a B1 always-on slotted | Resúmenes por pasada muestran caída sistemática de rx_total vs esperado |
+| OPS-TLE-01 | TLE viejo desplaza ventana | Media | Alta | convertir error/edad a incertidumbre de tiempo/elevación; invalidar según budget | error excede allocation |
+| OPS-TLE-02 | Fuente falsa/object ID incorrecto/rollback | Media | Alta | fuente autenticada, object ID, expiry y monotonic update | firma/ID/epoch inválidos |
+| OPS-TLE-03 | Fallback B1 eleva airtime/interferencia | Media | Alta | análisis regulatorio/energético y rate limit antes de habilitar | duty/airtime supera autorización |
 
-## Referencias
-- `05_Software/node_uplink_scheduler_pass_prediction.md`
-- `04_Communications/uplink_lora_slotted_protocol.md`
+Los umbrales fijos de edad no sustituyen un error budget.

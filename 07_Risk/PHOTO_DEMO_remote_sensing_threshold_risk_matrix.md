@@ -2,9 +2,15 @@
 
 **Destino en repo:** `07_RISKS/PHOTO_DEMO_remote_sensing_threshold_risk_matrix.md`  
 **Fecha de análisis:** 2026-03-05  
-**Estado:** v2 (repo‑ready) — para decisión de arquitectura/compliance  
+**Estado:** Preliminary — análisis heurístico no normativo
 **Ámbito geográfico primario:** Argentina (estación terrena/operación), con referencias a marcos internacionales relevantes (UIT/ONU).  
 **Disclaimer:** esto **no** es asesoramiento legal; es un análisis técnico‑jurídico de riesgo para ingeniería de misión.
+
+> **Disposición 2026-07-27:** los umbrales de GSD, cadencia y latencia de este
+> documento no provienen de una norma aplicable y no constituyen un safe harbor.
+> `PHOTO_DEMO` permanece opcional/OFF. Cualquier inclusión, targeting, producto
+> EO o publicación sistemática requiere revisión con especialista y
+> autoridades/partners aplicables.
 
 ---
 

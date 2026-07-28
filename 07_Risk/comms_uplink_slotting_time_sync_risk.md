@@ -1,18 +1,14 @@
-# COMMS — Riesgo: slotting requiere hora/sync (nodos típicos)
+# COMMS — Riesgo de slotting y timebase
 
-**Review date:** 2026-02-20
+**Revisión:** 2026-07-27
+**Estado:** Active
 
-## Resumen
-El modo B (slotted) mejora la escalabilidad del uplink con nodos típicos, pero depende de que:
-- el nodo tenga una noción razonable de hora UTC (o al menos epoch boundaries), y
-- si se usa B2 (pass-aware), el nodo reciba ventanas de pasada por un canal externo (internet/manual).
-
-## Risk matrix
-
-| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger condition |
+| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger |
 |---|---|---|---|---|---|
-| COMMS-SLOT-01 | Error de hora/deriva en nodos causa desalineación de slots y colisiones | Media | Alta | Guard time conservador; jitter; re-sync periódico (NTP si existe); usar epochs cortos; opción B1 always-on si no hay schedule | Colisiones altas en pruebas / baja tasa de paquetes válidos vs esperado |
-| COMMS-SLOT-02 | Falta de canal para distribuir ventanas de pasada (B2) reduce efectividad del esquema | Media | Media | Usar B1 (always-on) o distribuir schedule por internet/archivo; mantener fallback de transmisión periódica | Los nodos no transmiten durante pasadas o transmiten fuera de ventana |
+| COMMS-SLOT-01 | Deriva invade slot/guard | Alta | Alta | base temporal medida, cold/hot drift y fail-silent al perder validity; NTP no es supuesto | worst-case invade guard |
+| COMMS-SLOT-02 | Schedule no llega o es inválido | Media | Media | schedule autenticado/expirable; fail-silent. B1 exige autorización separada | nodo transmite con schedule inválido |
+| COMMS-SLOT-03 | Hash genera colisiones persistentes/near-far | Alta | Alta | ToA correcto, Monte Carlo, percentiles, retries y load cap | PDR bajo threshold |
+| COMMS-SLOT-04 | Capacidad usa preámbulo/ToA incorrectos | Alta | Alta | cálculo LoRa independiente y test con analizador/airtime | airtime medido excede slot |
 
-## Referencias
-- `04_Communications/uplink_lora_slotted_protocol.md`
+Gate B debe fijar cantidad de nodos, canales no solapados, PHY, jitter, retry,
+PDR e intervalo de confianza.

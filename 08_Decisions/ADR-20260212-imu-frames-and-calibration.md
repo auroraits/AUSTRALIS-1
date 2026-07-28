@@ -1,7 +1,8 @@
 # ADR-20260212-imu-frames-and-calibration
 
 - **Fecha:** 2026-02-12
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-telemetry-bench-433-v4.md`
 - **Alcance:** banco terrestre 433 MHz; no constituye evidencia de ADCS orbital
 
 ## Contexto

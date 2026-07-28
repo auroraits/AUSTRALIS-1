@@ -1,7 +1,8 @@
 # ADR-20260212-telemetry-bench-433mhz
 
 - **Fecha:** 2026-02-12
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-telemetry-bench-433-v4.md`
 - **Alcance:** banco terrestre, no representativo del enlace orbital
 
 ## Contexto

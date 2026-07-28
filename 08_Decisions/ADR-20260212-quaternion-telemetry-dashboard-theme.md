@@ -1,7 +1,8 @@
 # ADR-20260212-quaternion-telemetry-dashboard-theme
 
 - **Fecha:** 2026-02-12
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-telemetry-bench-433-v4.md`
 - **Alcance:** visualización de banco terrestre; no constituye solución ni evidencia de ADCS orbital
 
 ## Contexto

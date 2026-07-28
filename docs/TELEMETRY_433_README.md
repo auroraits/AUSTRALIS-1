@@ -1,69 +1,63 @@
-# TELEMETRY 433 MHz — ESP32-S3 TX + Arduino UNO RX
+# Telemetry Bench 433 MHz — V4
 
-## 1) Hardware validado
+**Revisión:** 2026-07-27
+**Estado:** Active — banco terrestre, no orbital
 
-IMU usada: **GY-521 (MPU6050)** por I2C.
+## Alcance
 
-- Address detectado en TX: `0x68` (AD0=0) o `0x69` (AD0=1).
-- Alimentación del módulo: `3V3`.
-- El TX imprime por Serial: `#SENSOR:MPU6050 addr=0x..`.
+Banco ESP32-S3 + IMU + TX ASK/OOK 433 MHz → RX/UNO → ground dashboard. Sirve
+para validar framing, sesión, quality flags, pérdida y visualización. No valida
+TTC UHF, patrón orbital, Doppler, microgravedad ni ADCS.
 
-## 2) Convenciones de frame (importante)
+## Configuración vigente
 
-- Quaternion transmitido: **`qw,qx,qy,qz`** (`q0..q3`).
-- Three.js aplica: `set(qx,qy,qz,qw)`.
-- En TX existe un bloque de remapeo editable para alinear frame sensor->body:
-  - `BODY_AX_SIGN/BODY_AY_SIGN/BODY_AZ_SIGN`
-  - `BODY_GX_SIGN/BODY_GY_SIGN/BODY_GZ_SIGN`
+- RadioHead `RH_ASK`: 2000 bit/s.
+- Filtro IMU: objetivo 100 Hz.
+- Telemetría RF: objetivo **2 Hz**.
+- Envío: no bloqueante para que RF no detenga el filtro.
+- Frame: V4, con `boot_id` y `quality_flags`.
 
-## 3) Inicialización MPU6050 en firmware TX
+El frame histórico de 41 bytes necesita `41×8/2000 = 164 ms` antes de overhead
+de framing/codificación. Por eso 20 Hz era imposible. Dos hertz dejan margen y
+deben verificarse con timestamps y contadores; no se declaran validados sin log.
 
-- Wake: `PWR_MGMT_1(0x6B)=0x00`.
-- DLPF: `CONFIG(0x1A)=0x03` (~44/42 Hz).
-- Gyro range: `GYRO_CONFIG(0x1B)=0x00` (±250 dps).
-- Accel range: `ACCEL_CONFIG(0x1C)=0x00` (±2g).
+## Métricas
 
-Unidades para fusión:
-- `accel_g = raw / 16384.0`
-- `gyro_rad_s = (raw / 131.0) * PI/180`
+RX/ground deben distinguir:
 
-## 4) Calibración
+- sesión y `boot_id`;
+- sequence gap;
+- duplicate;
+- out-of-order;
+- wrap;
+- malformed/CRC/quality flags;
+- `busy/dropped` TX cuando corresponda.
 
-### 4.1 Gyro bias (boot)
-En `setup()` se promedian muestras en reposo y se calcula bias (`gx,gy,gz` en rad/s).
+El retorno local de `send()` no mide el canal RF. Fuente/ruido/interferencia se
+evalúan con PER/gaps/dropped end-to-end.
 
-### 4.2 Recalibración runtime
-Por Serial del TX:
-- enviar `CAL` o `RECAL` + Enter.
+## Frames y actitud
 
-TX responde:
-- `#CAL,gyro_bias=...`
+- `sensor→body` es una matriz ortonormal con determinante `+1`.
+- Se usa identidad hasta medir la orientación física del montaje.
+- Quaternion se valida por finitud y norma.
+- La corrección accel de Madgwick se admite solo si `0.5 g ≤ |a| ≤ 1.5 g`.
+- En órbita/caída libre el acelerómetro no es una referencia gravitatoria; este
+  estimador **no puede citarse como solución ni evidencia ADCS orbital**.
 
-### 4.3 Zero visual (dashboard)
-El botón **Set Reference (Zero)** define la pose actual como identidad visual:
-- `q_display = inverse(q_ref) * q_current`
+## Validación mínima
 
-## 5) Paquete RF y compatibilidad
+1. build TX/RX reproducible;
+2. filtro observado cercano a 100 Hz bajo RF activo;
+3. RF observada cercana a 2 Hz sin bloquear;
+4. power-cycle cambia `boot_id`;
+5. fixtures de gap/duplicate/out-of-order/wrap;
+6. matriz `RᵀR=I`, `det(R)=+1`;
+7. quaternion finite/norm;
+8. pérdida por fuente/interferencia visible en métricas RX.
 
-### V3 (actual)
-Campos en struct:
-- `magic='T'`, `version=3`, `sensor_type=1(MPU6050)`
-- `seq,t_ms,ax,ay,az,gx,gy,gz,q0,q1,q2,q3,dt_ms`
+## Referencias
 
-### Compatibilidad RX
-UNO acepta:
-- V3 (versionado)
-- V2 (sin header)
-- V1 (legacy sin quaternion, emite identidad `1,0,0,0`)
-
-CSV de salida UNO:
-`seq,t_ms,ax,ay,az,gx,gy,gz,q0,q1,q2,q3`
-
-## 6) Frecuencias
-
-- Filtro Madgwick: ~100 Hz.
-- Envío RF: ~20 Hz.
-
-## 7) Limitaciones
-
-Sin magnetómetro, yaw deriva con el tiempo (esperado).
+- `../08_Decisions/ADR-20260727-telemetry-bench-433-v4.md`
+- `../07_Risk/telemetry_433_bench_risks.md`
+- `../05_Software/embedded/platformio.ini`

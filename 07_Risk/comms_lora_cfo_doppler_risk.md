@@ -1,21 +1,18 @@
-# COMMS — Riesgo: CFO/Doppler en LoRa 915 MHz (uplink)
+# COMMS — Riesgo CFO/Doppler LoRa
 
-**Review date:** 2026-02-20
+**Revisión:** 2026-07-27
+**Estado:** Active
 
-## Resumen
-En 915 MHz, el uplink desde LEO enfrenta offsets de frecuencia significativos:
-- Doppler por velocidad orbital (orden de decenas de kHz),
-- error de cristal del nodo (±10 ppm → ±9 kHz),
-- deriva térmica y tolerancias del front‑end.
+En 915 MHz se combinan Doppler orbital, error de reloj TX/RX, deriva térmica y
+front-end. BW/receptor finales son TBD; no se supone que BW125 sea óptimo.
 
-Con BW=125 kHz se maximiza sensibilidad pero se reduce tolerancia a offsets y errores de reloj.
-
-## Risk matrix
-
-| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger condition |
+| ID | Riesgo | Prob. | Impacto | Mitigación | Trigger |
 |---|---|---|---|---|---|
-| COMMS-LORA-02 | CFO+Doppler impiden demodulación estable en BW=125 kHz con nodos típicos (±10 ppm) | Media | Alta | (1) Medir tolerancia real con hardware (nodo + RX orbital); (2) fallback a BW=250 kHz si es necesario; (3) diversidad por firmware: retransmisión multi‑frecuencia; (4) operación solo a elevación alta | Pruebas muestran caída marcada de CRC OK o ausencia de lock con offsets simulados |
+| COMMS-LORA-02 | CFO+Doppler impiden lock/PDR con nodo típico | Alta | Alta | Doppler ramp calibrado; error combinado TX+RX; cold/hot; comparar BW/receptores | PDR/IC bajo threshold preregistrado |
+| COMMS-LORA-03 | CFO estático de banco subestima dinámica orbital | Alta | Alta | perfil temporal de pasada con rate-of-change y adquisición inicial | static test pasa y ramp falla |
+| COMMS-LORA-04 | Canales BW250 se solapan con spacing histórico 200 kHz | Alta | Media | frequency plan por BW, filtros/IF medidos y autorización | occupied bandwidths se solapan |
 
-## Referencias
-- `04_Communications/link_budget_lora_uplink_preliminary.md`
-- `04_Communications/uplink_lora_slotted_protocol.md`
+## Gate de cierre
+
+Gate B con hardware exacto, configuración/digests, raw IQ/logs y análisis de
+incertidumbre.
