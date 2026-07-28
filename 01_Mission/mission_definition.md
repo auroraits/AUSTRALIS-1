@@ -2,7 +2,8 @@
 
 **Revisión:** 2026-07-27
 **Estado:** Active — pre-SRR
-**Trazabilidad:** `00_MVP/MVP v2.2.md` y ADRs `Accepted`
+**Trazabilidad:** `00_MVP/MVP v2.2.md` y
+`ADR-20260727-mission-scientific-experiment-baseline.md`
 
 ## 1. Declaración de misión
 

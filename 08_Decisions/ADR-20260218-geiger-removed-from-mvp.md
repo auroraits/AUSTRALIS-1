@@ -3,10 +3,14 @@
 - **Fecha:** 2026-02-18
 - **Estado:** Accepted
 
+> **Alcance aclarado 2026-07-27:** solo permanece aceptada la exclusión del
+> Geiger/HV. Modos, consumos y márgenes históricos de esta ADR no son
+> allocations vigentes ni evidencia del power budget.
+
 ## Contexto
 El Science Pack del MVP v2.1 incluía un contador Geiger con convertidor de alta tensión (HV).
-Este componente era el segundo mayor consumidor eléctrico del satélite (0.70 W, 33% duty en
-SCI MODE) y añadía complejidad de diseño de convertidor HV, reglas operativas restrictivas
+Este componente tenía una estimación histórica de consumo/duty y añadía
+complejidad de diseño de convertidor HV, reglas operativas restrictivas
 (HV OFF durante UHF TX para evitar EMI) y riesgos de interferencia. El criterio de éxito
 mínimo del MVP no depende del Geiger.
 
@@ -29,13 +33,13 @@ disponibilidad de presupuesto de potencia y volumen.
 2. **Reemplazar por detector de radiación de estado sólido:** válido para versiones futuras;
    más liviano, sin HV, pero mayor costo y disponibilidad. No priorizado en MVP.
 3. **Eliminar del MVP (elegida):** simplifica EPS (elimina convertidor HV del 5V_AUX path),
-   reduce consumo en SCI MODE en ~0.231 W promedio, elimina reglas EMI Geiger/TX, y no afecta
+   elimina una carga y reglas EMI Geiger/TX, y no afecta
    el criterio de éxito mínimo del MVP.
 
 ## Impacto en presupuesto de potencia
-- SCIENCE avg: 0.610 W → **~0.299 W** (reducción de ~51%)
-- SAFE avg: 0.193 W → **~0.143 W** (reducción por UHF TX recalculado)
-- Caso típico por órbita: 0.55 Wh → **~0.381 Wh** (mejor margen energético)
+
+La exclusión elimina la carga HV, pero su efecto cuantitativo se recalculará en
+el ledger integrado BOL/EOL. Los valores históricos no se propagan.
 
 ## Implicancias (archivos actualizados)
 - `00_MVP/MVP v2.1.md`

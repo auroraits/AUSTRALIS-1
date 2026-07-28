@@ -1,9 +1,9 @@
 # PHOTO_DEMO — Análisis jurídico‑técnico de umbral regulatorio (amateur vs “remote sensing satellite”)
 
-**Destino en repo:** `07_RISKS/PHOTO_DEMO_remote_sensing_threshold_risk_matrix.md`  
-**Fecha de análisis:** 2026-03-05  
+**Destino en repo:** `07_Risk/PHOTO_DEMO_remote_sensing_threshold_risk_matrix.md`
+**Fecha de análisis:** 2026-03-05
 **Estado:** Preliminary — análisis heurístico no normativo
-**Ámbito geográfico primario:** Argentina (estación terrena/operación), con referencias a marcos internacionales relevantes (UIT/ONU).  
+**Ámbito geográfico primario:** Argentina (estación terrena/operación), con referencias a marcos internacionales relevantes (UIT/ONU).
 **Disclaimer:** esto **no** es asesoramiento legal; es un análisis técnico‑jurídico de riesgo para ingeniería de misión.
 
 > **Disposición 2026-07-27:** los umbrales de GSD, cadencia y latencia de este

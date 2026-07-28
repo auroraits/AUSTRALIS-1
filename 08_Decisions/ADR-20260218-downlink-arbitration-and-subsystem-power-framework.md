@@ -3,6 +3,12 @@
 - **Fecha:** 2026-02-18
 - **Estado:** Accepted
 
+> **Aclaración 2026-07-27:** la lista vigente incluye
+> `AI_BEHAVIOR_LOG` como mayor prioridad científica best-effort. La prioridad
+> de `HOUSEKEEPING`/`COMMAND_ACK` no habilita starvation: cuotas mínimas, aging,
+> retención y data budget se verifican bajo carga. Todo comando indicado abajo
+> requiere autenticación y anti-replay.
+
 ## Contexto
 El MVP requería reglas permanentes para arbitrar downlink entre subsistemas, controlar power-gating selectivo y aislar fallas sin comprometer SAFE ni telemetría crítica.
 

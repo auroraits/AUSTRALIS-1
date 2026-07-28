@@ -3,6 +3,11 @@
 - **Fecha:** 2026-03-13
 - **Estado:** Accepted
 
+> **Alcance aclarado 2026-07-27:** esta ADR define únicamente una clase de
+> artículo de banco para trade y ensayos. No autoriza 915 MHz Tierra→espacio,
+> no congela banda/PHY/B2 y no demuestra performance orbital. Esas decisiones
+> dependen de `ADR-20260727-rf-regulatory-command-security-baseline.md`.
+
 ---
 
 ## Contexto

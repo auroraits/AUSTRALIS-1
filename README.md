@@ -50,6 +50,7 @@ confirmados resultados que la evidencia disponible no reproduce.
 
 - `08_Decisions/ADR-20260727-cubesat-1p5u-cds-envelope.md`
 - `08_Decisions/ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
+- `08_Decisions/ADR-20260727-mission-scientific-experiment-baseline.md`
 - `08_Decisions/ADR-20260727-orbit-attitude-analysis-reopened.md`
 - `08_Decisions/ADR-20260727-thermal-power-baselines-reopened.md`
 - `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`

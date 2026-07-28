@@ -4,6 +4,12 @@
 - **Estado:** Accepted
 - **Supersede:** `ADR-20260218-optional-demo-payload-feature-flag.md` (que pasa a estado `Superseded` por esta ADR)
 
+> **Aclaración 2026-07-27:** "opcional" no resuelve regulación, privacidad,
+> remote sensing ni propiedad intelectual. Si se incluye, capacidad, targeting,
+> productos, operaciones y publicación requieren revisión especializada y de
+> la autoridad/partner aplicable. Umbrales heurísticos de GSD/cadencia no son
+> safe harbors legales.
+
 ---
 
 ## Contexto

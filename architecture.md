@@ -85,6 +85,7 @@ Space segment — CubeSat 1.5U
 |---|---|
 | ADR-20260727-cubesat-1p5u-cds-envelope | corrige geometría 1.5U |
 | ADR-20260727-ai-payload-gemma4-e2b-candidate | candidato IA y límites de claim |
+| ADR-20260727-mission-scientific-experiment-baseline | hipótesis, control, métricas y evidencia científica |
 | ADR-20260727-orbit-attitude-analysis-reopened | reabre órbita/actitud/layout |
 | ADR-20260727-thermal-power-baselines-reopened | reabre energía/térmica |
 | ADR-20260727-rf-regulatory-command-security-baseline | RF/regulación/seguridad TTC |
