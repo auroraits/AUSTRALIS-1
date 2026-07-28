@@ -1,0 +1,75 @@
+ReqID,Method,AcceptanceRef,ProcedureID,Gate,Article,ConfigurationID,EvidenceID,VerificationStatus,RiskID,OwnerRole
+MIS-REQ-01,I+D,requirements_matrix.md,PROC-MECH-001,PDR/FRR,Flight-Like/Flight,TBD,TBD,Planned,RSK-MECH-01,Structure
+MIS-REQ-02,I+T,requirements_matrix.md,PROC-RF-002,CDR/TRR,Flight-Like,TBD,TBD,Planned,RSK-REG-01,COMMS
+MIS-REQ-03,I+T+D,requirements_matrix.md,PROC-REG-001,PDR/FRR,System/Ground,TBD,TBD,Open,RSK-REG-02,COMMS/Operations
+MIS-REQ-04,T+D+A,requirements_matrix.md,PROC-RF-002,TRR/Post-Mission,Flight/Ground,TBD,TBD,Open,RSK-REG-01,COMMS/Ground
+MIS-REQ-05,T+I,requirements_matrix.md,PROC-DATA-001,TRR,FlatSat/Ground,TBD,TBD,Planned,RSK-DATA-01,COMMS/Ground
+MIS-REQ-06,I+T,requirements_matrix.md,PROC-EPS-001,CDR/TRR,Flight-Like,TBD,TBD,Planned,RSK-EPS-01,EPS
+MIS-REQ-07,I,requirements_matrix.md,PROC-DOC-001,SRR/System,Configuration,TBD,TBD,Implemented,RSK-CONF-01,Science/EPS
+MIS-REQ-08,T,requirements_matrix.md,PROC-FSW-001,TRR,FlatSat,TBD,TBD,Planned,RSK-FSW-01,FSW/EPS
+MIS-REQ-09,T+A,requirements_matrix.md,PROC-FSW-001,TRR,FlatSat/Ground,TBD,TBD,Planned,RSK-DATA-02,FSW/COMMS
+MIS-REQ-10,T+I,requirements_matrix.md,PROC-FSW-001,TRR,FlatSat,TBD,TBD,Planned,RSK-FSW-02,FSW/EPS
+MIS-REQ-11,T,requirements_matrix.md,PROC-SEC-001,TRR,FlatSat/Ground,TBD,TBD,Planned,RSK-SEC-01,FSW/COMMS
+MIS-REQ-12,T+I,requirements_matrix.md,PROC-FSW-001,CDR/TRR,FSW/FlatSat,TBD,TBD,Planned,RSK-FSW-01,FSW/EPS
+MIS-REQ-13,I,requirements_matrix.md,PROC-DOC-001,SRR/CDR,Repository/BOM,TBD,TBD,Implemented,RSK-CONF-01,Systems/QA
+MIS-REQ-14,I+T,requirements_matrix.md,PROC-RF-002,TRR,Ground Node,TBD,TBD,Planned,RSK-COMMS-01,Node/COMMS
+MIS-REQ-15,I,requirements_matrix.md,PROC-DOC-001,SRR,Repository,TBD,TBD,Implemented,RSK-CONF-01,Systems/QA
+MIS-REQ-16,D+A,requirements_matrix.md,PROC-SCI-001,SRR/Post-Mission,Flight/Ground,TBD,TBD,Open,RSK-AI-01,AI/Science/Ground
+MIS-REQ-17,T+D,requirements_matrix.md,PROC-DATA-001,TRR/Post-Mission,Flight/Ground,TBD,TBD,Planned,RSK-DATA-01,FSW/Ground
+MIS-REQ-18,T+D,requirements_matrix.md,PROC-SEC-001,TRR,FlatSat/Flight/Ground,TBD,TBD,Planned,RSK-SEC-01,FSW/COMMS
+MIS-REQ-19,T+D+I,requirements_matrix.md,PROC-RF-001,TRR,Flight-Like/Ground,TBD,TBD,Planned,RSK-REG-02,COMMS/Ground
+MIS-REQ-20,A+T+I,requirements_matrix.md,PROC-SEC-001,CDR/TRR,FSW/RF/Ground,TBD,TBD,Planned,RSK-SEC-01,Security/COMMS
+MIS-REQ-21,I+T,requirements_matrix.md,PROC-GND-001,TRR,Ground Station,TBD,TBD,Planned,RSK-GND-01,Ground/COMMS
+MIS-REQ-22,A+T+D,requirements_matrix.md,PROC-GND-001,TRR,Ground Station,TBD,TBD,Planned,RSK-GND-02,Ground
+MIS-REQ-23,I+A,requirements_matrix.md,PROC-COST-001,SRR/CDR,Repository/BOM,TBD,TBD,Implemented,RSK-SUP-01,Systems/Cost
+MIS-REQ-24,I,requirements_matrix.md,PROC-COST-001,PDR/CDR,BOM,TBD,TBD,Planned,RSK-COST-01,Cost/Procurement
+COMMS-UL-01,I+T,requirements_matrix.md,PROC-RF-002,TRR,Ground Node,TBD,TBD,Planned,RSK-COMMS-01,COMMS/Node
+COMMS-UL-02,T+A,requirements_matrix.md,PROC-RF-002,TRR,Ground Node,TBD,TBD,Planned,RSK-COMMS-02,Node FW
+COMMS-UL-03,T+A,requirements_matrix.md,PROC-RF-002,TRR,Node/Ground,TBD,TBD,Planned,RSK-COMMS-03,Node FW/Ground
+COMMS-UL-04,T+I,requirements_matrix.md,PROC-DATA-001,TRR,Flight-Like/Ground,TBD,TBD,Planned,RSK-DATA-01,COMMS/OBC
+COMMS-UL-05,A+T,requirements_matrix.md,PROC-DATA-001,TRR,FlatSat/Ground,TBD,TBD,Planned,RSK-DATA-02,FSW/COMMS
+COMMS-UL-06,A+T,requirements_matrix.md,PROC-RF-002,PDR/TRR,Analysis/Node,TBD,TBD,Planned,RSK-COMMS-02,COMMS/Node
+COMP-REQ-01,I+D,requirements_matrix.md,PROC-MECH-001,FRR,Flight,TBD,TBD,Blocked by Integrator,RSK-MECH-01,Structure
+COMP-REQ-02,I+T,requirements_matrix.md,PROC-EPS-001,FRR,Flight,TBD,TBD,Blocked by Integrator,RSK-LAUNCH-01,EPS/COMMS
+COMP-REQ-03,I+T,requirements_matrix.md,PROC-RF-002,TRR,Flight-Like,TBD,TBD,Planned,RSK-REG-01,COMMS
+COMP-REQ-04,I+D,requirements_matrix.md,PROC-REG-001,FRR,Mission/Ground,TBD,TBD,Open,RSK-REG-02,Operations
+COMP-REQ-05,I+A+T,requirements_matrix.md,PROC-MAT-001,CDR/FRR,Flight-Like/Flight,TBD,TBD,Blocked by Integrator,RSK-MAT-01,Structure/Materials
+COMP-REQ-06,I+T,requirements_matrix.md,PROC-EPS-001,CDR/FRR,Battery/Flight,TBD,TBD,Blocked by Integrator,RSK-EPS-02,EPS/Safety
+MIS-REQ-PH-01,T,requirements_matrix.md,PROC-PH-001,TRR,FlatSat,TBD,TBD,Planned,RSK-PH-01,FSW/EPS
+MIS-REQ-PH-02,T,requirements_matrix.md,PROC-PH-001,TRR,FlatSat,TBD,TBD,Planned,RSK-PH-01,FSW/COMMS
+MIS-REQ-PH-03,T,requirements_matrix.md,PROC-PH-001,TRR,FlatSat/Ground,TBD,TBD,Planned,RSK-PH-01,FSW/Ground
+MIS-REQ-PH-04,T,requirements_matrix.md,PROC-PH-001,TRR,FlatSat,TBD,TBD,Planned,RSK-PH-01,Systems/FSW
+IA-REQ-01,I+T,requirements_matrix.md,PROC-AI-002,CDR/TRR,Flight-Like,TBD,TBD,Planned,RSK-AI-02,EPS/FSW
+IA-REQ-02,T,requirements_matrix.md,PROC-AI-002,TRR,FlatSat,TBD,TBD,Planned,RSK-AI-02,FSW/EPS
+IA-REQ-03,T,requirements_matrix.md,PROC-AI-002,TRR,FlatSat,TBD,TBD,Planned,RSK-AI-02,FSW/EPS
+IA-REQ-04,I+T,requirements_matrix.md,PROC-AI-002,CDR/TRR,FSW/FlatSat,TBD,TBD,Planned,RSK-AI-03,FSW/Safety
+IA-REQ-05,T,requirements_matrix.md,PROC-AI-002,TRR,FSW/FlatSat,TBD,TBD,Planned,RSK-AI-03,FSW/Safety
+IA-REQ-06,T,requirements_matrix.md,PROC-SEC-001,TRR,FSW/Ground,TBD,TBD,Planned,RSK-SEC-01,FSW/Security
+IA-REQ-07,T+I,requirements_matrix.md,PROC-DATA-001,TRR,AI/FlatSat/Ground,TBD,TBD,Planned,RSK-DATA-01,FSW/Ground
+IA-REQ-08,T,requirements_matrix.md,PROC-AI-002,TRR,FlatSat/Ground,TBD,TBD,Planned,RSK-AI-02,FSW/COMMS
+IA-REQ-09,I+A+T,requirements_matrix.md,PROC-RAD-001,PDR/CDR,AI Hardware,TBD,TBD,Open,RSK-RAD-01,Systems/AI
+IA-REQ-10,I+T+A,requirements_matrix.md,PROC-AI-001,PDR/TRR,AI Candidate,TBD,TBD,Open,RSK-AI-01,AI/Science
+IA-REQ-11,I,requirements_matrix.md,PROC-DOC-001,SRR/Each Change,Repository/TBD,TBD,TBD,Implemented,RSK-CONF-01,Systems/QA
+STR-REQ-01,A+I,requirements_matrix.md,PROC-MECH-001,PDR,System Model,TBD,TBD,Open,RSK-THR-01,Structure/Thermal
+STR-REQ-02,A+T,requirements_matrix.md,PROC-ADCS-001,PDR/TRR,ADCS/FlatSat,TBD,TBD,Open,RSK-ADCS-01,ADCS
+THR-REQ-01,T+A,requirements_matrix.md,PROC-THR-001,CDR/QAR,Coupon/Flight-Like,TBD,TBD,Open,RSK-THR-01,Thermal/Materials
+THR-REQ-02,T,requirements_matrix.md,PROC-THR-001,CDR/QAR,Thermal Article,TBD,TBD,Open,RSK-THR-02,Thermal/Structure
+THR-REQ-03,T+A,requirements_matrix.md,PROC-THR-001,CDR/QAR,Battery/Flight-Like,TBD,TBD,Open,RSK-EPS-02,EPS/Thermal
+THR-REQ-04,I+T,requirements_matrix.md,PROC-MAT-001,CDR,Thermal Materials,TBD,TBD,Blocked by Integrator,RSK-MAT-01,Materials
+SYS-REQ-01,I,requirements_matrix.md,PROC-SCI-001,SRR,Protocol,TBD,TBD,Open,RSK-AI-01,Science/Systems
+SYS-REQ-02,I,requirements_matrix.md,PROC-DOC-001,Each Review,Repository,TBD,TBD,Implemented,RSK-CONF-01,QA/Systems
+SYS-REQ-03,I,requirements_matrix.md,PROC-REV-001,Each Review,Project,TBD,TBD,Implemented,RSK-CONF-01,Systems/QA
+SYS-REQ-04,I,requirements_matrix.md,PROC-DOC-001,TRR/Each Test,Test Article,TBD,TBD,Planned,RSK-CONF-01,Configuration/QA
+SYS-REQ-05,I,requirements_matrix.md,PROC-DOC-001,Each Review,VCRM,TBD,TBD,Implemented,RSK-CONF-01,QA
+SYS-REQ-06,I,requirements_matrix.md,PROC-REV-001,Each Review,Project,TBD,TBD,Open,RSK-PROG-01,Project Management
+SYS-REQ-07,I,requirements_matrix.md,PROC-REV-001,Each Review,NCR/Waiver,TBD,TBD,Planned,RSK-PROG-01,QA/Risk
+EPS-REQ-01,I+T,requirements_matrix.md,PROC-EPS-001,CDR/TRR,EPS/FSW,TBD,TBD,Open,RSK-EPS-03,EPS/FSW
+EPS-REQ-02,I,requirements_matrix.md,PROC-EPS-001,CDR,EPS PCB,TBD,TBD,Open,RSK-EPS-01,EPS/QA
+ADCS-REQ-01,A+T,requirements_matrix.md,PROC-ADCS-001,PDR/TRR,ADCS,TBD,TBD,Open,RSK-ADCS-01,ADCS
+ADCS-REQ-02,A,requirements_matrix.md,PROC-ADCS-001,PDR,System Models,TBD,TBD,Open,RSK-ADCS-01,ADCS/Systems
+DATA-REQ-01,T,requirements_matrix.md,PROC-DATA-001,TRR,Ground SW,TBD,TBD,Open,RSK-DATA-01,Ground SW
+DATA-REQ-02,T,requirements_matrix.md,PROC-DATA-001,TRR,Ground SW,TBD,TBD,Open,RSK-DATA-03,Ground SW
+SEC-REQ-01,T+A,requirements_matrix.md,PROC-SEC-001,CDR/TRR,TTC Stack,TBD,TBD,Open,RSK-SEC-01,Security/FSW
+SEC-REQ-02,A+I,requirements_matrix.md,PROC-SEC-001,CDR,Threat Model,TBD,TBD,Open,RSK-SEC-02,Security
+RAD-REQ-01,A+T+I,requirements_matrix.md,PROC-RAD-001,PDR/CDR,Flight-Like,TBD,TBD,Open,RSK-RAD-01,Radiation/Systems
+ENV-REQ-01,T,requirements_matrix.md,PROC-ENV-001,QAR,Qualification/Acceptance Article,TBD,TBD,Blocked by Integrator,RSK-ENV-01,AIT/QA

@@ -1,373 +1,314 @@
-# Plan de Validación y Stage-Gates — AUSTRALIS-1 / DIY Nanosat MVP
+# Verification, Validation and Review Plan — AUSTRALIS-1
 
-**Revisión:** 2026-04-03
-**Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, `01_Mission/compliance_matrix.md`, `01_Mission/requirements_matrix.md`
+**Revisión:** 2026-07-27
+**Estado:** Active — pre-SRR
+**Trazabilidad:** ADR-20260727-verification-and-review-governance
 
-> Este documento define el **plan** de validación y los criterios de los stage-gates. No declara resultados de ensayo. Los resultados se documentan en la evidence pack de cada gate cuando se obtengan.
+## 1. Política
 
----
+Secuencia obligatoria:
 
-## 1) Objetivo
+```text
+Gate A → SRR → subsystem evidence gates → PDR → CDR → TRR
+       → Qualification/Acceptance Review (QAR) → FRR
+```
 
-Definir una ruta de validación incremental desde banco hasta órbita que:
-- cierre requisitos verificables (`01_Mission/requirements_matrix.md`),
-- genere evidencia trazable para la compliance matrix,
-- identifique dependencias y riesgos antes de cada fase,
-- sea coherente con la separación bench / flight-like / flight,
-- y priorice el cierre del objetivo primario de misión en el payload IA.
+- Solo un resultado `Verified` en VCRM cierra un requisito.
+- “Preliminary”, “bench funcionando” o “documentado” no sustituyen evidencia.
+- Una dependencia no puede reemplazarse por una “versión funcional”.
+- Waiver exige autoridad, justificación, expiración/condición y RiskID residual.
+- `Blocked by Integrator` impide FRR si afecta seguridad/aceptación.
+- Todo test usa procedimiento aprobado, artículo/configuración identificados,
+  instrumentación calibrada, raw data y digest.
 
-**Regla de criticidad:** `Gate IA-1` es el gate más crítico del plan. Sin su cierre no puede declararse cumplimiento del criterio mínimo primario de misión.
+## 2. Artefactos de control
 
----
+- requisitos: `requirements_matrix.md`;
+- VCRM: `verification_cross_reference_matrix.csv`;
+- procedimientos: `verification_procedure_index.md`;
+- compliance: `compliance_matrix.md`;
+- risk register: `../07_Risk/top_risks.md`;
+- BOM/configuración: `../06_Costs/BOM_master.csv`.
 
-## 2) Fases de ensayo
+## 3. Gate A — Configuration Reconciliation
 
-| Fase | Nombre | Descripción |
-|---|---|---|
-| F0 | Bench | Validación funcional de componentes y subsistemas en laboratorio |
-| F1 | Campo | Validación de enlace RF terrestre (LoRa + UHF) con hardware representativo |
-| F2 | FlatSat | Integración completa del sistema en mesa (sin estructura/vuelo) |
-| F3 | Ambiental / Fit-Check | Ensayos ambientales básicos + fit-check con dispenser (si aplica) |
-| F4 | Operación inicial (Órbita) | Activación progresiva post-lanzamiento |
+**Estado:** `Open`.
 
----
+### Entrada
 
-## 3) Stage-Gates
+- rama/revisión identificada;
+- auditoría integral disponible;
+- autoridad de baseline definida.
 
-### Gate A — Configuración documental coherente
+### Salida
 
-**Objetivo:** El baseline documental está sincronizado y los agentes tienen una fuente de verdad unificada.
+1. cero ADRs `Accepted` incompatibles;
+2. todos los documentos activos usan 1.5U CDS y no 150 mm;
+3. `gemma4:e2b` es el único candidato IA activo, sin claim de validación;
+4. Granite/SmolLM/órbita/radiador/margen históricos dispuestos;
+5. Gate A/SRR/PDR/readiness consistentes;
+6. 100% de ReqIDs presentes una sola vez en VCRM;
+7. estados/document links validados automáticamente;
+8. cada conflicto `CONF-*` está resuelto o ligado a RiskID/acción;
+9. revisión independiente del diff y acta de cierre.
 
-**Criterios de entrada:**
-- Repositorio accesible con estructura definida.
+**Owner role:** Systems/Configuration/QA.
+**Authority nominal:** TBD.
+**EvidenceID:** TBD.
 
-**Criterios de salida:**
-- `AGENTS.md` raíz con política documental global completo y aceptado.
-- `architecture.md` actualizado con precedencia, estados y regla de propagación.
-- `SYSTEM_BASELINE.md` y `README.md` sincronizados.
-- `00_MVP/MVP v2.2.md` con modelo operativo único (`MISSION_MODE`/`EPS_STATE`).
-- `PHOTO_DEMO` congelado como opcional no crítico (ADR `Accepted`).
-- Compliance matrix (`compliance_matrix.md`) inicial creada.
-- ADRs de gobierno documental, nodo típico, EPS separación, misión primaria y EPS_STATE 4 niveles en estado `Accepted`.
+## 4. SRR — System Requirements Review
 
-**Estado actual (2026-03-14):** ✅ **Completado** — baseline documental resincronizado en esta pasada correctiva.
+**Estado:** `Open`; depende de Gate A `Verified`.
 
-**Evidencias requeridas:** Este documento + ADRs listadas en `architecture.md`.
+### Salida
 
-**Dependencias:** Ninguna.
+- misión, alcance y CONOPS aprobados;
+- protocolo científico preregistrado;
+- requisitos atómicos con criterios y VCRM completa;
+- normativa/ICD/regulatory applicability identificada;
+- interfaces y budgets con reglas de margen;
+- risk register con owner nominal, triggers y residual;
+- plan COTS-to-flight, radiación, ambiente y artículos de ensayo;
+- schedule/cost baseline ROM con reservas;
+- ningún TBD crítico sin plan/gate de cierre.
 
-**Owner tentativo:** Sistema / Documentación.
+## 5. Gates de evidencia de subsistema
 
----
+Estos gates producen evidencia para PDR/CDR/TRR; no sustituyen las reviews.
 
-### Gate IA-1 — Payload IA bench baseline cerrado
+### Gate IA-1 — Candidate model evidence
 
-**Objetivo:** El payload IA experimental ha sido validado en banco con el modelo baseline y puede considerarse candidato a integrarse en la plataforma.
+**Estado:** `Open`.
 
-**Criterios de entrada:**
-- Gate A completado. ✅
-- Hardware bench candidate (CM5 8 GB o equivalente) disponible.
-- Interfaz OBC ↔ CM5 definida y conectada en banco.
+Salida:
 
-**Criterios de salida (subdivididos en alcanzados / pendientes):**
+- manifest/digest exacto de `gemma4:e2b`, tokenizer, runtime y licencia;
+- dataset con provenance, deduplicación y blind split;
+- suite con oráculo externo, schemas estrictos y casos adversariales;
+- análisis estadístico preregistrado;
+- cero transferencia de métricas Granite;
+- resultados raw y reproducibles.
 
-Alcanzados (evidencia de banco sin hardware CM5):
-- ✅ Benchmark funcional del modelo baseline completado (benchmark corrected + holdout 2026-03-16).
-- ✅ Modelo baseline seleccionado con criterios explícitos y documentado en ADR `Accepted`.
-- ✅ Dataset de entrenamiento representativo del dominio de operaciones satelitales (~1800 ejemplos).
-- ✅ Fine-tuning QLoRA operativo y reproducible en hardware local.
-- ✅ Mejora sustancial verificada (pass_rate 14 % → 57 %; avg_score_ratio 0.32 → 0.83).
-- ✅ Holdout funcional en tareas misión-críticas: SAFE fallback, RF fault isolation, regulatory refusal, eclipse hold.
+### Gate IA-2 — Hardware/supervisor integration
 
-Pendientes (requieren hardware CM5 real — Gate IA-2):
-- ❌ Boot reproducible del payload IA en CM5 real (CM5 8 GB + Linux + Granite fine-tuned).
-- ❌ Inferencia reproducible en CM5 real con prompt por defecto.
-- ❌ Cambio de prompt por uplink simulado — verificar que el modelo usa el nuevo prompt en CM5 real.
-- ❌ Behavior logging persistente en CM5 real — verificar que los campos mínimos se registran.
-- ❌ RuntimeSafetySupervisor integrado — al menos un caso de accept y uno de reject en CM5 real.
-- ❌ Power cycling controlado — verificar boot limpio tras corte de alimentación en CM5.
-- ❌ Medición de consumo en CM5 real: idle, activo, inferencia burst (mW reales).
-- ❌ Evidencia de fallback a control determinístico — operación normal del OBC con CM5 apagado.
-- ❌ Ningún cierre falso de térmica/consumo sin datos medidos.
+**Estado:** `Open`; depende de IA-1.
 
-**Estado actual:** ⚠️ Parcialmente completado.
-- Parte funcional (benchmark de modelo, holdout, selección con criterios, evidencia de banco): **alcanzada** (2026-03-16).
-- Parte de hardware (boot CM5 real, medición consumo, integración OBC↔CM5, supervisor integrado): **pendiente** — requiere hardware bench candidate.
+Salida:
 
-**Evidencias requeridas (pendientes):** Reporte de banco con CM5 real, logs de inferencia en hardware, mediciones de consumo reales, resultados del supervisor integrado.
+- hardware/configuración exacta;
+- boot/power-cycle/kill/lockout;
+- supervisor valida schema, args, clases, pre/postconditions;
+- tests negativos: no-action, malformed, prosa envolvente, rango, zero values,
+  acción insegura y replay;
+- latencia, memoria, energía y térmica medidos;
+- OBC opera normalmente con IA apagada;
+- storage/prompt shutdown seguro.
 
-**Evidencias requeridas (disponibles):** `05_Software/AI PAYLOAD/ai_payload_bench_evidence_2026-03-16.md`, `ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md`.
+### Gate B — LoRa non-radiated feasibility
 
-**Dependencias:** Hardware bench candidate (CM5 8 GB), interfaz OBC↔CM5 implementada.
+**Estado:** `Open`.
 
-**Owner tentativo:** FSW/EPS.
+Salida:
 
-**Riesgos relacionados:** Top-risks 17–23 (payload IA).
+- autorización/ruta regulatoria documentada antes de cualquier ensayo radiado;
+- ToA y slot capacity corregidos;
+- sensibilidad/PDR/CFO/Doppler ramp calibrados;
+- clock/TLE error budget, near-far, adjacent/cochannel y coexistencia;
+- patrón OTA integrado y criterios con N/IC;
+- persistencia/replay de ground data.
 
----
+### Gate C — UHF TTC candidate
 
-### Gate IA-2 — Payload IA en hardware CM5 real sobre `EPS_Bench1_1S` extendido
+**Estado:** `Open`.
 
-**Objetivo:** Validar el payload IA con Granite fine-tuned en hardware CM5 real usando `EPS_Bench1_1S` extendido como plataforma bench-only. Este gate cierra boot, secuenciamiento, FPM, logging, consumo y térmica básica del CM5 real en banco. **No** valida el rail IA de vuelo 2S + MPPT.
+Salida:
 
-**Criterios de entrada:**
-- Gate A completado. ✅
-- Evidencia funcional de banco (benchmark + holdout) completada. ✅
-- `EPS_Bench1_1S` extendido documentado con FPM bench + rail IA bench-only + `J_AI_PWR`.
-- Hardware bench candidate (CM5 8 GB) disponible.
-- Interfaz OBC ↔ CM5 de banco definida (UART primaria; SPI / I2C siguen TBD para otras capas).
-- Firmware del RuntimeSafetySupervisor disponible para prueba integrada.
+- link budgets uplink/downlink corregidos;
+- waveform/occupied bandwidth/Doppler/FEC/framing definidos;
+- EIRP, sensibilidad, G/T, PER y patrón integrado medidos;
+- coexistencia/EMC y spurious emissions;
+- beacon público decodificado;
+- autenticación/anti-replay integrada;
+- dossier ENACOM/IARU/ITU avanzado;
+- T/R isolation y SatNOGS RX-only verificados.
 
-**Criterios de salida:**
-- `T11` — presencia de `5V_AI_EXT` con rail IA apagado y sin backfeed.
-- `T12` — `EN_AI` / `SW_AI` ON y verificación de `PGOOD_AI`.
-- `T13` — boot reproducible del CM5 real x5.
-- `T14` — `HB_AI` válido.
-- `T15` — pérdida de `HB_AI` -> kill + retry + lockout.
-- `T16` — prompt versionado cargado y usado en inferencia.
-- `T17` — `AI_BEHAVIOR_LOG` persistente con campos mínimos.
-- `T18` — un caso `accepted` y un caso `rejected` del supervisor.
-- `T19` — mutua exclusión IA ↔ TX UHF.
-- `T20` — medición real de consumo: idle / activo / inferencia burst.
-- `T21` — medición térmica básica del CM5 + fallback determinístico con CM5 apagado.
-- Ningún cierre de presupuesto energético sin datos medidos.
-- Ninguna extrapolación del rail IA bench-only al rail IA de vuelo.
+### Gate D — EPS flight-like design/release
 
-**Estado actual:** ❌ Pendiente — existe definición documental del bench extendido, pero no hay evidencia de ejecución T11–T21 en el repo.
+**Estado:** `Blocked` hasta reconstrucción del diseño.
 
-**Evidencias requeridas:** Reporte de banco sobre `EPS_Bench1_1S` extendido, medición de corriente (idle/active/inference), logs de inferencia en hardware, informe térmico básico, resultados del supervisor integrado y evidencia de T11–T21.
+Salida previa a fabricación:
 
-**Dependencias:** Hardware CM5 8 GB, interfaz OBC↔CM5 implementada, wiring bench extendido cerrado.
+- esquema funcional sin cortos/placeholders;
+- celda, BMS completo, cargador/MPPT, balanceo y secondary protection;
+- power paths/gating/telemetry/charge inhibit/launch inhibits;
+- ERC/BOM/design review aprobados.
 
-**Owner tentativo:** FSW/EPS.
+Salida posterior:
 
-**Bloquea:** Gate E (FlatSat integrado), Gate F (Readiness), criterio primario de éxito orbital.
+- PCB con stackup/DRC/fabrication package;
+- pruebas rails, inrush, short/OCP/backfeed/brownout;
+- state machine completa;
+- budgets medidos por modo;
+- dossier batería.
 
----
+### Gate G — Structure/ADCS/thermal preliminary closure
 
-### Gate B — Cierre uplink P1
+**Estado:** `Open`.
 
-**Objetivo:** Evidencia medida de que el uplink LoRa con nodos de clase típica es factible en condiciones representativas.
+Salida:
 
-**Criterios de entrada:**
-- Gate A completado.
-- Banco LoRa disponible con hardware de clase nodo típica.
-- Plan de pruebas `docs/COMMS/uplink_lora_bench_testing_plan.md` definido.
+- CAD CDS 1.5U, stack, harness, antenna stowage, mass/CG/inertia;
+- CONOPS ADCS, detumble, pointing/jitter y safe attitude;
+- simulación SSO validada e incertidumbre;
+- budgets solar/térmico/RF con dispersión de actitud;
+- thermal model conservativo y test plan correlativo;
+- FEA/load path/modes preliminares.
 
-**Criterios de salida:**
-- Medición real de sensibilidad RX del receptor orbital en banco.
-- Tolerancia a CFO/Doppler medida con offset simulado (BW125 vs BW250 evidenciados; BW definitivo cerrado).
-- Probabilidad de recepción en ventana de 6 min estimada con datos medidos.
-- Parámetros TBD cerrados: elevación mínima operativa, BW definitivo, criterio de aceptación.
-- Riesgos CX-RF-01 y `comms_lora_uplink_feasibility_risk.md` con evidencia.
-- Validación de base temporal del modo B2: deriva real del RTC/cristal medida y dentro del guard time del slot (o decisión documentada de operar en B1).
-- **Implementación funcional de persistencia de datos de tierra** según `05_Software/ground_data_architecture.md` §8.2.
+## 6. PDR — Preliminary Design Review
 
-**Estado actual:** ❌ Pendiente — requiere hardware y ensayos.
+**Estado:** `Open`; depende de SRR y evidencia preliminar IA/B/C/D/G.
 
-**Evidencias requeridas:** Reporte de banco con datos medidos, plots de BER/PDR vs elevación simulada, parámetros cerrados en ADR.
+Salida:
 
-**Dependencias:** Hardware receptor LoRa orbital seleccionado (concentrator o módulo), nodo de clase típica disponible.
+- arquitectura de cada subsistema y ICD draft;
+- trade studies reproducibles;
+- budgets masa/potencia/energía/datos/térmico/RF con margen e incertidumbre;
+- CAD/layout preliminar conforme CDS;
+- FMEA inicial y top risks;
+- selección de artículos/prototipos;
+- regulatory plan y launch-provider assumptions;
+- verificación planificada para 100% de requisitos.
 
-**Owner tentativo:** COMMS.
+No requiere hardware final, pero no admite un “design source” placeholder
+presentado como arquitectura preliminar cerrada.
 
-**Riesgos relacionados:** Top-risks 1, 2, 3, 4, 5.
+## 7. CDR — Critical Design Review
 
----
+**Estado:** `Open`; depende de PDR.
 
-### Gate C — TTC UHF dev base cerrado
+Salida:
 
-**Objetivo:** Hardware TTC UHF seleccionado, evaluado en banco y candidato a flight-like.
+- diseño fabricable y configuración congelada;
+- esquemas/ERC, PCB/DRC, CAD/drawings, harness e ICD;
+- BOM/procurement y derating completos;
+- FMEA/FMECA, radiation analysis y fault containment;
+- budgets cerrados contra configuración;
+- procedimientos TRR/QAR aprobables;
+- software/model/runtime manifests;
+- todas las acciones PDR críticas cerradas o waived formalmente.
 
-**Criterios de entrada:**
-- Gate B completado (o en paralelo).
-- Candidato de TTC UHF definido (OpenLST-derived u otro).
+## 8. Gate E — FlatSat integrated
 
-**Criterios de salida:**
-- Medición de potencia RF, sensibilidad RX y consumo eléctrico del TX (resuelve CONF-01).
-- Medición de emisiones espurias / armónicos (verificar CX-RF-03).
-- Supply chain del PA y SAW confirmada (sin EOL crítico).
-- ADR de adopción TTC UHF en estado `Accepted`.
-- Baseline operativo UHF (bitrate, modulación, potencia) confirmado o actualizado.
-- `PUBLIC_BEACON` transmitido por hardware candidato, recibido por SDR/estación propia y decodificado con frame schema publico.
-- Separación verificada entre `PUBLIC_BEACON`, `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`; el beacon no incluye payload, comandos, prompts ni datos operativos sensibles.
-- Paquete preliminar SatNOGS DB preparado: frecuencia, modo, baudrate, servicio, estado, referencia publica y decoder/protocolo del beacon.
-- Estacion terrena fase 1/2 disponible para recepcion UHF direccional: rotor AZ/EL, antena 435-438 MHz, SDR, LNA/filtro, logs y pipeline de evidencia.
-- T/R switch digital y secuenciador evaluados en banco/dummy load antes de cualquier uplink radiado.
-- Validación de máscara operativa ≥20° con hardware real: link budget re-calculado con pérdidas medidas. Confirmación o revisión de `ADR-20260313-uhf-downlink-operational-mask.md`.
-
-**Estado actual:** ❌ Pendiente — hardware TTC UHF final TBD.
-
-**Evidencias requeridas:** Medición de espectro, link budget validado con hardware real, ADR de adopción, captura/decoder del `PUBLIC_BEACON`, evidencia de separación publico/controlado, evidencia de estacion terrena RX direccional y pruebas de T/R switch sin TX radiado.
-
-**Dependencias:** Selección de PA UHF, SAW, placa PCB flight-like.
-
-**Owner tentativo:** COMMS/EPS.
-
-**Riesgos relacionados:** Top-risks 6, 11, 12, 31.
-
----
-
-### Gate D — EPS flight-like cerrado
-
-**Objetivo:** PCB EPS 2S + MPPT flight-like fabricado, ensayado y apto para integración FlatSat.
-
-**Criterios de entrada:**
-- Gate A completado.
-- Diseño KiCad `EPS_PCB/EPS_Bench2S_FlightLike/` completado.
-- BOM 2S confirmada con componentes disponibles.
-
-**Criterios de salida:**
-- Pruebas T1-T10 equivalentes al banco 1S pero en plataforma 2S.
-- Medición real de consumo en todos los modos (`MISSION_MODE = SAFE / NOMINAL / DOWNLINK_WINDOW`).
-- Validación de transiciones `EPS_STATE = CRIT / LOW / NOMINAL / HIGH`.
-- Pico EPS medido con carga real (resuelve CONF-01 de `architecture.md`).
-- Dossier de batería 2S completado (CX-EPS-02).
-- Power-gating y health signals verificados.
-
-**Estado actual:** ❌ Pendiente — PCB 2S en KiCad, sin fabricar.
-
-**Evidencias requeridas:** Reporte de pruebas T1-T10 (2S), medición de corrientes, dossier batería.
-
-**Dependencias:** BOM EPS flight-like cerrada, fabricación PCB, selección celda 2S.
-
-**Owner tentativo:** EPS.
-
-**Riesgos relacionados:** Top-risks 7, 8, 14.
-
----
-
-### Gate E — FlatSat integrado
-
-**Objetivo:** Sistema completo integrado en mesa con todos los subsistemas funcionales end-to-end.
-
-**Criterios de entrada:**
-- Gate IA-2 completado (incluye evidencia funcional de banco y hardware CM5 real validado).
-- Gate B, C y D completados (o versiones preliminares funcionales documentadas).
-- OBC con firmware de vuelo (beta).
-
-**Criterios de salida:**
-- Boot determinista en `MISSION_MODE = SAFE`.
-- Arbitraje de colas verificado bajo saturación.
-- Payload IA integrado en el loop OBC ↔ supervisor ↔ logging.
-- LoRa RX activo en ventana de pasada simulada.
-- UHF TX/RX operativo end-to-end con estación terrena.
-- Modo SatNOGS receive-only aislado del modo AUSTRALIS privado/controlado; SatNOGS sin acceso al transmisor/PTT.
-- Science Pack I2C funcional.
-- GNSS best-effort funcional.
-- Power-gating por `EN_x` verificado.
-- `PHOTO_DEMO` off-by-default y aislado (si está incluido).
-- Persistencia de logs en NOR + microSD verificada.
-
-**Estado actual:** ❌ Pendiente — requiere Gates IA-2, B, C y D.
-
-**Evidencias requeridas:** Reporte de integración FlatSat, screenshots/logs de cada función.
-
-**Dependencias:** Gates IA-2, B, C, D.
-
-**Owner tentativo:** Sistema / FSW.
-
-**Riesgos relacionados:** Top-risks 9, 10, 13, 15, 17–23.
-
----
-
-### Gate F — Readiness / Compliance Pack
-
-**Objetivo:** El sistema está listo para integración con el integrador de lanzamiento; compliance pack documentado.
-
-**Criterios de entrada:**
-- Gates IA-2 y E completados.
-- ICD del integrador disponible.
-
-**Criterios de salida:**
-- Compliance matrix con todos los ítems `Closed` o `Blocked by Integrator` con justificación documentada.
-- Evidence pack completo: banco, campo, FlatSat, ambiental (si aplica).
-- Coordinación IARU documentada (CX-RF-04).
-- Camino regulatorio ENACOM documentado (CX-RF-05).
-- Inhibiciones RF implementadas y verificadas (CX-RF-02).
-- Dossier de batería completo (CX-EPS-02).
-- Fit-check completado (CX-M-06).
-- Masa, CG y propiedades mecánicas documentadas (CX-M-02, CX-M-03).
-- Documentación de ICD, drawings y owners entregada al integrador (CX-M-07).
-
-**Estado actual:** ❌ Pendiente — requiere todos los gates anteriores.
-
-**Evidencias requeridas:** Evidence pack completo, compliance matrix cerrada, documentación entregada al integrador.
-
-**Dependencias:** Gates A, IA-1, IA-2, B, C, D, E + ICD del integrador.
-
-**Owner tentativo:** Sistema / Operaciones.
-
-**Riesgos relacionados:** Top-risks 12, 13; todos los ítems `Blocked by Integrator` en compliance matrix.
-
----
-
-## 4) Resumen de gates
-
-| Gate | Nombre | Estado actual | Bloquea |
-|---|---|---|---|
-| A | Configuración documental coherente | ✅ Completado (2026-03-14) | Gate IA-1, IA-2, B, C, D |
-| IA-1 | Payload IA bench baseline — parte funcional (benchmark + holdout + ADR) | ⚠️ Parcialmente completado (2026-03-16) | Gate IA-2 |
-| IA-2 | Payload IA en hardware CM5 real sobre `EPS_Bench1_1S` extendido | ❌ Pendiente — bench extendido documentado; faltan T11–T21 | Gate E, Gate F y criterio primario de misión |
-| B | Cierre uplink P1 | ❌ Pendiente | Gate E |
-| C | TTC UHF dev base cerrado | ❌ Pendiente | Gate E |
-| D | EPS flight-like cerrado | ❌ Pendiente | Gate E |
-| E | FlatSat integrado | ❌ Pendiente | Gate F |
-| F | Readiness / Compliance Pack | ❌ Pendiente | Lanzamiento |
-
----
-
-## 5) Riesgos vs gates
-
-| Riesgo (top_risks.md) | Gate de cierre | Evidencia requerida |
-|---|---|---|
-| 1 — Uplink LoRa factibilidad | B | Medición real PDR en banco |
-| 2 — CFO/Doppler BW125 | B | Test de tolerancia a offset |
-| 3 — Slots desalineados | B | Test de slotting con múltiples nodos |
-| 4 — TLE desactualizado | B | Validación del mecanismo TLE update |
-| 5 — Integración concentrator | B/C | Banco de integración RF |
-| 6 — Downlink UHF margen | C | Medición real con hardware TX |
-| 7 — Déficit energético / brownouts | D | Pruebas banco 2S bajo carga real |
-| 8 — EMI interna EPS vs RF | D/E | Medición integrada |
-| 9 — Reset / SW no idempotente | E | Test de robustez FlatSat |
-| 10 — Regulatorio / frecuencias | F | Documentación IARU/ENACOM |
-| 11 — Supply chain TTC UHF | C | BOM cerrada sin EOL |
-| 12 — Compliance integrador | F | ICD + evidence pack |
-| 13 — IARU sin coordinación | F | Documentación coordinación |
-| 14 — Pico EPS real | D / IA-1 | Medición con TX real y carga IA |
-| 15 — Persistencia datos tierra | B/E | Implementación ground_data_architecture |
-| 17 — Sobreconsumo payload IA | IA-2 | Medición real idle/active/inference en CM5 real |
-| 18 — Fallo Linux / boot CM5 | IA-2 | Test de boot reproducible en CM5 real y fallback |
-| 19 — Corrupción PromptStore | IA-2 | Test de prompt swap y verificación de integridad en CM5 real |
-| 20 — Recomendaciones erróneas del modelo | IA-1 (parcial) / IA-2 | IA-1: evidencia de banco (holdout, benchmark corrected — 2026-03-16). IA-2: test del supervisor integrado en hardware real. |
-| 21 — Deriva térmica payload IA | IA-2 / E | Análisis térmico + medición en CM5 real |
-| 22 — Acoplamiento EMI (digital noise) | IA-2 / E | Medición con analizador espectro integrado |
-| 23 — Dependencia indebida CONOPS en IA | IA-2 | Verificar operación nominal del OBC con CM5 apagado |
-| 24 — Extrapolación indebida bench 1S -> rail IA de vuelo | IA-2 / D | Evidencia bench acotada + separación documental conservada hasta `EPS_Flight_Like_2S_MPPT` |
-| 25 — Backfeed entre `5V_AI_EXT` y rails del bench | IA-2 | Resultado de `T11` con rail IA apagado y sin retroalimentación |
-| 26 — Potencia IA rutada por `JP1` | IA-2 | Inspección de wiring y evidencia de `J_AI_PWR` como entrada principal |
-| 27 — `SW_AI` insuficiente para corriente de arranque del CM5 | IA-2 | Resultado de `T12`, `T13` y medición de corriente real |
-| 28 — Caída excesiva si se usa `INA219` inline | IA-2 | Medición T20 + justificación de metrología externa si corresponde |
-| 29 — Secuenciamiento incorrecto del CM5 | IA-2 | Evidencia de T12–T15 y secuencia documentada de encendido/apagado |
-| 30 — Corrupción por apagado brusco del CM5 | IA-2 | Evidencia de apagado lógico, kill controlado y fallback determinístico |
-
----
-
-## 6) Referencias
-
-- `01_Mission/compliance_matrix.md`
-- `01_Mission/requirements_matrix.md`
-- `00_MVP/MVP v2.2.md`
-- `07_Risk/top_risks.md`
-- `architecture.md`
-- `04_Communications/ground_station_dual_use_satnogs_australis.md`
-- `05_Software/ai_payload_architecture.md`
-- `08_Decisions/ADR-20260316-ai-payload-granite350m-baseline-funcional-banco.md`
-- `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`
-- `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`
-- `08_Decisions/ADR-20260314-eps-state-4-levels.md`
-- `05_Software/AI PAYLOAD/ai_payload_bench_evidence_2026-03-16.md`
-- `docs/COMMS/uplink_lora_bench_testing_plan.md`
-- `03_Power/EPS_Bench1_1S.md` §9 (plan de pruebas T1-T21)
-- `03_Power/EPS_PCB/EPS_Bench1S/eps_bench_mods.md`
+**Estado:** `Open`; depende de IA-2, B, C, D y G completos.
+
+Salida:
+
+- boot SAFE y recuperación;
+- EPS/OBC/COMMS/ADCS/payload/ground integrados;
+- auth/replay y command roles;
+- colas/data budget/persistencia/replay;
+- fault injection, power cycling y degraded modes;
+- RF por cable/dummy load antes de irradiar;
+- configuración del FlatSat registrada.
+
+## 9. TRR — Test Readiness Review
+
+**Estado:** `Open`; depende de CDR y Gate E.
+
+Salida:
+
+- procedimientos aprobados y trazados;
+- artículos/seriales/configuración definidos;
+- fixtures e instrumentación/calibración;
+- criterios pass/fail y abort;
+- data acquisition/backup/digests;
+- hazard controls y permisos RF;
+- NCR/waiver process activo.
+
+## 10. QAR — Qualification/Acceptance Review
+
+**Estado:** `Open`; depende de TRR.
+
+Campaña mínima, adaptada al ICD:
+
+- funcional eléctrico/RF pre/post;
+- random vibration y cargas/sine aplicables;
+- shock si aplica;
+- thermal cycling y TVAC/thermal balance;
+- EMC/coexistencia;
+- deployment después de ambiente;
+- end-to-end RF/ground;
+- correlación de modelos;
+- acceptance del artículo de vuelo.
+
+“Si disponible” no es un criterio válido para thermal-vac o evidencia ambiental
+requerida.
+
+## 11. FRR — Flight Readiness Review
+
+**Estado:** `Open`; depende de QAR e ICD final.
+
+Salida:
+
+- requisitos de seguridad/mission success `Verified`;
+- compliance matrix sin bloqueantes;
+- IARU/ITU/ENACOM e integrador aprobados;
+- fit-check y mass properties;
+- battery/launch safety dossier;
+- CONOPS, procedures, staffing y ground segment listos;
+- anomalies/waivers aceptados con riesgo residual;
+- as-built/as-flown configuration y evidence pack congelados.
+
+No se declara readiness con ítems críticos `Open`, `Planned`,
+`Implemented` o `Blocked by Integrator`.
+
+## 12. Cobertura de requisitos
+
+La VCRM contiene una fila por cada ID. Esta enumeración permite auditar que el
+plan referencia el universo completo:
+
+- misión/sistema:
+  `MIS-REQ-01`, `MIS-REQ-02`, `MIS-REQ-03`, `MIS-REQ-04`, `MIS-REQ-05`,
+  `MIS-REQ-06`, `MIS-REQ-07`, `MIS-REQ-08`, `MIS-REQ-09`, `MIS-REQ-10`,
+  `MIS-REQ-11`, `MIS-REQ-12`, `MIS-REQ-13`, `MIS-REQ-14`, `MIS-REQ-15`,
+  `MIS-REQ-16`, `MIS-REQ-17`, `MIS-REQ-18`, `MIS-REQ-19`, `MIS-REQ-20`,
+  `MIS-REQ-21`, `MIS-REQ-22`, `MIS-REQ-23`, `MIS-REQ-24`;
+- uplink:
+  `COMMS-UL-01`, `COMMS-UL-02`, `COMMS-UL-03`, `COMMS-UL-04`,
+  `COMMS-UL-05`, `COMMS-UL-06`;
+- compliance:
+  `COMP-REQ-01`, `COMP-REQ-02`, `COMP-REQ-03`, `COMP-REQ-04`,
+  `COMP-REQ-05`, `COMP-REQ-06`;
+- PHOTO_DEMO:
+  `MIS-REQ-PH-01`, `MIS-REQ-PH-02`, `MIS-REQ-PH-03`, `MIS-REQ-PH-04`;
+- IA:
+  `IA-REQ-01`, `IA-REQ-02`, `IA-REQ-03`, `IA-REQ-04`, `IA-REQ-05`,
+  `IA-REQ-06`, `IA-REQ-07`, `IA-REQ-08`, `IA-REQ-09`, `IA-REQ-10`,
+  `IA-REQ-11`;
+- estructura/térmico:
+  `STR-REQ-01`, `STR-REQ-02`, `THR-REQ-01`, `THR-REQ-02`, `THR-REQ-03`,
+  `THR-REQ-04`;
+- assurance:
+  `SYS-REQ-01`, `SYS-REQ-02`, `SYS-REQ-03`, `SYS-REQ-04`, `SYS-REQ-05`,
+  `SYS-REQ-06`, `SYS-REQ-07`, `EPS-REQ-01`, `EPS-REQ-02`,
+  `ADCS-REQ-01`, `ADCS-REQ-02`, `DATA-REQ-01`, `DATA-REQ-02`,
+  `SEC-REQ-01`, `SEC-REQ-02`, `RAD-REQ-01`, `ENV-REQ-01`.
+
+## 13. Resumen de estado
+
+| Review/Gate | Estado |
+|---|---|
+| Gate A | Open |
+| SRR | Open |
+| IA-1 | Open |
+| IA-2 | Open |
+| B | Open |
+| C | Open |
+| D | Blocked — design source no fabricable |
+| G | Open |
+| PDR | Open |
+| CDR | Open |
+| E | Open |
+| TRR | Open |
+| QAR | Open |
+| FRR | Open |
