@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "defaultProvider": "unpkg",
+  "libraries": [
+    {
+      "library": "@microsoft/signalr@8.0.7",
+      "destination": "wwwroot/vendor/signalr/",
+      "files": [
+        "dist/browser/signalr.min.js",
+        "src/third-party-notices.txt",
+        "package.json"
+      ]
+    },
+    {
+      "library": "chart.js@4.4.9",
+      "destination": "wwwroot/vendor/chart.js/",
+      "files": [
+        "dist/chart.umd.js",
+        "LICENSE.md"
+      ]
+    },
+    {
+      "library": "three@0.128.0",
+      "destination": "wwwroot/vendor/three/",
+      "files": [
+        "build/three.min.js",
+        "examples/js/controls/OrbitControls.js",
+        "LICENSE"
+      ]
+    }
+  ]
+}

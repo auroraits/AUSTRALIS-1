@@ -41,6 +41,8 @@
                 <div class="stat-card"><span>Port</span><strong>@(status.PortName ?? "-")</strong></div>
                 <div class="stat-card"><span>Success</span><strong>@stats.SuccessRateWindow.ToString("P1")</strong></div>
                 <div class="stat-card"><span>PER</span><strong>@stats.PerWindow.ToString("P1")</strong></div>
+                <div class="stat-card"><span>Session</span><strong>@(stats.CurrentBootId?.ToString("X8") ?? "-")</strong></div>
+                <div class="stat-card"><span>Dup / OOO</span><strong>@($"{stats.DuplicateCount} / {stats.OutOfOrderCount}")</strong></div>
             </div>
         </article>
 
@@ -86,8 +88,11 @@
     private bool isDark = true;
     private bool followCamera = true;
     private string sensorInfo = "GY-521 (MPU6050) via I2C";
-    private ConnectionStatus status = new(false, null, 115200);
-    private TelemetryStats stats = new(0, 0, 0, 0, 1, 0, null, DateTime.UtcNow);
+    private ConnectionStatus status = new(false, null, 115200, 0);
+    private TelemetryStats stats = new(
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0,
+        1, 0, null, null, DateTime.UtcNow);
     private DotNetObjectReference<Index>? dotNetRef;
 
     protected override async Task OnInitializedAsync() => await RefreshPorts();

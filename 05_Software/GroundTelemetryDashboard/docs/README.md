@@ -1,50 +1,63 @@
 # GroundTelemetryDashboard
 
-Dashboard de telemetría de estación terrena (Arduino UNO por serial COM) implementado con .NET 8 + Blazor Server + SignalR.
+.NET 8 / Blazor dashboard for the versioned 433 MHz engineering bench.
+It is not orbital ground-station flight software.
 
-## Requisitos
-- .NET SDK 8.x
+## Build and test
 
-## Cómo correr
 ```bash
 dotnet restore 05_Software/GroundTelemetryDashboard/GroundTelemetryDashboard.sln
-dotnet build 05_Software/GroundTelemetryDashboard/GroundTelemetryDashboard.sln
+dotnet test 05_Software/GroundTelemetryDashboard/GroundTelemetryDashboard.sln -c Release
+```
+
+The build restores pinned browser assets from `libman.json` into
+`wwwroot/vendor`. Runtime pages use those local files and do not require a CDN.
+The restored license/notice files are retained beside the assets.
+
+Run locally:
+
+```bash
 dotnet run --project 05_Software/GroundTelemetryDashboard/src/GroundTelemetryDashboard.Web
 ```
 
-### Acceso desde red local (LAN)
-Para exponer el dashboard en toda la red local (sin restringir a `localhost`), correr:
-```bash
-ASPNETCORE_URLS="http://0.0.0.0:3000" dotnet run --project 05_Software/GroundTelemetryDashboard/src/GroundTelemetryDashboard.Web
+The application is loopback-only. LAN access is intentionally rejected even if
+an operator binds Kestrel to `0.0.0.0`; remote access needs a separately
+reviewed authenticated gateway.
+
+## Evidence
+
+Evidence recording is on by default. Each run creates a unique directory below
+the configured `Evidence:Root` containing:
+
+- `manifest.json`;
+- SHA-256-chained `evidence.jsonl`.
+
+The log records raw serial lines before parsing, parsed samples, rejected lines
+with reason codes, connection transitions and errors. Check the live chain at
+`/api/evidence/status`. A valid chain is tamper-evident but is not a digital
+signature or trusted timestamp.
+
+## Supported input
+
+Preferred V4:
+
+```text
+version,boot_id,seq,t_ms,quality_flags,ax,ay,az,gx,gy,gz,q0,q1,q2,q3
 ```
-Luego abrir desde otro equipo: `http://<LAN-IP>:3000`.
 
-Notas:
-- Para obtener tu IP local (Windows): `ipconfig`.
-- Exponer en LAN solo en una red confiable.
+Diagnostic compatibility:
 
-## CSV soportado
-- Legacy: `seq,t_ms,ax,ay,az,gx,gy,gz`
-- Quaternion: `seq,t_ms,ax,ay,az,gx,gy,gz,q0,q1,q2,q3`
+- legacy 8 columns without quaternion;
+- legacy 12 columns with quaternion.
 
-`q0..q3 = qw,qx,qy,qz`.
+The parser enforces finite/ranged values and quaternion norm. V4 session-aware
+statistics separate gaps, duplicates, out-of-order frames, wrap and reboot.
 
-## Vista 3D
-- Aplicación de quaternion correcta para Three.js:
-  - `obj.quaternion.set(qx,qy,qz,qw)`
-- Zero visual:
-  - botón **Set Reference (Zero)**
-  - fórmula: `q_display = inverse(q_ref) * q_current`
-- Camera:
-  - OrbitControls habilitado
-  - modo **Follow ON/OFF**
-- HUD:
-  - roll/pitch/yaw visual para diagnóstico
+## Interpretation limits
 
-## Debug de ejes
-- Botón **Axis Debug** agrega líneas `#AXIS` al terminal con `ax..gz` y `q`.
-- Útil para verificar signos por eje al mover el módulo.
-
-## Nota IMU
-- Sensor objetivo: GY-521 (MPU6050).
-- El TX reporta por Serial: `#SENSOR:MPU6050 addr=0x68|0x69`.
+- Raw MPU6050 values are not calibrated physical measurements.
+- Madgwick IMU output is a terrestrial bench visualization and is not an
+  orbital ADCS solution.
+- A local TX `started` status does not prove RF delivery; use receiver-side
+  sequence/PER evidence.
+- No Gate closes merely because the dashboard builds or records a session.

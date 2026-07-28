@@ -1,8 +1,11 @@
 namespace GroundTelemetryDashboard.Core.Models;
 
 public sealed record TelemetrySample(
+    int ProtocolVersion,
+    long BootId,
     long Seq,
     long TMs,
+    int QualityFlags,
     double Ax,
     double Ay,
     double Az,
@@ -15,5 +18,12 @@ public sealed record TelemetrySample(
     double Q3,
     DateTime ReceivedAtUtc)
 {
-    public bool HasQuaternion => !(Q0 == 0 && Q1 == 0 && Q2 == 0 && Q3 == 0);
+    public bool HasQuaternion => QuaternionNormSquared > 0;
+
+    public double QuaternionNormSquared =>
+        Q0 * Q0 + Q1 * Q1 + Q2 * Q2 + Q3 * Q3;
+
+    public string SessionId => ProtocolVersion >= 4
+        ? $"v{ProtocolVersion}-{BootId:X8}"
+        : $"legacy-v{ProtocolVersion}";
 }
