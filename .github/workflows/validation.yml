@@ -79,9 +79,13 @@ jobs:
           python-version: "3.12"
       - name: Install pinned PlatformIO
         run: python -m pip install --disable-pip-version-check platformio==6.1.19
-      - name: Build ESP32-S3 transmitter and Uno receiver
-        working-directory: 05_Software/embedded
+      - name: Build ESP32-S3 transmitter
+        working-directory: 05_Software/embedded/esp32_s3_tx_telemetry
         run: >-
           python -m platformio run
           -e esp32s3_supermini_tx
+      - name: Build Uno receiver
+        working-directory: 05_Software/embedded/uno_rx_logger
+        run: >-
+          python -m platformio run
           -e uno_rx_logger

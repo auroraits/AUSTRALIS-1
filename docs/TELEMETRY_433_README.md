@@ -60,4 +60,5 @@ evalúan con PER/gaps/dropped end-to-end.
 
 - `../08_Decisions/ADR-20260727-telemetry-bench-433-v4.md`
 - `../07_Risk/telemetry_433_bench_risks.md`
-- `../05_Software/embedded/platformio.ini`
+- `../05_Software/embedded/esp32_s3_tx_telemetry/platformio.ini`
+- `../05_Software/embedded/uno_rx_logger/platformio.ini`
