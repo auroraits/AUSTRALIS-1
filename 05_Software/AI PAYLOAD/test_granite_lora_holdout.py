@@ -1,11 +1,17 @@
+"""INVALIDATED legacy print-only holdout; retained for provenance only."""
+
 import json
+import os
 import torch
 from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import PeftModel
 
-# Bench/ground experimentation model. The compact flight-candidate line is
-# Granite 350M; 2B is intentionally kept for lab exploration and comparisons.
+if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
+    raise SystemExit(
+        "Refusing invalidated legacy holdout. It is contaminated and has no oracle."
+    )
+
 BASE_MODEL = "ibm-granite/granite-3.1-2b-instruct"
 ADAPTER_PATH = "granite_cubesat_lora"
 CASES_FILE = "cubesat_holdout_cases.json"

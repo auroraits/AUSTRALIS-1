@@ -1,5 +1,15 @@
+"""INVALIDATED legacy synthetic generator; retained for provenance only."""
+
 import json
+import os
 import random
+
+if os.environ.get("AUSTRALIS_ALLOW_INVALIDATED_LEGACY_AI") != "1":
+    raise SystemExit(
+        "Refusing invalidated legacy generator. Use AGENTIC_DATASET_SCHEMA.md."
+    )
+
+random.seed(0)
 
 OUTPUT_FILE = "cubesat_granite_final_correction_200.jsonl"
 
