@@ -117,4 +117,5 @@ Para arquitectura detallada, flujo OBC↔IA, estados operativos y riesgos del pa
 - `08_Decisions/ADR-20260314-ai-payload-cm5-smollm2-360m-runtime-supervision.md`
   (antecedente `Superseded`)
 - `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`
+  (antecedente `Superseded`)
 - `08_Decisions/ADR-20260314-eps-state-4-levels.md`
