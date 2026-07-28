@@ -1,7 +1,7 @@
 # UHF TTC — plan de verificación de banco, OTA y end-to-end
 
-**Revisión:** 2026-07-27  
-**Estado:** Draft — criterios numéricos pendientes de asignación previa al test  
+**Revisión:** 2026-07-27
+**Estado:** Draft — criterios numéricos pendientes de asignación previa al test
 **Trazabilidad:** `04_Communications/link_budget_uhf_preliminary.md`, `04_Communications/rf_subsystem_overview.md`
 
 ## 1) Objetivo
@@ -168,4 +168,3 @@ Cada `EvidenceID` contiene:
 
 Un test exploratorio sin criterio previo se conserva como exploratorio y no
 cierra un requisito.
-

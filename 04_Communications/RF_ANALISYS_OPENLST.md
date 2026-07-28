@@ -349,7 +349,7 @@ En ambos casos, el limitante real suele ser:
 ### 12.1 Qué haría (recomendación)
 1) **Evaluar OpenLST como candidato TTC UHF** (PHY + tooling + arquitectura de
    referencia) por encajar con 70 cm, sin transferirle herencia a la variante.
-2) **Fork** de `openlst-hw` y crear una variante: **OpenLST‑Derived‑TTC‑435**:
+2) **Fork** de `openlst-hw` y crear una variante: **OpenLST-Derived-TTC-UHF**:
    - SAW centrado para 435–438.
    - front-end discreto reemplazando RFFM6403.
    - power‑gating + medición de consumo RF (alineado con ICD EPS).
@@ -388,7 +388,7 @@ En ambos casos, el limitante real suele ser:
    - shortlist de 2–3 PAs disponibles (Mouser/DigiKey) + switch/LNA.  
 3) Definir **perfil de modulación/tasa** para MVP:  
    - beacon 1k2 con PER objetivo + modo 3–7 kbps candidato para dump.
-4) Diseñar **OpenLST‑Derived‑TTC‑435 v0.1** en KiCad:  
+4) Diseñar **OpenLST-Derived-TTC-UHF v0.1** en KiCad:
    - cambios mínimos (SAW + front-end) manteniendo placement RF.  
 5) Banco RF:  
    - medir potencia, espectro, sensibilidad, y corriente TX/RX.  

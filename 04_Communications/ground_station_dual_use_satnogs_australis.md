@@ -210,7 +210,7 @@ Recomendacion inicial:
 - loop de servicio suficiente para movimiento AZ/EL sin fatiga del coax;
 - cables de rotor/control separados fisicamente de RF cuando sea posible.
 
-Perdidas orientativas a 435 MHz para 20 m:
+Perdidas orientativas a 436.5 MHz de referencia para 20 m:
 
 | Cable | Perdida tipica | Comentario |
 |---|---:|---|
@@ -287,7 +287,7 @@ Predimensionamiento del conjunto superior:
 
 | Bloque | Dimension / masa preliminar |
 |---|---|
-| UHF cross-Yagi 435 MHz | boom ~1.5-2.5 m, 2-5 kg |
+| UHF cross-Yagi 435–438 MHz | boom ~1.5-2.5 m, 2-5 kg |
 | Crossboom + clamps | ~1-2 m, 2-5 kg |
 | Rotor AZ/EL comercial | ~8-18 kg con soportes, segun modelo |
 | Gabinete RF mastil | 2-5 kg |
@@ -585,7 +585,7 @@ MercadoLibre pages may change and may require account verification. Treat all se
 | BOM role | Candidate | Fit | Recommendation |
 |---|---|---|---|
 | SatNOGS / `PUBLIC_BEACON` RX | RTL-SDR Blog V4 receiver | RX-only, low cost, widely documented, SatNOGS-friendly with the correct RTL-SDR v4 driver. | Preferred Phase 1 RX candidate if genuine. Use with UHF filter, mast LNA and good USB/RFI hygiene. |
-| SatNOGS / `PUBLIC_BEACON` RX alternate | Nooelec NESDR SMArt v5 / RTL-SDR premium metal | RX-only, metal case, TCXO class receiver, UHF 435 MHz coverage. | Good alternate to RTL-SDR Blog V4 if genuine and Linux/SatNOGS driver support is confirmed. |
+| SatNOGS / `PUBLIC_BEACON` RX alternate | Nooelec NESDR SMArt v5 / RTL-SDR premium metal | RX-only, metal case, TCXO class receiver, UHF 435–438 MHz coverage. | Good alternate to RTL-SDR Blog V4 if genuine and Linux/SatNOGS driver support is confirmed. |
 | AUSTRALIS modem development | PlutoSDR Zynq7010 AD9363 transceiver | SDR TX/RX platform, suitable for GNU Radio/libiio experiments around UHF. | Use as Phase 2 lab/development transceiver for controlled downlink/uplink waveforms. Do not expose it to SatNOGS or to an unattended TX path. |
 
 Candidate links:
@@ -622,7 +622,8 @@ Candidate:
 Compatibility reading:
 
 - This is compatible with the baseline if it is true 50 ohm LMR-400-class cable and the real station run is near 10 m.
-- Expected loss at 435 MHz for 10 m is roughly **0.8-1.0 dB**, before connector/adaptor losses.
+- At the 436.5 MHz reference frequency, expected loss for 10 m is roughly
+  **0.8-1.0 dB**, before connector/adaptor losses.
 - Confirm connector type before buying. Exterior RF runs should prefer N-type weatherproof connectors. SMA should remain inside the RF cabinet as short pigtails.
 - Confirm jacket UV rating, minimum bend radius, shielding quality, strain relief and whether the cable is flexible enough for the rotor service loop.
 - If the final route exceeds ~20-25 m, re-evaluate LMR-600 / hardline 1/2 in or moving the RF box closer to the mast.
