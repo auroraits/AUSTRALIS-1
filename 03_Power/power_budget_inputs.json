@@ -69,7 +69,7 @@
     }
   ],
   "required_unclosed_loads": [
-    "AI rail: CM5 + Gemma 4 e2b candidate, idle/inference/inrush",
+    "AI rail: CM5 + gemma4:e2b candidate, idle/inference/inrush",
     "ADCS sensors and actuators, including detumbling",
     "EPS controller and quiescent current of all converters",
     "BMS/protection/balancing and measurement chain",

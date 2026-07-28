@@ -28,7 +28,7 @@ Correcciones incluidas:
 - view factors y eclipse conceptuales;
 - propiedades ópticas, masas y conductancias no derivadas del CAD/ensayo;
 - solo se disipa CM5; faltan OBC, EPS, RF, ADCS, batería y storage;
-- Gemma 4 e2b/CM5 usa potencia ingresada por usuario, no evidencia;
+- `gemma4:e2b`/CM5 usa potencia ingresada por usuario, no evidencia;
 - no se modela charge-inhibit, Tmax de batería ni estado de carga;
 - no hay correlación thermal balance/TVAC.
 

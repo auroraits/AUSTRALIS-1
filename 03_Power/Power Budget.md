@@ -21,7 +21,7 @@ Quedan retiradas como conclusiones vigentes:
 - `≥1.2 W netos` como target solar demostrado;
 - cualquier afirmación de que el EPS cierra con el payload IA.
 
-El nuevo candidato de modelo es **Gemma 4 e2b** sobre CM5. Sus potencias
+El nuevo candidato de modelo es **`gemma4:e2b`** sobre CM5. Sus potencias
 idle/inferencia, energía por tarea, inrush, latencia y duty orbital son `TBD`
 hasta medir la revisión exacta de hardware, runtime y modelo.
 
@@ -103,7 +103,7 @@ propagador orbital validado y del CONOPS.
 
 El presupuesto no puede cerrarse hasta incorporar:
 
-- rail IA: CM5 + Gemma 4 e2b, idle/inferencia/inrush;
+- rail IA: CM5 + `gemma4:e2b`, idle/inferencia/inrush;
 - sensores y actuadores ADCS, incluido detumbling;
 - controlador EPS y corrientes quiescentes de todos los convertidores;
 - BMS, protección, balanceo y cadena de medición;
@@ -191,7 +191,7 @@ parcial de la IA.
 | PWR-VV-01 | Unit test de calculadora | `--self-test` PASS |
 | PWR-VV-02 | Medición de cada rail | min/nom/max, inrush y energía con incertidumbre |
 | PWR-VV-03 | Secuencia half-duplex | ocupación TX+RX≤1 y sin brownout |
-| PWR-VV-04 | CM5 + Gemma 4 e2b | potencia/energía/latencia/temperatura para revisión exacta |
+| PWR-VV-04 | CM5 + `gemma4:e2b` | potencia/energía/latencia/temperatura para revisión exacta |
 | PWR-VV-05 | MPPT/DC-DC | eficiencia y estabilidad en matriz V/I/T |
 | PWR-VV-06 | Batería | protecciones y charge-inhibit en límites |
 | PWR-VV-07 | Campaña orbital | energía BOL/EOL y recuperación SAFE |

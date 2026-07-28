@@ -47,7 +47,7 @@ Si se cambia química/capacidad/topología de batería, rails o perfiles de cons
 - No usar el perfil histórico 90/60/30 min ni la geometría 1.5U de 150 mm.
 - No declarar margen energético mientras `Power Budget.md` permanezca
   `INCOMPLETE`.
-- El candidato IA actual para medición energética es CM5 + Gemma 4 e2b; toda
+- El candidato IA actual para medición energética es CM5 + `gemma4:e2b`; toda
   cifra de potencia/energía sigue TBD hasta ensayo de la revisión exacta.
 - Nunca generar Gerbers/BOM/netlist desde
   `EPS_PCB/EPS_Bench2S_FlightLike/` mientras su validador de bloqueo esté

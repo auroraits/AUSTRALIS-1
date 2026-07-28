@@ -113,7 +113,7 @@ El modelo de diseño deberá incluir:
 - propiedades espectrales coherentes;
 - extracción de energía eléctrica de las celdas;
 - disipación de OBC, EPS, convertidores, batería, RF/PA, storage, ADCS,
-  science y CM5/Gemma 4 e2b por modo;
+  science y CM5/`gemma4:e2b` por modo;
 - eclipses, actitud nominal/degradada, tumble y error de apuntamiento;
 - BOL/EOL, hot/cold y tolerancias;
 - masas y capacidades derivadas del CAD/BOM, sin doble conteo;

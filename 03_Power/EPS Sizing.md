@@ -72,7 +72,7 @@ Casos mínimos:
 - eclipses consecutivos durante contingencia;
 - downlink en peor estado permitido;
 - detumbling/ADCS;
-- inferencia Gemma 4 e2b en CM5, solo si la política la permite;
+- inferencia `gemma4:e2b` en CM5, solo si la política la permite;
 - arranque en frío, inrush y brownout;
 - pérdida/degradación de un string solar;
 - EOL y temperatura hot/cold.
