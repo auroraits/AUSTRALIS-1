@@ -45,8 +45,8 @@ este documento conserva, aun así, una fila por cada punto original.
 
 | Disposición | Cantidad |
 |---|---:|
-| `CORRECTED` | 49 |
-| `CONTROLLED OPEN` | 48 |
+| `CORRECTED` | 50 |
+| `CONTROLLED OPEN` | 47 |
 | `SUPERSEDED-EVIDENCE` | 19 |
 | `BLOCKED-EXTERNAL` | 4 |
 | **Total** | **120** |
@@ -172,7 +172,7 @@ este documento conserva, aun así, una fila por cada punto original.
 | SW-H07 | El trigger de riesgo miraba `send()` fail aunque la pérdida real aparecía en RX. | `CORRECTED` | `07_Risk/telemetry_433_bench_risks.md` usa PER, gaps, duplicates/out-of-order y evidencia RX; dashboard/registrador conservan los contadores. |
 | SW-H08 | El remapeo sensor→body tenía determinante −1 y no permitía permutar ejes. | `CORRECTED` | Firmware usa matriz 3×3 controlada; `validate_telemetry_bench.py` exige ortonormalidad y determinante +1. La calibración física del montaje sigue siendo evidencia de banco, no ADCS de vuelo. |
 | SW-H09 | La documentación de Madgwick omitía que un acelerómetro en caída libre no referencia roll/pitch orbital. | `CORRECTED` | `embedded/common/filters/MadgwickAHRS.h`, README 433 y ADR de banco limitan la interpretación a bench; ninguna salida se promueve a ADCS orbital. |
-| SW-H10 | `platformio.ini` no apuntaba al árbol real y no había compilación reproducible. | `CONTROLLED OPEN` | `05_Software/embedded/esp32_s3_tx_telemetry/platformio.ini` y `05_Software/embedded/uno_rx_logger/platformio.ini` fijan `src_dir` por proyecto; `.github/workflows/validation.yml` define PlatformIO 6.1.19 para ambos entornos. El build CI del head vigente debe quedar verde antes de recibir crédito de compilación. |
+| SW-H10 | `platformio.ini` no apuntaba al árbol real y no había compilación reproducible. | `CORRECTED` | Los dos `platformio.ini` fijan `src_dir`, `espressif32@7.0.1`/`atmelavr@5.3.0` y RadioHead 1.120.0; `.github/workflows/validation.yml` fija PlatformIO 6.1.19. Los runs push `30327087956` y PR `30327090361` compilaron TX ESP32-S3 y RX Uno en el commit `8137176`. Esto no acredita funcionamiento con hardware. |
 
 ### Ground software
 

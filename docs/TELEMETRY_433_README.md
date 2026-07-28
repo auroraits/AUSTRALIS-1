@@ -21,6 +21,21 @@ El frame histórico de 41 bytes necesita `41×8/2000 = 164 ms` antes de overhead
 de framing/codificación. Por eso 20 Hz era imposible. Dos hertz dejan margen y
 deben verificarse con timestamps y contadores; no se declaran validados sin log.
 
+## Build reproducible
+
+Desde `05_Software/embedded`:
+
+```bash
+python -m pip install platformio==6.1.19
+python -m platformio run --project-dir esp32_s3_tx_telemetry -e esp32s3_supermini_tx
+python -m platformio run --project-dir uno_rx_logger -e uno_rx_logger
+```
+
+Los manifiestos fijan `platformio/espressif32@7.0.1`,
+`platformio/atmelavr@5.3.0` y `mikem/RadioHead@1.120.0`. El workflow ejecuta
+exactamente esos dos builds. Que compilen solo acredita integridad del código y
+dependencias: la operación RF/IMU y los timings deben verificarse con el banco.
+
 ## Métricas
 
 RX/ground deben distinguir:
