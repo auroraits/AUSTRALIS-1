@@ -1,7 +1,7 @@
 # Base mecánica preliminar — AUSTRALIS-1 1.5U
 
-**Revisión:** 2026-07-27  
-**Estado:** Preliminary  
+**Revisión:** 2026-07-27
+**Estado:** Preliminary
 **Trazabilidad:** CubeSat Design Specification Rev. 14.1; sujeto al ICD del
 integrador
 
