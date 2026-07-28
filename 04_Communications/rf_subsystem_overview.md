@@ -1,163 +1,230 @@
-# RF Subsystem Overview — AUSTRALIS-1 / DIY Nanosat MVP
+# RF Subsystem Overview — AUSTRALIS-1
 
-**Revisión:** 2026-03-14
+**Revisión:** 2026-07-27
 **Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md`, `08_Decisions/ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-rx.md`, `08_Decisions/ADR-20260218-uhf-link-budget-preliminary.md`
+**Trazabilidad:** `00_MVP/MVP v2.2.md`, `04_Communications/regulatory_gate_rf.md`, documentos de link budget de este subsistema
 
-## 1) Arquitectura RF del satélite
-El subsistema RF del MVP utiliza dos canales:
-- **LoRa RX 915 MHz** para uplink de nodos IoT en tierra (RX-only en satélite).
-- **UHF TRX 435 MHz** para beacon publico, downlink/TTC y uplink privado/controlado con estacion/es terrena/s propia/s o autorizada/s.
+## 1) Arquitectura RF y estado real
 
-Decisión P1 (ver ADR): para maximizar probabilidad de uplink con nodos típicos, el RX orbital se explora como **LoRa concentrator** y el acceso múltiple se hace por **slotting (modo B2)**.
+El subsistema propuesto tiene dos cadenas:
 
-Nota de integración EPS: el escenario de sizing para un concentrator COTS de clase SX1303 HAT usa **0.495 W en RX** (99 mA @ 5 V con GNSS ON) y exige **OFF real** fuera de ventana; ver `03_Power/Power Budget.md` y `07_Risk/comms_concentrator_integration_risk.md`. Esto no selecciona hardware de vuelo ni habilita TX LoRa desde órbita.
+- **LoRa RX 915–928 MHz:** experimento de uplink desde nodos terrestres. El
+  satélite es RX-only, pero la transmisión deliberada Tierra→espacio está
+  **bloqueada hasta dictamen escrito de ENACOM**.
+- **UHF TRX en una asignación coordinada TBD dentro de 435–438 MHz:** beacon
+  público, downlink/TTC y uplink autenticado desde estaciones autorizadas.
+  `435.000 MHz` no es una frecuencia asignada ni un centro de diseño válido.
 
-## 2) Arbitraje de downlink y prioridad de tráfico (permanente)
-El downlink UHF es gestionado por Downlink Manager en OBC con colas:
-- `HOUSEKEEPING`
-- `COMMAND_ACK`
-- `AI_BEHAVIOR_LOG`
-- `LORA_LOG`
-- `SCIENCE`
-- `OPTIONAL_PAYLOAD`
+La exploración P1 estudia un concentrador LoRa y acceso por slotting. No implica
+que un concentrador sea más sensible que un receptor single-channel ni que B2
+sea legal u operable. La comparación debe medir sensibilidad, consumo,
+blocking, Doppler/CFO y capacidad.
 
-Reglas:
-- Prioridad estricta para `HOUSEKEEPING` y `COMMAND_ACK` en todos los modos.
-- `AI_BEHAVIOR_LOG` es la cola best-effort de mayor prioridad científica.
-- `LORA_LOG`, `SCIENCE` y cola opcional operan en best-effort por cuota.
-- En SAFE se limita a housekeeping/comandos.
+Estado de madurez:
 
-## 3) Uplink mínimo de comando (permanente)
-Comandos mínimos soportados en TTC:
-- `SET_MODE`
-- `POWER_SET`
-- `DL_SELECT`
-- `DL_SET_LIMITS`
-- `REQUEST_STATUS`
-- `ABORT`
+- módulo UHF orbital: `TBD`;
+- receptor LoRa orbital: `TBD`;
+- antenas y despliegue: `TBD`;
+- KiCad RF: **placeholder/no design**, sin circuito, netlist, footprints,
+  outline ni ruteo fabricable;
+- link budgets y protocolos: análisis de diseño, no evidencia de hardware.
 
-## 4) LoRa Uplink
+## 2) Arbitraje de downlink
 
-| Parámetro | Valor |
+El Downlink Manager del OBC gestiona:
+
+1. `HOUSEKEEPING` — prioridad estricta;
+2. `COMMAND_ACK` — prioridad estricta;
+3. `AI_BEHAVIOR_LOG` — mayor prioridad científica best-effort;
+4. `LORA_LOG` — best-effort;
+5. `SCIENCE` — best-effort;
+6. `OPTIONAL_PAYLOAD` — best-effort mínimo.
+
+Las prioridades estrictas no deben causar starvation permanente. El presupuesto
+de datos debe reservar mínimos configurables, aplicar aging a colas
+best-effort y demostrar que cierra los productos de éxito de misión. Ver
+`04_Communications/uplink_data_products_and_downlink_policy.md`.
+
+## 3) Uplink TTC y seguridad
+
+Comandos conceptuales mínimos:
+
+- `SET_MODE`;
+- `POWER_SET`;
+- `DL_SELECT`;
+- `DL_SET_LIMITS`;
+- `REQUEST_STATUS`;
+- `ABORT`;
+- carga/activación de prompts y consulta de estado.
+
+Todos los comandos, incluido `ABORT`, deben llevar autenticación criptográfica
+y protección anti-replay. CRC, hash sin clave, `node_id` o un canal
+“privado” no autentican origen.
+
+El contenido se mantiene en claro mientras no exista autorización expresa de
+confidencialidad. La especificación de seguridad está en
+`04_Communications/uhf_command_security_protocol.md`.
+
+## 4) LoRa uplink experimental
+
+| Parámetro | Estado de diseño |
 |---|---|
-| Frecuencia terrestre | 915–928 MHz (AU915 o equivalente, Argentina) |
-| Modulación | LoRa |
-| SF/BW | SF12 / BW **TBD** — BW250 candidato preferente |
-| Modo en satélite | **RX-only** (sin TX ISM desde órbita en MVP) |
-| Ventanas de operación | Solo durante pasadas previstas |
-| RX orbital explorado | Concentrator class como P1, con modo degradado single-channel si potencia/EMI no cierran |
-| Antena candidata | Patch o dipolo impreso |
+| Banda | Canalización TBD dentro de 915–928 MHz, sujeta a autorización |
+| Dirección | Tierra→satélite; satélite RX-only |
+| PHY candidato | LoRa SF12, CR 4/5; BW125/BW250 en trade |
+| Receptor orbital | Concentrador vs single-channel, `TBD` por ensayo |
+| Ventana | `TBD`; derivada de elevación y error de predicción |
+| Antena | `TBD`; patrón integrado obligatorio |
+| Protocolo | Frame versionado, identidad autenticada, anti-replay |
 
-### 4.1 Nodo típico terrestre (clase de nodo — no SKU)
+Clase de nodo de referencia, no SKU:
 
-El nodo típico objetivo se define como **clase**, no como SKU de mercado específico:
+- radio SX1262/SX1276 o equivalente;
+- MCU ESP32-S3 o equivalente;
+- +20 a +21 dBm, sin PA externo;
+- antena simple 0–2 dBi;
+- cristal comercial ±10 ppm; no se presupone TCXO.
 
-| Parámetro | Valor de clase |
+**Bloqueo regulatorio:** RX-only en órbita no autoriza al transmisor terrestre.
+No se realizarán transmisiones radiadas dirigidas al satélite hasta cerrar
+`REG-LORA-915` en `04_Communications/regulatory_gate_rf.md`.
+
+**Factibilidad:** el enlace de nodo típico puede quedar al borde incluso cerca
+de zenith. Slotting reduce colisiones, pero no mejora el link budget ni prueba
+origen. Los números corregidos están en
+`04_Communications/link_budget_lora_uplink_preliminary.md`.
+
+## 5) UHF TTC
+
+| Parámetro | Estado de diseño |
 |---|---|
-| Radio | Clase SX1262 o SX1276 o equivalente |
-| MCU | Clase ESP32-S3 o equivalente |
-| Potencia TX | +20 a +21 dBm |
-| Antena | Simple, 0–2 dBi |
-| Cristal | Comercial típico, ±10 ppm |
-| PA externo | No |
-| LNA externo | No |
-| Antena direccional | No |
-| TCXO | No asumido |
+| Frecuencia | Asignación coordinada `TBD` dentro de 435–438 MHz |
+| Modulación | 2-FSK, perfil de ingeniería |
+| Tasa | 1200 bit/s, pendiente de waveform completa |
+| Potencia RF | 500 mW objetivo de papel; medir |
+| Integridad de canal | Framing versionado + CRC + secuencia |
+| Seguridad de comando | MAC/firma + contador anti-replay persistente |
+| Hardware | `TBD`; OpenLST es candidato, no baseline final |
 
-Referencias de clase (ejemplos, no normativas): módulos Heltec, RFM95W, SX1262-based y similares.
+El presupuesto UHF debe cerrar por separado downlink y uplink. La geometría
+corregida y ambos cálculos están en
+`04_Communications/link_budget_uhf_preliminary.md`.
 
-Referencia: `08_Decisions/ADR-20260313-nodo-tipico-lora-clase.md`
+La máscara `≥20°` se conserva únicamente para planificación. Con el caso de
+papel a 600 km, el margen es aproximadamente `+5.9 dB` a 20° y `+3.0 dB` a
+10°, antes de incertidumbres no asignadas. No es garantía de servicio.
 
-**Parámetros TBD:** elevación mínima operativa, canalización exacta dentro de 915–928 MHz, BW definitivo, criterio de aceptación numérico.
+### 5.1 Waveform y Doppler
 
-**Nota de factibilidad:** con nodos de clase típica, el enlace puede quedar al borde incluso a zenith. La estrategia realista es operar solo en elevaciones altas y **reducir colisiones por slotting** (modo B2).
+A 438 MHz, usando 7.7 km/s como cota radial, el Doppler máximo de primer orden
+es aproximadamente `±11.25 kHz`. Antes de congelar la waveform deben definirse
+y ensayarse:
 
-## 5) UHF Downlink/TTC
+- desviación 2-FSK y ancho ocupado;
+- preámbulo, sync, whitening, line coding, FEC e interleaver;
+- filtro RX, Automatic Frequency Control (AFC) y rango de adquisición;
+- tolerancia de ambos osciladores y precompensación Doppler;
+- MTU, fragmentación, ARQ, timeouts y comportamiento half-duplex.
 
-| Parámetro | Valor |
-|---|---|
-| Frecuencia | 435 MHz |
-| Modulación | FSK |
-| Data rate | 1 200 bps |
-| Potencia TX objetivo | 500 mW RF |
-| Potencia eléctrica estimada TX | ~1.5 W (preliminar; ver CONF-01 en `architecture.md`) |
-| Integridad | Framing + CRC + secuencia |
-| Tramas | BEACON / AI_BEHAVIOR_LOG / SCIENCE_SUMMARY / LORA_LOG / ACK-NACK |
+La validación debe aplicar una rampa Doppler orbital más el error combinado de
+osciladores y verificar el ancho autorizado. Un offset estático no basta.
 
-**Máscara de elevación operativa (provisional):** la validación nominal del downlink UHF se establece provisionalmente para elevaciones **≥20°**. Operación a <20° es experimental/oportunista. A 10° el margen teórico de papel es solo **+1 dB**.
+### 5.2 Perfiles de operación
 
-### 5.1 Modo publico SatNOGS y enlaces privados/controlados
+- `PUBLIC_BEACON`: beacon corto, identificado, públicamente documentado y
+  decodificable por SatNOGS/terceros.
+- `CONTROLLED_DOWNLINK`: downlink operado por estaciones autorizadas para
+  payload y dumps. Si se usa amateur-satellite, waveform, framing,
+  identificación y contenido deben satisfacer el régimen abierto aplicable.
+- `PRIVATE_UPLINK`: nombre histórico del uplink TTC. Significa **operador
+  autorizado**, no enlace secreto. Los comandos son legibles en RF pero
+  autenticados y protegidos contra replay.
 
-Decision vigente: `ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`.
+Cada emisión debe cumplir callsign/identificación y las condiciones del
+expediente. La autenticación sin cifrado protege origen e integridad sin
+ocultar el texto; su implementación requiere confirmación regulatoria.
 
-La arquitectura UHF debe soportar tres perfiles sobre el mismo TRX UHF de TTC:
+SatNOGS es receive-only y no reemplaza licencia, coordinación ni estación
+propia.
 
-- `PUBLIC_BEACON`: beacon publico compatible con SatNOGS, documentado y decodificable por terceros. Debe contener solo telemetria minima no sensible.
-- `CONTROLLED_DOWNLINK`: downlink privado/controlado hacia estacion/es propia/s o autorizada/s para `PHOTO_DEMO`, `AI_BEHAVIOR_LOG` detallado, performance IA, `SCIENCE`, `LORA_LOG` y dumps bajo demanda.
-- `PRIVATE_UPLINK`: comandos TTC, prompts versionados, seleccion de downlink, limites de cuota y comandos de seguridad desde estacion/es propia/s o autorizada/s.
+## 6) Candidatos UHF
 
-SatNOGS se adopta como red receive-only complementaria para el beacon publico. No se usa como infraestructura de uplink/control y no reemplaza licencias, coordinacion ni estaciones propias.
+Candidatos en análisis, no adoptados:
 
-Nota de seguridad/regulacion: "privado/controlado" no equivale por si solo a confidencialidad RF. Cualquier emision UHF puede ser capturada; cifrado/autenticacion y contenido permitido quedan sujetos al encuadre regulatorio final.
+- CC1110/OpenLST-derived;
+- AX5043;
+- CC1101 + front-end;
+- Si4463.
 
-### 5.2 Estacion terrena dual-use SatNOGS / AUSTRALIS
-
-La estacion terrena propia debe poder operar en dos dominios separados:
-
-- SatNOGS receive-only para `PUBLIC_BEACON` y observaciones publicas.
-- AUSTRALIS propio para `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`.
-
-La arquitectura de referencia usa una estacion UHF direccional con rotor AZ/EL, antena 435-438 MHz compartida y switch T/R digital fail-safe. SatNOGS no debe tener acceso al transmisor, PTT, credenciales de comandos ni camino de uplink.
-
-Diseno base: `04_Communications/ground_station_dual_use_satnogs_australis.md`.
-
-## 6) Selección de módulo UHF (TBD)
-
-Candidatos documentados (no baseline final):
-- CC1110 (base OpenLST) — ver `04_Communications/RF_ANALISYS_OPENLST.md`
-- AX5043
-- CC1101 + PA externo
-- Si4463
-
-**Hardware TTC UHF final:** TBD. Requiere ADR de adopción cuando se tome la decisión.
-**OpenLST:** candidato técnico en análisis. No copiar "tal cual" (componente RFFM6403 es EOL).
-**Requisito arquitectonico nuevo:** cualquier seleccion UHF debe permitir un `PUBLIC_BEACON` decodificable publicamente y perfiles separados para `CONTROLLED_DOWNLINK` y `PRIVATE_UPLINK`.
+OpenLST aporta una referencia útil, pero la herencia del diseño original no se
+transfiere automáticamente a una placa derivada con PA, filtro, layout,
+potencia y waveform distintos. RFFM6403 está EOL y no puede ser dependencia del
+diseño final. La adopción requiere ADR y nueva campaña de V&V.
 
 ## 7) Antena del satélite
-- Alternativa base: antena 1/4 onda deployable.
-- Alternativa secundaria: dipolo.
-- Restricción principal: volumen mecánico disponible en 1.5U y compatibilidad con despliegue.
 
-## 8) EMC / separación RF interna
-- Mantener separación física y de layout entre cadenas LoRa y UHF.
-- Controlar retorno de masa común y rutas de corriente de TX.
-- Evitar acoplamientos con fuentes switching del EPS y con el payload IA.
+Candidatos: dipolo desplegable, monopolo tangencial u otra geometría compatible
+con el dispenser; ninguno está seleccionado.
 
-## 9) Estado actual — inmadurez de hardware RF
+Un monopolo normal a la cara nadir tendría un nulo axial aproximadamente hacia
+tierra en pasadas de alta elevación, por lo que esa orientación no se adopta.
+La selección requiere:
 
-> **Brecha hardware/documentación:** la madurez documental del subsistema COMMS supera significativamente la madurez del hardware RF real.
+1. frames mecánico, corporal y de antena;
+2. patrón 3D con estructura, paneles, harness y radiales;
+3. realized gain, polarización y detuning medidos;
+4. deployment verificado después de ambiente;
+5. propagación del patrón por actitud nominal, error, tumble y modo seguro.
 
-- **Módulo UHF orbital definitivo: TBD** — no seleccionado; sin esquemático KiCad de RF orbital funcional.
-- **LoRa RX orbital (concentrator o módulo): TBD** — no seleccionado.
-- **PCB RF orbital (TTC UHF + LoRa RX):** esquemático KiCad esencialmente **placeholder**.
-- Toda la documentación de link budget, protocolo y arquitectura RF describe el **diseño objetivo**, no el hardware existente.
-- Gate de madurez de hardware RF: Gate C (TTC UHF dev base cerrado).
+El `0 dBi` de los link budgets es una hipótesis aritmética, no un patrón real.
+
+## 8) EMC y coexistencia
+
+La compatibilidad electromagnética no se cierra con reglas cualitativas. Debe
+existir una matriz de modos que cubra:
+
+- UHF TX → LoRa RX, SDR/LNA y sensores;
+- LoRa RX con UHF idle/RX/TX;
+- EPS, convertidores, CM5, storage, buses y actuadores en peor actividad;
+- armónicos, espurias, intermodulación, desense, blocking y ruido conducido;
+- estados nominales, brownout, inrush y conmutación de rails.
+
+Para cada combinación se registrarán aislamiento/S-parameters cuando aplique,
+noise floor, sensibilidad/PER antes y durante el agresor, espectro y corriente.
+El criterio cuantitativo debe asignarse antes del ensayo desde el margen del
+enlace; permanece `TBD` hasta cerrar hardware y presupuesto.
+
+No se permite UHF TX simultáneo con recepción LoRa salvo evidencia específica.
+
+## 9) Gates de cierre
+
+El subsistema no puede declararse cerrado hasta:
+
+- resolver `REG-UHF-AMATEUR` y `REG-LORA-915`;
+- seleccionar hardware y antenas con ADR;
+- medir link budgets bidireccionales, patrón, Doppler y PER;
+- cerrar protocolo autenticado, anti-replay y recuperación de claves;
+- cerrar data budget, retención y descarga;
+- superar EMC/coexistencia, OTA y end-to-end ground;
+- producir evidencia identificada, raw, calibrada y hasheada.
 
 <!-- FEATURE:PHOTO_DEMO START -->
 
-## 10) [PHOTO_DEMO] Integración opcional de tráfico
-- La cola `OPTIONAL_PAYLOAD` del Downlink Manager se asigna al catálogo/transferencia de [PHOTO_DEMO].
-- Siempre best-effort, con cuota por pasada configurable con `DL_SET_LIMITS`.
-- Transferencia por chunks reanudables, posterior a selección uplink de imagen.
+## 10) [PHOTO_DEMO] Tráfico opcional
+
+`PHOTO_DEMO` usa exclusivamente `OPTIONAL_PAYLOAD`, por chunks reanudables y
+sin desplazar housekeeping, ACK ni el producto científico primario.
 
 <!-- FEATURE:PHOTO_DEMO END -->
 
-## 11) Referencias cruzadas
+## 11) Referencias
+
 - `04_Communications/link_budget_uhf_preliminary.md`
+- `04_Communications/link_budget_lora_uplink_preliminary.md`
+- `04_Communications/uplink_lora_slotted_protocol.md`
+- `04_Communications/uhf_command_security_protocol.md`
+- `04_Communications/regulatory_gate_rf.md`
 - `04_Communications/satnogs_public_beacon_architecture.md`
 - `04_Communications/ground_station_dual_use_satnogs_australis.md`
-- `08_Decisions/ADR-20260704-satnogs-public-beacon-private-payload-uplink.md`
-- `08_Decisions/ADR-20260212-telemetry-bench-433mhz.md`
-- `08_Decisions/ADR-20260218-downlink-arbitration-and-subsystem-power-framework.md`
-- `08_Decisions/ADR-20260314-mission-redef-ai-primary.md`
+- `docs/COMMS/uhf_ttc_bench_testing_plan.md`
+- `docs/COMMS/uplink_lora_bench_testing_plan.md`

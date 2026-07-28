@@ -1,138 +1,143 @@
-# Link Budget LoRa Uplink Preliminar (915 MHz) — AUSTRALIS-1 / DIY Nanosat MVP
+# Link Budget LoRa uplink preliminar — AUSTRALIS-1
 
-**Fecha de revisión:** 2026-03-14
-**Estado:** preliminar (análisis de factibilidad; requiere medición/decisión)
+**Revisión:** 2026-07-27
+**Estado:** Preliminary — factibilidad técnica condicionada; operación no autorizada
+**Trazabilidad:** `04_Communications/regulatory_gate_rf.md`, `04_Communications/uplink_lora_slotted_protocol.md`, `docs/COMMS/rf_calculations.py`
 
-## 1) Objetivo
-Cuantificar, de forma preliminar, si el objetivo secundario de misión “**nodo IoT (Buenos Aires, LoRa 915) → satélite (RX)**” es realista bajo supuestos típicos, y qué márgenes/condiciones se requieren.
+## 1) Condición regulatoria previa
 
-> Nota: este documento es **uplink** (tierra → satélite). El downlink UHF se trata en `04_Communications/link_budget_uhf_preliminary.md`.
+Este cálculo no autoriza transmisiones. Que el satélite sea `RX-only` en
+915–928 MHz evita una emisión orbital en esa banda, pero **no autoriza** que un
+nodo terrestre emita deliberadamente Tierra→espacio.
 
-## 2) Supuestos de diseño (TBD donde aplique)
+Hasta obtener dictamen escrito de ENACOM que identifique servicio, banda,
+dirección, potencia, antena y condiciones:
 
-### 2.0 Nodo “típico” objetivo (clase de nodo — no SKU específico)
+- el enlace LoRa orbital se considera **no autorizado**;
+- solo se permiten ensayos conducidos, en caja apantallada o bajo autorización
+  experimental específica;
+- B1/B2 y el criterio de paquetes desde Buenos Aires no son operables.
 
-El nodo objetivo se define como **clase**, sin fijar SKU de mercado como requisito normativo. Ver `08_Decisions/ADR-20260313-nodo-tipico-lora-clase.md`.
+Ver `04_Communications/regulatory_gate_rf.md`.
 
-Clase de nodo de referencia para este link budget:
+## 2) Propósito técnico
 
-| Parámetro | Valor de clase | Nota |
+Cuantificar el enlace de papel para una clase de nodo, sin seleccionar SKU ni
+receptor orbital. Los resultados no representan sensibilidad del concentrador
+SX1302/SX1303, patrón de antena ni Packet Delivery Ratio (PDR) medidos.
+
+La frecuencia exacta es `TBD` y depende del cierre regulatorio. Se usa
+`915.0 MHz` solo como referencia numérica; no es un canal adoptado.
+
+## 3) Geometría y FSPL
+
+Se usa la geometría esférica y ecuaciones reproducibles de
+`docs/COMMS/rf_calculations.py`.
+
+| Altitud | Elevación | Distancia oblicua | FSPL a 915 MHz |
+|---:|---:|---:|---:|
+| 550 km | 10° | 1815.1 km | 156.85 dB |
+| 550 km | 20° | 1293.6 km | 153.90 dB |
+| 550 km | 30° | 992.8 km | 151.61 dB |
+| 550 km | 90° | 550.0 km | 146.48 dB |
+| 600 km | 10° | 1931.6 km | 157.39 dB |
+| 600 km | 20° | 1392.2 km | 154.54 dB |
+| 600 km | 30° | 1075.1 km | 152.30 dB |
+| 600 km | 90° | 600.0 km | 147.23 dB |
+| 650 km | 10° | 2044.7 km | 157.88 dB |
+| 650 km | 20° | 1488.8 km | 155.13 dB |
+| 650 km | 30° | 1156.4 km | 152.93 dB |
+| 650 km | 90° | 650.0 km | 147.93 dB |
+
+El valor histórico de 2500 km a 550 km/10° era incorrecto.
+
+## 4) Clase de nodo y receptor
+
+| Parámetro | Clase de referencia | Estado |
 |---|---:|---|
-| Frecuencia terrestre | 915–928 MHz | AU915 o equivalente (Argentina) |
-| Órbita de referencia | 550 km zenith | Supuesto de diseño |
-| Rango oblicuo peor caso | ~2 500 km | Elevación mínima 10° (geométrico) |
-| Potencia TX (nodo) | +20 a +21 dBm | Clase típica sin PA externo |
-| Antena TX tierra (nodo) | 0–2 dBi | Monopolo/dipolo; sin antena direccional |
-| Antena RX satélite | 0–2 dBi | Dipolo/monopolo/patch simple |
-| Cristal | ±10 ppm | Comercial típico; sin TCXO |
-| Pérdidas misceláneas | 4–10 dB | Polarización, body loss, desintonía, implementación |
-| LoRa BW | **TBD** (125 kHz o 250 kHz) | **BW definitivo TBD hasta Gate B.** BW250 es el **candidato preferente** por robustez frente a CFO+Doppler. |
-| LoRa SF | SF12 (caso robusto) | Para sensibilidad máxima |
-| Sensibilidad RX (referencia típica) | ~−137 dBm (SF12, BW125) | Orden de magnitud de datasheets SX127x; **medir/confirmar** |
+| Potencia TX | +20 a +21 dBm | Sin PA externo; medir |
+| Ganancia TX | 0 a +2 dBi | Antena simple; medir patrón |
+| Cristal | ±10 ppm | Sin asumir TCXO |
+| Ganancia RX orbital | 0 a +2 dBi | Hipótesis; patrón integrado TBD |
+| Pérdidas | 4 a 10 dB | Rango de estudio, no ledger validado |
+| PHY | SF12, CR 4/5, header explícito, CRC | Candidato de ensayo |
+| BW | 125 o 250 kHz | TBD por banco y autorización |
 
-Ejemplos de clase (referencia comercial, no normativa): RFM95W, SX1276-based, módulos Heltec ESP32+SX1262, y equivalentes.
+Las sensibilidades `−137 dBm` (BW125) y `−134 dBm` (BW250) se conservan
+únicamente como referencias de orden de magnitud de transceptores LoRa. No se
+pueden atribuir al concentrador orbital: deben medirse con el módulo,
+front-end, filtro, reloj, temperatura y criterio PDR exactos.
 
-### 2.1 Free-Space Path Loss (FSPL)
-Usando la aproximación estándar:
-
-\[ FSPL(dB) = 32.44 + 20\log_{10}(f_{MHz}) + 20\log_{10}(d_{km}) \]
-
-Para 915 MHz:
-- FSPL(550 km) ≈ **146.5 dB**
-- FSPL(2500 km) ≈ **159.6 dB**
-
-## 3) Cálculo (casos)
+## 5) Casos de papel a 600 km
 
 Ecuación:
-\[ P_{rx} = P_{tx} + G_{tx} + G_{rx} - FSPL - L_{misc} \]
 
-### 3.1 Caso A — “Nodo mínimo / legacy”
-- Ptx = +14 dBm
-- Gtx = +0 dBi
-- Grx = +0 dBi
-- Lmisc = 6 dB (polarización + body loss + implementación)
+\[
+P_{RX}=P_{TX}+G_{TX}+G_{RX}-FSPL-L_{misc}
+\]
 
-> Nota: este caso representa un nodo con potencia mínima (**+14 dBm**), por debajo de la clase de nodo objetivo (**+20 a +21 dBm**). Se conserva como referencia de peor caso extremo.
+### 5.1 Caso nominal explícito
 
-| Elevación | FSPL (dB) | P_rx (dBm) |
-|---:|---:|---:|
-| 90° (550 km) | 146.5 | **−138.5** |
-| 10° (2500 km) | 159.6 | **−151.6** |
+Supuestos: `Ptx=+20 dBm`, `Gtx=0 dBi`, `Grx=0 dBi`, `Lmisc=6 dB`.
 
-**Lectura:**
-- A zenith queda **en el borde** incluso para SF12 (~−137 dBm típico). Sin margen.
-- A 10° es **inviable** con nodo mínimo.
+| Elevación | Potencia recibida | Margen BW125 vs −137 | Margen BW250 vs −134 |
+|---:|---:|---:|---:|
+| 10° | −143.39 dBm | −6.39 dB | −9.39 dB |
+| 20° | −140.54 dBm | −3.54 dB | −6.54 dB |
+| 30° | −138.30 dBm | −1.30 dB | −4.30 dB |
+| 90° | −133.23 dBm | +3.77 dB | +0.77 dB |
 
-### 3.2 Caso B — “Nodo típico + módulo más fuerte”
-- Ptx = +20 dBm
-- Gtx = +2 dBi
-- Grx = +0 dBi
-- Lmisc = 6 dB
+Este caso solo cierra sobre el papel cerca de zenith y con la sensibilidad de
+referencia; no incluye confianza ni variación de patrón.
 
-| Elevación | FSPL (dB) | P_rx (dBm) |
-|---:|---:|---:|
-| 90° (550 km) | 146.5 | **−130.5** |
-| 10° (2500 km) | 159.6 | **−143.6** |
+### 5.2 Envolvente favorable/adversa a 20°
 
-**Lectura:**
-- Zenith: factible con margen (si la sensibilidad real es ~−137 dBm).
-- 10°: sigue quedando muy lejos.
+| Caso | Ptx | Gtx | Grx | Pérdidas | Prx | Margen BW125 | Margen BW250 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Favorable | +21 | +2 | +2 | 4 | −133.54 | +3.46 | +0.46 |
+| Nominal | +20 | 0 | 0 | 6 | −140.54 | −3.54 | −6.54 |
+| Adverso | +20 | 0 | 0 | 10 | −144.54 | −7.54 | −10.54 |
 
-### 3.3 Caso C — “Gateway dedicado” (más realista para objetivo orbital)
-Ejemplo:
-- Ptx = +27 dBm (0.5 W) (TBD legal/operativo)
-- Gtx = +10 dBi (Yagi)
-- Grx = +0 dBi
-- Lmisc = 6 dB
+El enlace no tiene margen robusto demostrado. Una antena direccional o mayor
+potencia convertiría al nodo en otra clase y exigiría nuevo análisis técnico y
+regulatorio.
 
-| Elevación | FSPL (dB) | P_rx (dBm) |
-|---:|---:|---:|
-| 90° (550 km) | 146.5 | **−115.5** |
-| 10° (2500 km) | 159.6 | **−128.6** |
+## 6) Doppler, osciladores y ancho de banda
 
-**Lectura:**
-- Esto cierra con margen amplio incluso a elevaciones bajas.
-- Implica que el “nodo IoT” se comporta más como una **estación/gateway dedicado**.
+A 915 MHz y 7.7 km/s, la cota cinemática es aproximadamente `±23.5 kHz`. Un
+oscilador de ±10 ppm aporta aproximadamente `±9.2 kHz` por equipo; el error
+combinado debe incluir ambos relojes y temperatura.
 
-## 4) Implicancias para el MVP
+Por eso:
 
-### 4.1 Riesgo principal
-El criterio secundario de éxito “≥10 paquetes LoRa originados en Buenos Aires” **no está garantizado** si se interpreta “nodo” como dispositivo LoRa típico y si se pretende operar a elevaciones bajas.
+- BW125 no se puede adoptar sin prueba de rampa Doppler + error de osciladores;
+- BW250 intercambia aproximadamente 3 dB de sensibilidad de referencia por
+  mayor tolerancia al offset;
+- la decisión requiere PDR medido en toda la ventana, no solo CFO estático.
 
-Para “nodos típicos”, el diseño realista es:
-- intentar recepción **solo** en la porción alta de la pasada (cerca de zenith),
-- maximizar robustez LoRa y usar repetición de tramas,
-- recuperar dB con una antena bien implementada (sin volverlo direccional).
+## 7) Condiciones para una conclusión científica
 
-### 4.2 Doppler + error de cristal (impacto en decisión de BW)
-Orden de magnitud para 915 MHz:
-- Doppler LEO (v≈7.5 km/s): **~±23 kHz**.
-- Error de cristal ±10 ppm: **±9 kHz**.
+Antes de promover una configuración deben existir:
 
-Combinados, el offset puede ser del orden de **~30 kHz** durante una pasada real.
+- autorización escrita para el enlace Tierra→espacio o una banda/servicio
+  alternativo autorizado;
+- receptor orbital exacto y sensibilidad absoluta calibrada;
+- patrón OTA integrado, incluyendo orientación y estructura;
+- rampa Doppler, error térmico de ambos osciladores y canalización real;
+- PDR/PER con tamaño de muestra e intervalo de confianza predefinidos;
+- pruebas near-far, co-canal, canal adyacente, blocking y coexistencia;
+- configuración, raw data, calibraciones, versión y hashes archivados.
 
-Implicancias:
-- **BW125**: frágil sin calibración adecuada del hardware. **Solo adoptar si la evidencia de banco/campo lo respalda.**
-- **BW250**: mayor tolerancia al offset combinado (a costa de ~3 dB de sensibilidad). **Candidato preferente** mientras no haya evidencia que respalde BW125.
-- **BW definitivo: TBD** hasta Gate B.
-- Medida complementaria: **diversidad de frecuencia por firmware** puede ayudar en ambos casos.
+## 8) Dictamen preliminar
 
-### 4.3 Opciones de mitigación (permitidas sin “gateway dedicado”)
-1) **Elevar elevación mínima operacional**.
-2) **Mejorar antena del nodo** (sin direccional).
-3) **Firmware (nodo):** SF alto, payload corto, preámbulo largo, repetición de paquetes.
-4) **Firmware (satélite RX):** ventanas de escucha centradas en máxima elevación.
+La recepción desde nodos típicos sigue siendo una hipótesis experimental de
+alto riesgo, no un enlace cerrado. Técnicamente puede ser observable cerca de
+máxima elevación, pero el margen es insuficiente para garantizar el objetivo.
+Regulatoriamente permanece bloqueado.
 
-### 4.4 Alternativa (si no cierra)
-Si tras cerrar números/mediciones no hay margen con nodos típicos, la alternativa es redefinir el “nodo” como estación/gateway dedicado o cambiar el uplink.
+## 9) Referencias
 
-## 5) Próximos pasos (P1)
-1. Seleccionar radio LoRa candidato y fijar una tabla de sensibilidad real por BW/SF/CR.
-2. Definir legal/operativo: potencia y antena del “nodo” (o gateway) en Argentina (ENACOM).
-3. Validar en banco sensibilidad RX real, tolerancia a CFO/Doppler y tasa de paquetes esperable por ventana.
-4. Decidir/actualizar requisitos de misión para que el criterio secundario de éxito sea verificable y realista.
-
-## 6) Referencias cruzadas
-- `01_Mission/mission_definition.md`
-- `04_Communications/rf_subsystem_overview.md`
-- `04_Communications/link_budget_uhf_preliminary.md`
+- `04_Communications/regulatory_gate_rf.md`
+- `04_Communications/uplink_lora_slotted_protocol.md`
+- `docs/COMMS/uplink_lora_bench_testing_plan.md`
+- `docs/COMMS/rf_calculations.py`

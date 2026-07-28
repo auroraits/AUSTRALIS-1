@@ -1,18 +1,19 @@
 # RF_ANALISYS_OPENLST.md — Análisis OpenLST como Base para TTC UHF
 
 **Proyecto:** DIY Nanosat (Buenos Aires, AR)
-**Revisión:** 2026-03-03 (sin cambios de contenido al 2026-03-13)
+**Revisión:** 2026-07-27
 **Estado:** Preliminary — análisis técnico de factibilidad
 **Trazabilidad:** `04_Communications/rf_subsystem_overview.md`, `SYSTEM_BASELINE.md`
 
 ---
 
-> **Estado documental (2026-03-13):**
+> **Estado documental (2026-07-27):**
 >
 > Este documento es un análisis técnico de factibilidad. **No reemplaza el baseline ni ninguna decisión ADR.**
 >
-> Posición del proyecto al 2026-03-13:
-> - Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**.
+> Posición del proyecto:
+> - Perfil de ingeniería: **2-FSK 1200 bit/s en una asignación coordinada TBD
+>   dentro de 435–438 MHz**. `435.000 MHz` no es una frecuencia asignada.
 > - OpenLST: **candidato técnico en análisis / base de desarrollo**. No es baseline final.
 > - Hardware TTC UHF final: **TBD**.
 > - **No adoptar OpenLST "tal cual"**: componente RFFM6403 (FEM — Front-End Module) está EOL (End of Life).
@@ -29,14 +30,16 @@
 Fuentes primarias: repositorios oficiales `OpenLST/openlst` y `OpenLST/openlst-hw`.  
 
 **Encaje con el MVP actual del proyecto:**  
-- El baseline del DIY Nanosat define **UHF ~435 MHz (FSK 1200 bps)** como downlink y TTC, y **LoRa 915 MHz RX-only** para uplink usuario (`00_MVP/MVP v2.2.md`, `SYSTEM_BASELINE.md`).  
+- El perfil en corrección define **UHF 435–438 MHz coordinado (2-FSK 1200 bit/s)** como downlink/TTC, y estudia **LoRa 915–928 MHz RX-only** para uplink usuario. El segundo enlace permanece bloqueado hasta dictamen ENACOM.
 - OpenLST apunta exactamente a **70 cm (≈437 MHz)** y usa **2‑FSK** con bitrates del orden de **7.4 kbps** (configurable).  
-- Por ende, OpenLST es un **candidato fuerte** como punto de partida de una **radio TTC UHF** más “flight‑heritage‑like” que módulos maker típicos.
+- Por ende, OpenLST es un candidato útil como punto de partida para una radio
+  TTC UHF, pero su herencia no se transfiere a una placa derivada.
 
 **Riesgo principal 2026:** el diseño de referencia incorpora un **FEM (Front-End Module)**, **Qorvo RFFM6403**, **discontinuado** (EOL anunciado 2019). Esto obliga a rediseñar el front‑end (PA/LNA/switching/filtrado) o a depender de stock residual.  
 
 **Recomendación:**  
-- **Sí** tomar OpenLST como **candidato técnico prioritario** (PHY, framing, tooling, arquitectura y layout RF “con herencia”).  
+- **Sí** tomar OpenLST como candidato técnico (PHY, framing, tooling y
+  arquitectura de referencia), sin atribuir herencia de vuelo al rediseño.
 - **No** copiar el diseño “tal cual” (por obsolescencia del FEM y por adaptar a regulaciones/coord. de satélite).  
 - En práctica: fork del hardware y crear una **OpenLST‑Derived TTC Board** con: CC1110 (o migración a CC13xx si decidimos), front‑end modular (PA + SAW + switch/LNA), y compliance (inhibits RF, identificador, coordinación).
 - Si los resultados son positivos, formalizar adopción mediante ADR nueva antes de considerarlo baseline.
@@ -77,7 +80,10 @@ Hay publicaciones académicas que usan OpenLST como plataforma de estudio/modifi
 - Ejemplo: tesis/paper de Georgia Tech sobre modificar el firmware de OpenLST para compatibilidad con AX.25 (amateur packet radio).
 
 ### 2.3 Implicancia
-Para un proyecto DIY, OpenLST ofrece algo raro: **herencia de vuelo masiva** en un stack abierto. Eso reduce el riesgo técnico frente a “módulos genéricos” sin historial orbital.
+Para un proyecto DIY, OpenLST ofrece una referencia abierta derivada de un
+stack con uso orbital reportado. Eso reduce incertidumbre de investigación,
+pero **no confiere herencia** a una variante modificada ni sustituye su
+calificación.
 
 ---
 
@@ -85,8 +91,10 @@ Para un proyecto DIY, OpenLST ofrece algo raro: **herencia de vuelo masiva** en 
 
 ### 3.1 Requisitos de COMMS del proyecto (baseline actual)
 En la documentación consolidada del proyecto:
-- Uplink usuario: **LoRa 915 MHz RX‑only en órbita** (mitigación regulatoria).  
-- Downlink/TTC: **UHF 435 MHz**, baseline **FSK 1200 bps** (amateur-sat, con coordinación/encuadre).  
+- Uplink usuario: **LoRa 915–928 MHz RX‑only en órbita**, bloqueado para
+  emisiones Tierra→espacio hasta dictamen ENACOM.
+- Downlink/TTC: asignación coordinada TBD en **435–438 MHz**, perfil de
+  ingeniería 2-FSK 1200 bit/s.
 
 > Esto implica que OpenLST se evalúa como candidato para **UHF TTC**, no para LoRa 915.
 
@@ -109,11 +117,15 @@ OpenLST se adapta a “store & forward + ventanas de downlink”. El mayor bitra
 
 ### 4.1 Argentina (ENACOM)
 - La operación en el **Servicio de Radioaficionados** y **Servicio de Radioaficionados por Satélite** está regulada por ENACOM (reglamento general, plan de bandas, licencias/categorías).  
-- Para un downlink UHF “amateur-sat”, el camino típico es:
-  1) encuadre de misión bajo “amateur-satellite service” (sin fines de lucro, experimentación),
-  2) licencia/estación (propia o a través de radio club),
-  3) coordinación de frecuencia (ver IARU en 4.2),
-  4) cumplimiento de identificaciones, emisiones, potencia, etc.
+- Para un enlace UHF amateur-satellite no basta una licencia personal o un
+  radio club. Se requiere responsable habilitado, autorización de estación
+  espacial, identificación/callsign en las emisiones, coordinación y
+  presentación por la administración nacional.
+- El régimen amateur no debe presumirse compatible con texto cifrado o un
+  decoder cerrado. Autenticación de origen sin confidencialidad se mantiene
+  como requisito técnico y debe confirmarse por escrito.
+- La banda 915–928 MHz no tiene atribución amateur-satellite demostrada para
+  este enlace. RX-only en órbita no autoriza emisiones Tierra→espacio.
 
 Fuentes:
 - ENACOM – página “nuevo reglamento de radioaficionados”: https://www.enacom.gob.ar/nuevo-reglamento-de-radioficionados_p3301  
@@ -121,25 +133,35 @@ Fuentes:
 - Resolución nacional (actualizaciones al régimen): https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-1186-2024-406719/texto  
 
 ### 4.2 Internacional (ITU + IARU)
-- Para satélites, además de la licencia nacional, se requiere encuadre en el **International Telecommunication Union (ITU)** (coordinación de asignaciones, filings, etc.) dependiendo del perfil de misión y del país de administración.  
-- En bandas amateur-sat, es práctica estándar requerir prueba de coordinación IARU (International Amateur Radio Union) para el launch provider y para operación ordenada.  
+- Para satélites, además de la licencia nacional, la administración debe
+  gestionar la información, coordinación y notificación aplicable ante la
+  **International Telecommunication Union (ITU)**. No se debe asumir una
+  exención por tratarse de un CubeSat o una misión amateur.
+- En bandas amateur-satellite se requiere coordinación IARU temprana, además
+  del expediente nacional y UIT; ninguna reemplaza a las otras.
 - Esto coincide con requisitos típicos de integradores/lanzadores: “provide documentation of proper licenses… for amateur frequency use, requires proof of frequency coordination by the IARU”.
 
 Fuente de requisito de coordinación (CubeSat Design Specification Rev 14.1, Cal Poly): ver CDS Rev 14.1.
 
 ### 4.3 Implicancia para elegir banda “óptima”
-En nuestro MVP ya está tomada la decisión macro:
-- **No transmitir ISM desde órbita** (LoRa RX-only).  
-- Downlink/TTC por **UHF amateur-sat**.
+El análisis técnico de corto plazo se limita a:
 
-Por ende, “optimizar banda” en el corto plazo significa optimizar **dentro del marco amateur-sat** (435–438 MHz típicamente), no saltar a bandas comerciales/space-ops (lo cual dispara complejidad de licensing/frequency filing).
+- no transmitir LoRa 915–928 MHz desde órbita;
+- no transmitir LoRa desde tierra hacia el satélite hasta dictamen escrito;
+- diseñar UHF dentro de 435–438 MHz sin fijar centro hasta coordinación.
+
+El gate y las fuentes primarias se mantienen en
+`04_Communications/regulatory_gate_rf.md`.
 
 ---
 
 ## 5) Factibilidad de implementación en custom PCB (partiendo del diseño original)
 
 ### 5.1 Qué tan “copiable” es openlst-hw
-El repo `openlst-hw` es un KiCad completo (esquemático + layout + BOM + gerbers). Eso habilita un fork y una placa derivada sin empezar de cero.
+El repo `openlst-hw` es un KiCad completo (esquemático + layout + BOM +
+gerbers), útil como referencia. Todo cambio de PA, SAW, matching, layout,
+potencia o firmware invalida la extrapolación directa de comportamiento y
+obliga a revalidar el diseño derivado.
 
 ### 5.2 Qué partes “rompen” al migrar/retocar
 El stack puede dividirse en 4 bloques:
@@ -159,7 +181,8 @@ Para un custom PCB pragmático:
 - Cambiar:
   - SAW filter a uno que cubra 435–438 (o centrado ~436/437).
   - Front-end PA/FEM por alternativa vigente (ver §6).
-- Mantener footprints/placement de RF siguiendo la herencia (planos, keepouts, SMA, etc.).
+- Usar el placement original solo como referencia y revalidar planos,
+  keepouts, matching, estabilidad y emisiones de la variante.
 
 ---
 
@@ -281,17 +304,21 @@ Esto es manejable en 1.5U con operación por ventanas, pero obliga a:
 ### 10.1 Ancho de banda / tasa
 Hay dos perfiles posibles:
 
-**Perfil A (conservador, alineado con MVP):**  
-- FSK 1k2 (1200 bps) / framing robusto / beacon “siempre llega”.
+**Perfil A (conservador, alineado con el perfil de ingeniería):**
+- 2-FSK 1200 bit/s / framing robusto. La recepción no está garantizada y debe
+  demostrarse por BER/PER, patrón y link budget.
 
 **Perfil B (OpenLST default):**  
 - 2‑FSK con bitrate raw ≈ 7416 baud, user data reportada ~3.5 kbps.  
 
 ### 10.2 Ventana de downlink (volumen de datos)
-En una pasada útil de ~8 min:
+En una pasada útil hipotética de 8 min:
 
-- A 1.2 kbps: ≈ 70 KiB por pasada (sin contar overhead).  
-- A 3.5 kbps: ≈ 205 KiB por pasada (sin contar overhead).  
+- A 1.2 kbit/s, el techo bruto continuo es 72 000 B (70.3 KiB).
+- Con 30 % de TX es 21 600 B y con 60 % es 43 200 B, antes de framing,
+  FEC, ARQ, gaps y paquetes perdidos.
+- A 3.5 kbit/s, el techo continuo sería 210 000 B (205.1 KiB), también antes
+  de overhead y sin que ese perfil esté adoptado.
 
 En ambos casos, el limitante real suele ser:
 - elevación útil,
@@ -320,14 +347,15 @@ En ambos casos, el limitante real suele ser:
 ## 12) Recomendación general del approach
 
 ### 12.1 Qué haría (recomendación)
-1) **Evaluar OpenLST como candidato TTC UHF** (PHY + tooling + arquitectura) por su herencia y por encajar con 70 cm.  
+1) **Evaluar OpenLST como candidato TTC UHF** (PHY + tooling + arquitectura de
+   referencia) por encajar con 70 cm, sin transferirle herencia a la variante.
 2) **Fork** de `openlst-hw` y crear una variante: **OpenLST‑Derived‑TTC‑435**:
    - SAW centrado para 435–438.
    - front-end discreto reemplazando RFFM6403.
    - power‑gating + medición de consumo RF (alineado con ICD EPS).
    - inhibiciones RF (mínimo 3, ver CDS Rev 14.1).
 3) Mantener “compatibilidad de operación” con tu ground segment:
-   - Beacon ultra robusto (posible 1k2) + modo “bulk downlink” (3–7 kbps) cuando el margen lo permita.
+   - beacon 1k2 medido + modo bulk solo si espectro, potencia y link budget lo permiten.
 4) Si la validación técnica/regulatoria cierra, emitir ADR de adopción para actualizar baseline canónico.
 
 ### 12.2 Qué NO haría
@@ -359,7 +387,7 @@ En ambos casos, el limitante real suele ser:
 2) Elegir estrategia de front‑end (PA discreto):  
    - shortlist de 2–3 PAs disponibles (Mouser/DigiKey) + switch/LNA.  
 3) Definir **perfil de modulación/tasa** para MVP:  
-   - Beacon 1k2 “siempre llega” + modo 3–7 kbps para dump.  
+   - beacon 1k2 con PER objetivo + modo 3–7 kbps candidato para dump.
 4) Diseñar **OpenLST‑Derived‑TTC‑435 v0.1** en KiCad:  
    - cambios mínimos (SAW + front-end) manteniendo placement RF.  
 5) Banco RF:  
