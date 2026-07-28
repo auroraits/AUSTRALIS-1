@@ -1,3 +1,6 @@
+// HISTORICAL SNAPSHOT — DO NOT USE FOR AUSTRALIS DESIGN OR EVIDENCE.
+// This model retains the obsolete 500 km / 150 mm Borealis assumptions and
+// does not reproduce australis-sim-v10-pre. See README_BorealisThermalConcept.md.
 within ;
 package BorealisThermalConcept
   import Modelica.Constants.pi;
@@ -18,7 +21,7 @@ package BorealisThermalConcept
   end posPart;
 
   model LEO500kmNadir_1p5U
-    "Conceptual lumped-parameter thermal + solar model for a 1.5U nadir-pointing CubeSat"
+    "HISTORICAL/INVALID FOR CURRENT BASELINE: obsolete Borealis concept"
 
     // -------------------------------------------------------------------------
     // Geometry convention

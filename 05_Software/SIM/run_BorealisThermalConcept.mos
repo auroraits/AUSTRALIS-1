@@ -1,13 +1,6 @@
-loadModel(Modelica);
-loadFile("BorealisThermalConcept.mo");
-getErrorString();
-
-simulate(BorealisThermalConcept.LEO500kmNadir_1p5U,
-  startTime=0,
-  stopTime=18000,
-  numberOfIntervals=1800,
-  method="dassl",
-  tolerance=1e-6,
-  outputFormat="mat");
-
-getErrorString();
+// HISTORICAL SNAPSHOT — simulation intentionally disabled.
+//
+// BorealisThermalConcept.mo uses obsolete 500 km / 150 mm geometry and a
+// thermal formulation that does not reproduce australis-sim-v10-pre.
+// This script deliberately contains no model-loading or simulation command.
+// See README_BorealisThermalConcept.md and README_SIMULATION.md.
