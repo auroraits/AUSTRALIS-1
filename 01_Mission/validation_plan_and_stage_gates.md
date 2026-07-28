@@ -21,6 +21,17 @@ Gate A → SRR → subsystem evidence gates → PDR → CDR → TRR
 - Todo test usa procedimiento aprobado, artículo/configuración identificados,
   instrumentación calibrada, raw data y digest.
 
+Semántica VCRM:
+
+- `Open`: falta definición o plan verificable;
+- `Planned`: procedimiento/gate asignado, sin implementación acreditada;
+- `Implemented`: existe diseño/artefacto inspeccionable, pero no evidencia de
+  aceptación;
+- `Verified`: criterio satisfecho con configuración y EvidenceID aprobados;
+- `Waived`: autoridad acepta una desviación con expiración y riesgo residual;
+- `Blocked by Integrator`: depende de una entrada/aceptación externa y no está
+  cerrado.
+
 ## 2. Artefactos de control
 
 - requisitos: `requirements_matrix.md`;

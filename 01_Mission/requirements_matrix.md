@@ -106,7 +106,7 @@
 | ID | Requirement | Criterio de aceptación | Método | Fuente | Owner role | Lifecycle |
 |---|---|---|---|---|---|---|
 | SYS-REQ-01 | El experimento IA shall tener protocolo preregistrado antes de SRR. | Documento aprobado contiene todos los elementos de Mission Definition §3–4. | I | ADR-20260727-verification-and-review-governance | Science/Systems | Active |
-| SYS-REQ-02 | Todo claim cuantitativo shall citar configuración, unidades, artefacto y resultado exacto. | Muestreo de claims activos tiene trazabilidad completa; cero resultado transferido por analogía. | I | AGENTS.md §13.1 | QA/Systems | Active |
+| SYS-REQ-02 | Todo claim cuantitativo shall citar configuración, unidades, artefacto y resultado exacto. | Muestreo de claims activos tiene trazabilidad completa; cero resultado transferido por analogía. | I | AGENTS.md §13, “Evidencia y reproducibilidad” | QA/Systems | Active |
 | SYS-REQ-03 | Readiness shall seguir SRR→PDR→CDR→TRR→Q/AR→FRR sin dependencias preliminares. | Review records y entrance/exit criteria completos; waivers controlados. | I | ADR-20260727-verification-and-review-governance | Systems/QA | Active |
 | SYS-REQ-04 | Shall existir configuración identificada del artículo ensayado. | Cada EvidenceID liga BOM/CAD/FW/model/config hashes y serial/lote aplicables. | I | ADR-20260727-verification-and-review-governance | Configuration/QA | Active |
 | SYS-REQ-05 | Ningún requisito shall cerrarse por análisis preliminar sin criterio/evidencia controlada. | VCRM usa `Verified` solo con ProcedureID, configuración y EvidenceID aprobado. | I | ADR-20260727-verification-and-review-governance | QA | Active |

@@ -25,11 +25,14 @@ Impacto:
 
 Un riesgo solo puede cerrarse con `EvidenceID`, review y riesgo residual
 aceptado. Todos los owners son **roles** hasta asignación nominal en la review.
-No hay riesgos cerrados en esta revisión.
+No hay riesgos cerrados en esta revisión. Los scores de la tabla son
+exposición inicial; la exposición residual y la fecha calendario permanecen
+`TBD`. La columna `Due gate` es el hito máximo y en SRR se asignarán nombre y
+fecha sin inventarlos en esta revisión.
 
 ## 2. Registro consolidado
 
-| ID | Causa → evento → impacto | P | I | Score | Owner role | Trigger | Mitigación / evidencia de cierre | Gate | Estado |
+| ID | Causa → evento → impacto | P | I | Score | Owner role | Trigger | Mitigación / evidencia de cierre | Due gate | Estado |
 |---|---|---:|---:|---:|---|---|---|---|---|
 | RSK-CONF-01 | Fuentes activas incompatibles → configuración equivocada → decisiones/test inválidos | 4 | 5 | 20 | Systems/QA | parámetro/estado con dos valores activos | Gate A, checks automáticos, ADR disposition, VCRM 1:1 | Gate A | Open |
 | RSK-MECH-01 | Geometría 150 mm propagada/CAD o masa ausentes → no conformidad/fit failure | 5 | 5 | 25 | Structure | modelo activo usa 150 mm, supera referencia CDS 3.00 kg/límite ICD o no existe fit CAD | regenerar CAD/budgets con CDS 170.2 mm; mass roll-up, metrología/fit-check | PDR/FRR | Open |

@@ -45,6 +45,6 @@ patent scope, termination and governing law.
 
 Before accepting external contributions, the project also needs an inbound
 contributor license workflow so accepted contributions can be used and
-commercially licensed by the project owner.
+commercially licensed by the confirmed authorized entity.
 
 See `LEGAL_ENFORCEMENT_REVIEW.md` and `CONTRIBUTING.md`.

@@ -1,6 +1,7 @@
 # EPS Bench1 1S — Risk Matrix
 
 **Revisión:** 2026-07-27
+**Estado:** Active — bench-only; riesgos abiertos
 **Scope:** banco 1S y riesgo de extrapolación
 
 | ID | Riesgo | Prob. | Impacto | Mitigación | Trigger |

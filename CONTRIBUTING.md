@@ -1,7 +1,11 @@
 # Contributing
 
+Status: **External merges closed pending contributor-license and chain-of-title
+review**
+
 AUSTRALIS-1 / DIY-Nanosat is not accepting unrestricted public contributions
-until the project owner approves a contributor license workflow.
+until a confirmed rightsholder/licensing entity and qualified counsel approve a
+contributor license workflow.
 
 ## Before opening a pull request
 
@@ -17,9 +21,10 @@ By submitting a contribution, you must be able to certify that:
 ## Inbound license requirement
 
 External contributions require an explicit inbound license or CLA before merge.
-The project owner must retain the right to use, modify, sublicense and
-commercially license accepted contributions as part of AUSTRALIS-1, while the
-public repository remains available under its public non-commercial terms.
+The authorized licensing entity must obtain the rights needed to use, modify,
+sublicense and commercially license accepted contributions as part of
+AUSTRALIS-1, while the public repository remains available under its public
+non-commercial terms.
 
 Until that process exists, maintainers should treat external pull requests as
 discussion material only and should not merge them.
