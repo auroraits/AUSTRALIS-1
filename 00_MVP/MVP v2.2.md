@@ -315,7 +315,7 @@ Ver `01_Mission/validation_plan_and_stage_gates.md`.
 - compliance: `01_Mission/compliance_matrix.md`;
 - costs/BOM: `06_Costs/`;
 - riesgos: `07_Risk/`;
-- ADRs: `08_Decisions/`.
+- ADRs: `08_Decisions/INDEX.md`.
 
 ## 20. Disposición de claims históricos
 
