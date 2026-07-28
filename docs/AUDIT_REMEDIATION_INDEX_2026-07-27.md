@@ -108,7 +108,7 @@ este documento conserva, aun así, una fila por cada punto original.
 | SYS-M11 | Informes de auditoría de marzo parecían actuales aunque sus entradas habían cambiado. | `SUPERSEDED-EVIDENCE` | `docs/informe_revision_integral_nanosat_2026-03-12.md` y su CSV están identificados como snapshots históricos; este índice y los registros de frente controlan la disposición vigente. |
 | SYS-M12 | PHOTO_DEMO mezclaba heurísticas técnicas con conclusiones legales. | `BLOCKED-EXTERNAL` | `07_Risk/PHOTO_DEMO_remote_sensing_threshold_risk_matrix.md` declara sus umbrales heurísticos/no estatutarios; `RSK-PH-01`, `PROC-PH-001` requieren especialista/autoridad. |
 | SYS-M13 | El mirror ya era público mientras auditorías legales/publicación conservaban blockers previos. | `CONTROLLED OPEN` | `PUBLIC_RELEASE_PROCESS.md`, `PUBLICATION_AUDIT.md` y `LEGAL_ENFORCEMENT_REVIEW.md` distinguen snapshots y exigen sign-off/claim scan por release; la disposición retrospectiva no equivale a aprobación legal. |
-| SYS-M14 | Licencia, titular, SPDX, contacto comercial, SBOM y provenance legal eran incompletos. | `BLOCKED-EXTERNAL` | `LICENSE.md`, `COMMERCIAL_USE.md`, proceso de release y `RSK-LEGAL-01` dejan titular/contacto/chain-of-title/revisión profesional abiertos; no se concede permiso por inferencia. |
+| SYS-M14 | Licencia, titular, SPDX, contacto comercial, SBOM y provenance legal eran incompletos. | `BLOCKED-EXTERNAL` | Los assets browser vendorizados ya tienen versión, licencia y manifest SHA-256 controlado por CI en `THIRD_PARTY_NOTICES.md`; `LICENSE.md`, `LICENSE_SCOPE.md`, el proceso de release y `RSK-LEGAL-01` mantienen titular/contacto/chain-of-title, SBOM total y revisión profesional abiertos. |
 
 ## 4. COMMS/RF/regulatorio/ground — 25/25
 

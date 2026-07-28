@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import re
 import sys
@@ -78,6 +79,75 @@ def markdown_rows(path: Path) -> list[list[str]]:
 def csv_rows(path: Path) -> list[dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as stream:
         return list(csv.DictReader(stream))
+
+
+def validate_vendor_manifest(errors: list[str]) -> int:
+    vendor_root = (
+        ROOT
+        / "05_Software/GroundTelemetryDashboard/src/"
+        "GroundTelemetryDashboard.Web/wwwroot/vendor"
+    )
+    manifest_path = vendor_root / "manifest.sha256"
+    expected: dict[str, str] = {}
+
+    if not manifest_path.exists():
+        errors.append(f"{manifest_path.relative_to(ROOT)}: missing checksum manifest")
+        return 0
+
+    for line_number, line in enumerate(
+        manifest_path.read_text(encoding="ascii").splitlines(),
+        start=1,
+    ):
+        match = re.fullmatch(r"([0-9a-f]{64})  ([^\r\n]+)", line)
+        if not match:
+            errors.append(
+                f"{manifest_path.relative_to(ROOT)}:{line_number}: "
+                "invalid SHA-256 manifest row"
+            )
+            continue
+        digest, relative_name = match.groups()
+        relative_path = Path(relative_name)
+        if relative_path.is_absolute() or ".." in relative_path.parts:
+            errors.append(
+                f"{manifest_path.relative_to(ROOT)}:{line_number}: "
+                f"unsafe vendor path {relative_name!r}"
+            )
+            continue
+        if relative_name in expected:
+            errors.append(
+                f"{manifest_path.relative_to(ROOT)}:{line_number}: "
+                f"duplicate vendor path {relative_name!r}"
+            )
+            continue
+        expected[relative_name] = digest
+
+    actual = {
+        path.relative_to(vendor_root).as_posix()
+        for path in vendor_root.rglob("*")
+        if path.is_file() and path != manifest_path
+    }
+    if set(expected) != actual:
+        errors.append(
+            "vendor manifest/tree mismatch: "
+            f"missing={sorted(actual - set(expected))}; "
+            f"extra={sorted(set(expected) - actual)}"
+        )
+
+    for relative_name, expected_digest in expected.items():
+        path = vendor_root / relative_name
+        if not path.exists():
+            continue
+        # .gitattributes fixes this tree to LF. Normalize an already-populated
+        # Windows worktree so the local check matches the canonical Git bytes.
+        canonical_bytes = path.read_bytes().replace(b"\r\n", b"\n")
+        actual_digest = hashlib.sha256(canonical_bytes).hexdigest()
+        if actual_digest != expected_digest:
+            errors.append(
+                f"{path.relative_to(ROOT)}: SHA-256 {actual_digest} "
+                f"!= manifest {expected_digest}"
+            )
+
+    return len(expected)
 
 
 def validate_markdown_documents(errors: list[str]) -> tuple[int, int]:
@@ -176,6 +246,7 @@ def main() -> int:
     json_count = 0
     jsonl_count = 0
     python_count = 0
+    vendor_file_count = validate_vendor_manifest(errors)
     markdown_count, table_count = validate_markdown_documents(errors)
 
     for path in controlled_files(".json"):
@@ -388,6 +459,7 @@ def main() -> int:
         f"{len(top_risks)} parent risks,",
         f"{len(adr_files)} ADRs,",
         f"{markdown_count} Markdown files/{table_count} tables,",
+        f"{vendor_file_count} checksummed vendor files,",
         f"{json_count} JSON files,",
         f"{jsonl_count} JSONL records,",
         f"{python_count} Python files.",

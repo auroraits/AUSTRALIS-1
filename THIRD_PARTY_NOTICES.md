@@ -29,10 +29,18 @@ upstream license.
 
 - `System.IO.Ports` is referenced as a NuGet dependency by the .NET dashboard.
   Generated DLLs and native runtime libraries are not stored in the public tree.
-- Browser-side dashboard dependencies must be pinned and packaged with their
-  upstream notices for offline/reproducible operation. The release manifest
-  records exact versions and digests; an unpinned CDN reference is not accepted
-  as verification evidence.
+- Browser-side dependencies vendored for offline operation are:
+  - `@microsoft/signalr` 8.0.7 — MIT; upstream main license and bundled
+    third-party notices are stored under `wwwroot/vendor/signalr/`;
+  - Chart.js 4.4.9 — MIT; license stored under
+    `wwwroot/vendor/chart.js/LICENSE.md`;
+  - three.js 0.128.0 — MIT; license stored under
+    `wwwroot/vendor/three/LICENSE`.
+- `GroundTelemetryDashboard.Web/libman.json` fixes the upstream package
+  versions. `wwwroot/vendor/manifest.sha256` fixes the exact distributed bytes.
+  An unpinned CDN reference is not accepted as verification evidence.
+- The SignalR main license copy comes from the ASP.NET Core `v8.0.7` upstream
+  tag. Original upstream terms control every third-party file.
 
 ## Hardware and reference designs
 

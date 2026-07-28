@@ -33,6 +33,18 @@ not sufficient identity or evidence.
 | Historical training JSONL | File present; dataset provenance/metadata/split quality incomplete | Not accepted as independent benchmark evidence | Record generator revision/seed, source/license, deduplication, rule validation and immutable split digests |
 | Historical holdout | Contaminated by exact/near training overlap | Invalid as blind holdout | Replace with preregistered, isolated and hashed evaluation set |
 
+## Current vendored browser records
+
+| Artifact | Current identity | State | Evidence |
+|---|---|---|---|
+| SignalR browser client | `@microsoft/signalr` 8.0.7 | Vendored for offline ground UI; MIT | `libman.json`, main license, third-party notices and `wwwroot/vendor/manifest.sha256` |
+| Chart.js | 4.4.9 | Vendored for offline ground UI; MIT | `libman.json`, bundled license and `wwwroot/vendor/manifest.sha256` |
+| three.js | 0.128.0 | Vendored for offline ground UI; MIT | `libman.json`, bundled license and `wwwroot/vendor/manifest.sha256` |
+
+These records cover only the browser files committed under the ground
+dashboard. They do not replace the repository-wide SBOM, legal sign-off or
+release manifest required below.
+
 ## Release rule
 
 The release reviewer must export a machine-readable manifest containing the
