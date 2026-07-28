@@ -19,9 +19,14 @@
 - Órbita LEO de diseño `TBD`; sensibilidades actuales 600–650 km dan
   ~96.7–97.7 min por dinámica de dos cuerpos. Eclipse y campaña deben venir
   del propagador validado.
-- ADCS coarse (magnetorquers) o periodos de tumbling: generación solar variable.
+- ADCS permanece `TBD`; toda evaluación debe cubrir tumble, detumbling,
+  apuntamiento nominal y actitud degradada con generación solar variable.
 - Estación terrena fuerte; prioridad: **robustez y recuperabilidad** por sobre throughput.
-- Arquitectura **battery‑bus backbone** (VBAT como bus primario variable), con rails derivados (mínimo: 3V3_OBC always‑on y 5V para cargas que lo requieran). Dual‑bus (VBAT + 5V) queda como **opcional** a validar con power budget.
+- Arquitectura **battery‑bus backbone** (VBAT como bus primario variable), con
+  rails derivados. “Always-on” significa únicamente después de eyección y de
+  liberarse las inhibiciones CDS/ICD; antes de eyección todas las funciones
+  powered permanecen apagadas. Dual‑bus (VBAT + 5V) queda como **opcional** a
+  validar con power budget.
 - La topología de batería de vuelo **bloqueada** es 2S (ADR-20260218-battery-topology-2s-flight).
 - 2S2P puede evaluarse como expansión de capacidad, pero requiere ADR nueva para cambiar baseline.
 
@@ -79,7 +84,8 @@ Definir tolerancias explícitas evita discusiones eternas.
 
 ### 3.1 Reglas de tolerancia propuestas
 - **Pérdida de 1 string solar completo** (de 4 laterales) sin perder misión básica (SAFE + RX + housekeeping).
-- **Degradación solar total 30%** sin entrar en espiral de descarga (energy closure con duty-cycling).
+- **Degradación solar EOL** derivada del entorno, materiales y ensayos sin
+  entrar en espiral de descarga; no se fija un porcentaje universal.
 - **Falla de TX/PA (rail RF)**: el satélite debe seguir **vivo y comandable** (RX + OBC + telemetría mínima).
 - **Falla parcial de ADCS/payload**: no debe comprometer SAFE.
 
@@ -123,10 +129,13 @@ Definir tolerancias explícitas evita discusiones eternas.
 - **TX default OFF** tras reset (pull‑downs/pull‑ups por hardware).
 - Estado persistente de fallas (latch) para evitar re‑encender un rail defectuoso en loop.
 - Política TX/PA:
-  - **Auto‑recovery:** hasta **3 intentos** de re‑habilitar TX/PA tras una falla (con backoff entre intentos).
-  - Luego queda **bloqueado hasta comando**.
-  - Si no llega comando en **N órbitas** (parámetro), se rearma el contador y vuelve a habilitar hasta 3 intentos; repetir en loop.
-  - TX/PA siempre es *rail separado* y con OCP/soft‑start para evitar brownout loop.
+  - la cantidad de reintentos y el backoff permanecen `TBD` y deben derivarse
+    de FMEA, energía disponible y ensayo de la falla;
+  - después del límite, el rail queda bloqueado en estado seguro;
+  - no se permite un rearme periódico indefinido que repita una falla sin
+    demostrar contención y balance energético;
+  - TX/PA siempre es *rail separado* y con OCP/soft‑start para evitar
+    brownout loop.
 
 ### 5.4 Supervisión independiente
 - **EPS con MCU propio** (supervisor) para:
@@ -195,10 +204,16 @@ Prioridad de supervivencia:
 
 ## 7) Solar: reglas de strings y MPPT
 
-### 7.1 Topología recomendada (4 caras laterales)
-- **1 string por cara** (independientes) por robustez ante sombras y fallas.
-- MPPT **multi‑input** o por‑string (preferido si el costo/espacio lo permite).
-- Objetivo: maximizar energía en condiciones variables (tumbling/coarse ADCS).
+### 7.1 Topologías a comparar
+
+- entrada/MPPT independiente por cara o string iluminado;
+- MPPT multi‑input solo si sus canales son eléctricamente independientes;
+- cantidad de caras/strings derivada del CAD, curvas I-V y CONOPS ADCS;
+- conexión entre caras penalizada por mismatch y sombra;
+- tolerancia a abierto/corto de string y pérdida de una cara.
+
+No se fija “cuatro caras” ni “un string por cara” hasta demostrar volumen,
+área útil, tensión hot/cold/EOL, arranque del convertidor y energía de misión.
 
 ### 7.2 Anti‑propagación de fallas
 - Evitar que un string defectuoso arrastre a otros (or‑ing / diodos / arquitectura de MPPT adecuada).
@@ -209,7 +224,9 @@ Prioridad de supervivencia:
 ## 8) Arquitectura de potencia: Battery‑Bus Backbone (propuesta alineada a baseline) + Dual‑Bus opcional
 
 ### 8.1 Propuesta principal: VBAT como bus primario
-- El **bus primario** del satélite es **VBAT** (variable), alimentado por: *Solar strings → MPPT multi‑input → batería (2S/2S2P según budget)*.
+- El **bus primario** propuesto es **VBAT** (variable), alimentado por:
+  *strings solares → arquitectura MPPT TBD → batería 2S con capacidad/paralelo
+  TBD según budget*.
 - Los rails se derivan desde VBAT:
   - **3V3_OBC always‑on**: buck dedicado desde VBAT (**conservador y crítico**).
   - **5V rail**: buck desde VBAT para cargas que requieran 5V (switchable o semi‑crítico según misión).
@@ -251,11 +268,16 @@ Prioridad de supervivencia:
 ---
 
 ## 10) Derating (reglas de confiabilidad)
-- Componentes de potencia (MOSFETs, inductores, diodos, shunts) con margen:
-  - Voltaje: operar ≤70% del rating continuo.
-  - Corriente: operar ≤70% del rating térmico real (no el “peak” de marketing).
-- Capacitores: derating de voltaje y selección de dieléctrico estable con temperatura.
-- Conectores y cableado: margen de corriente + vibración.
+
+- El derating se documenta por componente mediante *part stress analysis*,
+  estándar aplicable, temperatura, vacío, tensión/corriente transitoria,
+  radiación y vida; no se adopta un `70%` universal.
+- MOSFETs, inductores, diodos y shunts se verifican contra SOA, pérdidas,
+  saturación, temperatura de unión y tolerancias.
+- Capacitores se verifican por tensión, bias DC, ESR/ripple, dieléctrico,
+  temperatura y vacío.
+- Conectores y cableado se verifican por corriente, caída, temperatura,
+  vibración, mating cycles y retención.
 
 ---
 
@@ -272,7 +294,8 @@ Prioridad de supervivencia:
 ## 12) Propuestas de politica para eventual ADR
 
 1) **RX_KEEPALIVE**: se adopta rail dedicado (no comparte rail del PA).  
-2) **TX/PA fault policy**: **3 intentos** de auto‑recovery con backoff; luego **bloqueo hasta comando**. Si no llega comando en **N órbitas**, se rearma y repite el ciclo.  
+2) **TX/PA fault policy**: intentos/backoff `TBD` derivados de FMEA y ensayo;
+   luego bloqueo seguro sin rearme periódico indefinido.
 3) **Heater batería**: por ahora **planificado** (pads/driver y provisión mecánica/termal). Se decide inclusión en MVP tras power budget + verificación térmica.  
 4) **Fallback 3V3_OBC**: **buck desde VBAT** (no depende del 5V).
 
@@ -285,7 +308,8 @@ Prioridad de supervivencia:
 - **Anti‑brownout loop**: latch de falla + reintentos limitados `TBD` derivados
   de ensayo → bloqueo autónomo seguro; no depender de comando de tierra para
   contener una falla.
-- **MPPT**: multi‑input por string (1 string por cara, 4 caras laterales) con tolerancia a pérdida de 1 string.
+- **MPPT**: arquitectura `TBD` comparada por cara/string, con bypass/OR-ing y
+  tolerancia a la falla definida por el energy balance.
 - **Supervisión**: EPS con MCU supervisor + watchdog independiente; SAFE autónomo.
 - **Derating y protecciones**: OVP/UVLO/OCP obligatorios según criticidad.
 
