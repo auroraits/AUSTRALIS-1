@@ -24,6 +24,8 @@ Fuente primaria:
   `170.2 ± 0.1 mm`.
 - URL oficial:
   <https://static1.squarespace.com/static/5418c831e4b0fa4ecac1bacd/t/62193b7fc9e72e0053f00910/1645820809779/CDS+REV14_1+2022-02-09.pdf>
+- SHA-256 de la copia consultada:
+  `221fbbbd4f632b16f3e219d1a5e2c2b04e1998c12025b793e6dfc6181af66b5d`.
 
 Para cálculos conceptuales de área solamente:
 

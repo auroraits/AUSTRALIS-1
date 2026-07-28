@@ -16,9 +16,11 @@ Fuente primaria:
 
 - *CubeSat Design Specification Rev. 14.1*, Cal Poly SLO, pp. 14–15.
 - <https://static1.squarespace.com/static/5418c831e4b0fa4ecac1bacd/t/62193b7fc9e72e0053f00910/1645820809779/CDS+REV14_1+2022-02-09.pdf>
+- SHA-256 de la copia consultada:
+  `221fbbbd4f632b16f3e219d1a5e2c2b04e1998c12025b793e6dfc6181af66b5d`.
 
-La revisión, página, cláusula y checksum de la copia controlada deberán
-registrarse antes de SRR.
+La revisión, página, cláusula y checksum deben conservarse en la configuración
+documental controlada.
 
 ## 2. Mínimos de diseño
 
@@ -29,7 +31,7 @@ registrarse antes de SRR.
 | LCH-EPS-03 | §2.3.5 | Existe Remove Before Flight (RBF) accesible y verificable |
 | LCH-EPS-04 | §2.3.6 | El pack incorpora protección contra desbalance de celdas |
 | LCH-EPS-05 | §2.3.7 | Existen al menos tres inhibiciones RF independientes |
-| LCH-EPS-06 | §2.3.8 | Existen al menos tres inhibiciones para cada función desplegable |
+| LCH-EPS-06 | §2.3.8 | Existen al menos tres inhibiciones independientes para impedir la liberación inadvertida de cualquier estructura desplegable |
 | LCH-EPS-07 | §2.4.4 | Ningún desplegable se activa antes de 30 min desde la eyección |
 | LCH-EPS-08 | §2.4.5 | Ningún transmisor se habilita antes de 45 min desde la eyección |
 
@@ -78,7 +80,7 @@ estado de pre-ejection definido y verificable.
 | LCH-VV-02 | Continuidad pre-ejection | Ninguna función alimentada fuera de los estados permitidos |
 | LCH-VV-03 | RBF/deployment switch | Apertura/cierre y rebote dentro de límites, sin bypass |
 | LCH-VV-04 | Tres inhibiciones RF | Cada inhibición se prueba por separado y en combinación |
-| LCH-VV-05 | Tres inhibiciones desplegables | Cada función cumple independencia y secuencia |
+| LCH-VV-05 | Tres inhibiciones de desplegables | El conjunto cumple independencia y bloquea toda liberación inadvertida |
 | LCH-VV-06 | Temporización | Despliegue ≥30 min y RF ≥45 min en tolerancia worst-case |
 | LCH-VV-07 | Reset/brownout | No adelanta timers ni habilita cargas/transmisores |
 | LCH-VV-08 | Post-ambiente | Todos los estados e inhibiciones funcionan después de vibración/TVAC |

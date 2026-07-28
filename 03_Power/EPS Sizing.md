@@ -158,7 +158,8 @@ El esquema futuro debe definir:
 Antes de la eyección, todas las funciones powered deben permanecer apagadas
 según el CDS/ICD aplicable. El diseño debe incluir RBF, deployment switch y,
 como base mínima, tres inhibiciones RF independientes y tres inhibiciones para
-cada función desplegable. Las interfaces finales se confirman con el
+impedir la liberación inadvertida de cualquier estructura desplegable. Las
+interfaces finales se confirman con el
 integrador, pero esos mínimos no pueden omitirse del esquema y la BOM. La
 trazabilidad completa se controla en
 `03_Power/LAUNCH_ELECTRICAL_SAFETY_PRELIMINARY.md`.
