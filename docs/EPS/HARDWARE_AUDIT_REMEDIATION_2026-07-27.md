@@ -65,6 +65,13 @@ Un diseño físico pendiente sigue `Open`, pero ya no puede promoverse como
 - `56f4095` — SSO, física térmica, no-ranking y reproducibilidad.
 - `fb71c6f` — materiales, coating, coupling, strap y batería térmica.
 - `dac4cae` — mínimos CDS de lanzamiento e inhibiciones.
+- `48cd2a2` — matriz de cobertura 33/33.
+- `6983227` — identificador exacto del candidato `gemma4:e2b`.
+- `d86b05f` — retiro de constantes heurísticas residuales de diseño EPS.
+- `762e42f` — checksum de fuente CDS y redacción exacta de inhibiciones.
+- `dd8e32d` — controles mecánicos y ambientales trazados al CDS.
+- `24e7a2c` — extremos térmicos all-state y métricas de batería.
+- `ed6243c` — detección visible de saturación por clamp numérico.
 
 ## 4. Verificación ejecutable
 
@@ -80,10 +87,29 @@ Estos checks verifican la documentación y los modelos actuales. No sustituyen
 ERC/DRC nativo, CAD/FEA, ensayo eléctrico, thermal balance, TVAC, ambiente,
 EMC ni calificación.
 
+Verificación de cierre ejecutada el 2026-07-27:
+
+- validador del placeholder KiCad: `PASS`;
+- calculadora de potencia `--self-test`: `PASS`;
+- validador SIM: `PASS`, con
+  `iSSO(600/650)=97.787670/97.985997°`;
+- parse de JSON y sintaxis del módulo JavaScript con Node: `PASS`;
+- carga real del HTML y módulos CDN en Edge headless: `PASS`;
+- barrido runtime de un caso 600 km/9.5 h LTAN: una fila, seis radiadores,
+  sin ranking, fatal ni clamp;
+- export runtime: CSV y manifest con 58 columnas, una fila, revisión fuente,
+  estado `INCOMPLETE_NOT_FOR_DESIGN_DECISIONS` y SHA-256 coincidente;
+- `git diff --check` en las rutas del frente: `PASS`.
+
+El barrido runtime fue una prueba funcional efímera del software, no evidencia
+de selección orbital/térmica; sus archivos temporales se eliminaron.
+
 ## 5. Bloqueos físicos remanentes
 
 - `kicad-cli` y un diseño EPS real siguen ausentes: no existe ERC/DRC de una
   placa fabricable.
+- OpenModelica (`omc`) no está instalado y, en cualquier caso, el artefacto
+  Modelica actual está deshabilitado por ser histórico.
 - No existe CAD estructural controlado ni ADCS implementado.
 - No hay selección de celda/BMS/MPPT/coating/strap ni datos de artículo.
 - El propagador y el modelo térmico no están validados contra herramienta
