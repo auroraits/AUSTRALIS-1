@@ -20,3 +20,7 @@ defined only by the accepted ADRs, `SYSTEM_BASELINE.md`,
 `01_Mission/requirements_matrix.md`,
 `01_Mission/verification_cross_reference_matrix.csv` and
 `07_Risk/top_risks.md`.
+
+The system/governance disposition and the distinction between corrected
+documentation and still-open engineering evidence are recorded in
+`SYSTEM_GOVERNANCE_AUDIT_REMEDIATION_2026-07-27.md`.
