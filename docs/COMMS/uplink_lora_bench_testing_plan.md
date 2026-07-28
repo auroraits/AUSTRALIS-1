@@ -1,73 +1,288 @@
-# COMMS — Uplink LoRa Bench Testing Plan (P1)
+# LoRa uplink — plan de ensayo de banco
 
-**Fecha de revisión:** 2026-02-20
-**Objetivo:** cerrar factibilidad de uplink LoRa 915 con nodos típicos (RFM95W) y validar el modo B2 (slotted + predicción de pasadas).
+**Revisión:** 2026-07-27
+**Estado:** Draft — ejecución radiada bloqueada por `REG-LORA-915`
+**Trazabilidad:** `04_Communications/uplink_lora_slotted_protocol.md`, `04_Communications/link_budget_lora_uplink_preliminary.md`
 
-## 1) Alcance
-- Validar PHY y robustez (SF/BW/CR/preamble/payload).
-- Medir tolerancia a **CFO** (offset de frecuencia) y a condiciones de "casi borde".
-- Validar slotting con múltiples nodos (colisiones, tasa CRC OK).
+## 1) Propósito
 
-> Esto NO reemplaza pruebas de campo con antenas reales, pero reduce incertidumbre y evita sorpresas de protocolo.
+Determinar si un nodo de clase objetivo puede ser recibido por el receptor
+orbital candidato y si slotting, autenticación, scheduler y pipeline de datos
+funcionan con rigor reproducible.
 
-## 2) Hardware mínimo
-- 2–10 nodos TX: ESP32 + RFM95W (ideal: al menos 3 para colisiones).
-- RX:
-  - opción A (mínima): otro SX1276 (single‑channel) para test PHY básico.
-  - opción B (objetivo): **LoRa concentrator** (multi‑canal / multi‑SF) + logging de RSSI/SNR/CFO.
-- Antenas: al menos 2 tipos:
-  - "mala" (whip genérica),
-  - "mejorada" (dipolo o 1/4 con plano de masa).
-- Atenuadores/caja metálica o distancia controlada para no saturar RX.
+El plan no selecciona BW, canal, concentrador ni hardware de vuelo.
 
-## 3) Testcases
+## 2) Restricción regulatoria
 
-### T1 — ToA y configuración base
-- Configurar baseline: SF12/BW125/CR4/5/preamble16/payload12B.
-- Verificar ToA real vs esperado.
+Hasta cerrar `REG-LORA-915`:
 
-### T2 — Sensibilidad relativa (comparativa)
-- Con atenuación creciente o distancia creciente (si es posible): comparar CRC OK vs nivel.
-- Objetivo: establecer un umbral práctico y márgenes aproximados.
+- ensayos por coax, atenuadores, dummy load o caja apantallada;
+- ninguna emisión dirigida al satélite;
+- ninguna prueba outdoor radiada salvo autorización experimental específica;
+- B1/B2 deshabilitados operacionalmente.
 
-### T3 — CFO (offset de frecuencia)
-- Simular CFO configurando el TX con offsets (ej. ±5, ±10, ±20, ±30 kHz) alrededor del canal.
-- Medir tasa de demodulación/CRC OK.
-- Repetir con BW125 y BW250.
+La evidencia técnica no cierra el gate legal.
 
-### T4 — Multi‑node collisions: ALOHA vs slotted
-- Mismo PHY.
-- N nodos transmitiendo:
-  - ALOHA con jitter (baseline negativo),
-  - slotted determinístico (modo B).
-- Métricas: rx_total, CRC OK, colisiones estimadas.
+## 3) Preregistro
 
-### T5 — Redundancia 2× y 2 canales
-- Primary en f1 + retry en f2.
-- Comparar vs 1 canal.
+Antes de cada campaña se congela:
 
-### T6 — Scheduler (modo B2) con “pasada simulada”
-- Emular ventana de 6 min con slots.
-- Validar que cada nodo respeta su slot, incluso con drift (introducir drift artificial en RTC si se puede).
+- TestID, hipótesis y requisitos;
+- Device Under Test (DUT), firmware, commit y configuración;
+- variable independiente/dependiente;
+- tamaño de muestra y niveles;
+- PDR/PER objetivo e intervalo de confianza;
+- criterio pass/fail;
+- plan de exclusiones y manejo de outliers;
+- calibraciones, raw format y hash esperado.
 
-## 4) Métricas a registrar
-- Por paquete:
-  - timestamp RX,
-  - node_id, seq,
-  - RSSI, SNR,
-  - CFO/offset estimado (si el RX lo da),
-  - CRC ok/fail.
-- Agregados por ventana:
-  - total, ok, fail,
-  - per-node ok.
+Un barrido exploratorio sin criterio previo se etiqueta `Exploratory` y no
+cierra baseline.
 
-## 5) Criterio de salida (P1)
-- Elegir un baseline operativo (SF/BW/canales/redundancia) con evidencia:
-  - CFO tolerable,
-  - tasa de CRC OK aceptable en slotted,
-  - y plan de fallback (BW250 o diversidad de frecuencia).
+## 4) Instrumentación
 
-## 6) Referencias
+- generador RF/modulador o segundo radio caracterizado;
+- step attenuator y atenuadores fijos calibrados;
+- power meter y analizador de espectro;
+- combinadores/acopladores y terminaciones;
+- emulador de Doppler o playback IQ;
+- recinto/cámara de temperatura para TX/RX;
+- fuente programable y captura de corriente;
+- referencia de frecuencia trazable;
+- concentrador y receptor single-channel candidatos;
+- al menos tres nodos para bring-up; cantidad final según preregistro;
+- para OTA, instalación calibrada y artículo representativo.
+
+Se registra pérdida de cables/fixtures en cada frecuencia, modelo/serie,
+calibración y uncertainty.
+
+## 5) Configuraciones mínimas
+
+Comparar, como mínimo:
+
+- SF12/BW125/CR4/5/header explícito/CRC/preamble16;
+- SF12/BW250 con iguales condiciones;
+- payload legado de 12 B para regresión de Time-on-Air (ToA);
+- frame autenticado real con longitud final;
+- single-channel vs concentrador con front-end/reloj reales.
+
+El canal usado en coax es una frecuencia de test. No se lo presenta como canal
+orbital.
+
+## 6) Matriz de ensayos
+
+### LORA-01 — Configuración y ToA
+
+- Capturar waveform y medir ToA.
+- Referencias de 12 B: 1.417216 s BW125 y 0.708608 s BW250.
+- Recalcular frame autenticado exacto.
+- Verificar preámbulo, header, CRC, CR, BW y occupied bandwidth.
+
+**Criterio:** error máximo `TBD` preregistrado contra cálculo y configuración
+decodificada consistente.
+
+### LORA-02 — Sensibilidad absoluta
+
+1. Medir potencia en plano de referencia RX.
+2. Barrer la transición completa de PDR.
+3. Ejecutar `N` frames preregistrados por nivel.
+4. Reportar PDR/PER e intervalo Wilson 95 %.
+5. Repetir BW125/BW250, temperaturas y tensión.
+
+La sensibilidad es el nivel que cumple el PDR preregistrado con confianza, no
+el primer paquete recibido. Comparar concentrador y single-channel bajo el
+mismo fixture.
+
+### LORA-03 — Doppler y osciladores
+
+Aplicar una rampa temporal, no solo offsets estáticos:
+
+- envolvente cinemática de referencia ±23.5 kHz a 915 MHz;
+- ppm TX + ppm RX;
+- deriva térmica y tensión;
+- error residual de scheduler/predicción.
+
+Medir adquisición, pérdida/recuperación de lock, CFO estimado y PDR a lo largo
+de la rampa. Repetir para ambos BW.
+
+### LORA-04 — Interferencia y near-far
+
+Ensayar:
+
+- co-canal;
+- canal adyacente;
+- blocking fuera de canal;
+- dos canales simultáneos;
+- near-far y capture;
+- múltiples SF si el receptor lo soporta;
+- canalización BW125 y BW250 por separado.
+
+Registrar potencia deseada/agresor en el plano RX. No usar canales que se
+solapan como evidencia de diversidad.
+
+### LORA-05 — ALOHA vs slotted
+
+Para cargas preregistradas:
+
+- ALOHA aleatorio como control;
+- slotting B1 simulado;
+- B2 con schedules independientes;
+- uno y dos retries;
+- colisiones deliberadas;
+- nodos con drift/latencia.
+
+Métricas:
+
+- intentos, únicos, duplicates, auth fail, replay;
+- PDR por nodo y percentiles;
+- collision/capture estimados;
+- fairness y starvation;
+- latencia y airtime.
+
+Comparar contra el modelo analítico y Monte Carlo. No asumir retries
+independientes sin comprobarlo.
+
+### LORA-06 — Timebase, TLE y scheduler
+
+Inyectar:
+
+- error de UTC/RTC y drift térmico;
+- GNSS ausente/degradado;
+- TLE correcto, viejo, de otro object ID, rollback y corrupto;
+- error de propagación;
+- ventana que cruza elevación mínima;
+- actualización a mitad de schedule;
+- reboot/power loss.
+
+**Hard-fail:** ante provenance, object ID, time quality o uncertainty inválidos,
+el nodo no transmite. B1 no se activa automáticamente.
+
+### LORA-07 — Frame, identidad y anti-replay
+
+Casos:
+
+- MAC/tag correcto, incorrecto, truncado;
+- misión/network/node equivocados;
+- boot epoch nuevo, repetido o rollback;
+- seq nuevo, duplicate, fuera de ventana y wrap;
+- payload/metadata modificados;
+- key epoch vigente, anterior, revocado;
+- reset/power-cut del receptor.
+
+CRC OK con auth fail debe rechazarse. Los casos críticos requieren 100 % de
+rechazo correcto.
+
+### LORA-08 — Antena OTA integrada
+
+Medir patrón 3D, polarización, detuning y realized gain con estructura, paneles,
+harness y configuración de despliegue. Repetir antes/después de ambiente.
+
+El patrón debe convertirse en pérdida para actitud nominal/degradada del link
+budget.
+
+### LORA-09 — EMC/coexistencia
+
+Ejecutar el receptor en la transición de PDR mientras se activan:
+
+- UHF TX/RX/idle;
+- EPS/MPPT/DC-DC;
+- CM5 en carga/inferencia;
+- storage/buses/actuadores;
+- switching de rails e inrush.
+
+Medir desense, noise floor, espurias, PDR y corriente. No se autoriza
+simultaneidad si excede el margen asignado.
+
+### LORA-10 — Potencia e integración
+
+- consumo min/nom/max RX;
+- GNSS on/off;
+- startup/inrush;
+- power gating OFF real;
+- brownout/reset;
+- temperatura;
+- logging continuo sin pérdida.
+
+El resultado alimenta EPS; una cifra de HAT de referencia no sustituye la
+medición del módulo final.
+
+### LORA-11 — Pipeline de datos
+
+Demostrar:
+
+- raw append-only;
+- resumen/catálogo/dump;
+- metadata RF y auth/replay;
+- reboot/session IDs;
+- digest/chunks;
+- downlink simulado bajo cuotas;
+- replay determinista en ground;
+- correlación con log TX/site para criterio de origen.
+
+## 7) Métricas y schema raw
+
+Por transmisión:
+
+- campaign/TestID/run ID;
+- node/boot/seq/key epoch;
+- UTC y time quality;
+- TX configuration/power;
+- RX configuration/input power;
+- Doppler/CFO aplicado y estimado;
+- RSSI/SNR con quality/calibración;
+- CRC/auth/replay verdict;
+- raw frame;
+- temperatura/tensión/corriente;
+- agresores EMC;
+- software/firmware/hash.
+
+Agregados:
+
+- PDR/PER e intervalo;
+- distribución por nodo;
+- duplicates/replays;
+- fairness;
+- energía por intento/éxito;
+- sensibilidad y degradación por condición.
+
+## 8) Evidence bundle
+
+Cada corrida conserva:
+
+- preregistro;
+- diagrama/fotos de setup;
+- instrumento/calibración;
+- configuración serializada;
+- raw data inmutable;
+- script de análisis;
+- resultados y uncertainty;
+- desviaciones;
+- commit y SHA-256.
+
+## 9) Criterio de salida
+
+Solo se propone baseline si:
+
+- autorización/encuadre existe;
+- PDR y confianza cumplen el criterio;
+- BW/canal resisten Doppler y osciladores;
+- frame autenticado y anti-replay pasan casos adversos;
+- capacidad multi-node cumple carga definida;
+- patrón y EMC integrados preservan margen;
+- potencia y data budget cierran;
+- evidencia fue revisada independientemente.
+
+Si no cierra, alternativas:
+
+- banda/servicio autorizado distinto;
+- receptor/antena distintos;
+- nodo/gateway bajo otra clase y permiso;
+- retirar o reformular el objetivo secundario.
+
+## 10) Referencias
+
+- `04_Communications/regulatory_gate_rf.md`
 - `04_Communications/uplink_lora_slotted_protocol.md`
 - `04_Communications/link_budget_lora_uplink_preliminary.md`
-- `07_Risk/comms_lora_cfo_doppler_risk.md`
+- `04_Communications/uplink_data_products_and_downlink_policy.md`
+- `docs/COMMS/rf_calculations.py`
