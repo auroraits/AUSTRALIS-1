@@ -1,7 +1,15 @@
 # ADR-20260316-ai-payload-granite350m-baseline-funcional-banco
 
 - **Fecha:** 2026-03-16
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-ai-payload-gemma4-e2b-candidate.md`
+
+> **Corrección de evidencia (2026-07-27):** los scripts citados por esta ADR
+> cargan `ibm-granite/granite-3.1-2b-instruct`, no Granite 350M. El dataset
+> contiene duplicación y contaminación del holdout, y el scorer tolera fallas
+> de seguridad. Los resultados históricos solo pueden atribuirse al artefacto
+> 2B efectivamente ejecutado y no validan Granite 350M, seguridad de vuelo,
+> reproducibilidad ni desempeño estadísticamente robusto.
 
 ---
 

@@ -1,7 +1,13 @@
 # ADR-20260313-uhf-downlink-operational-mask
 
 - **Fecha:** 2026-03-13
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-rf-regulatory-command-security-baseline.md`
+
+> **Nota de disposición (2026-07-27):** una máscara nominal no puede congelarse
+> antes de contar con link budgets bidireccionales corregidos, patrón de antena
+> integrado y mediciones de EIRP, sensibilidad y PER. El valor de 20° queda
+> únicamente como punto de ensayo histórico.
 
 ---
 

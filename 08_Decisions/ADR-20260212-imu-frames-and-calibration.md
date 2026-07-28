@@ -1,5 +1,9 @@
 # ADR-20260212-imu-frames-and-calibration
 
+- **Fecha:** 2026-02-12
+- **Estado:** Accepted
+- **Alcance:** banco terrestre 433 MHz; no constituye evidencia de ADCS orbital
+
 ## Contexto
 La rotación visual del widget 3D no coincidía con el movimiento real del módulo GY-521 (MPU6050). El problema combinaba bias de gyro, posibles signos/ejes inconsistentes y falta de referencia visual de cero.
 

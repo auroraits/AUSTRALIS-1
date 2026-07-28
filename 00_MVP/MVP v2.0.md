@@ -1,5 +1,9 @@
 # MVP v2.0 — Consolidado integral
 
+**Estado:** Historical Snapshot — superseded por `MVP v2.2.md`
+**Nota:** no normativo. Los marcadores `filecite` son residuos de importación
+sin fuente resoluble y no constituyen referencias válidas.
+
 ## Estado
 - **Tipo:** consolidación documental sin cambios técnicos nuevos.
 - **Regla de precedencia aplicada:** en caso de contradicción, prevalecen las versiones más nuevas y anexos de `v1.4` sobre `v1.3`, `v1.1` y `v1`.

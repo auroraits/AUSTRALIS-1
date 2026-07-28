@@ -4,10 +4,14 @@
 - **Estado:** Accepted
 
 ## Contexto
-El MVP v2.1 y los documentos de dimensionamiento EPS mencionaban celdas Li-ion "en paralelo"
-(1S2P) en algunos párrafos, mientras que el esquemático KiCad en
-`03_Power/EPS_PCB/EPS_Bench2S_FlightLike` ya implementa BMS 2S (serie). Esta inconsistencia
-requería una decisión formal que bloquee la topología para todos los documentos de vuelo.
+El MVP v2.1 y los documentos de dimensionamiento EPS mencionaban celdas Li-ion
+"en paralelo" (1S2P) en algunos párrafos. La topología necesitaba una decisión
+de sistema independiente de la madurez del esquema.
+
+> **Corrección 2026-07-27:** el proyecto KiCad
+> `03_Power/EPS_PCB/EPS_Bench2S_FlightLike` es un placeholder no fabricable y
+> no implementa un BMS/cargador 2S funcional. Esta ADR decide una topología de
+> referencia; no acredita el diseño eléctrico existente.
 
 Actualización 2026-03-14: la incorporación del payload IA obliga a revisar la **capacidad objetivo**
 sin cambiar la decisión de topología. La topología bloqueada sigue siendo 2S; lo que cambia es
@@ -19,7 +23,8 @@ Adoptar **topología 2S** (dos celdas Li-ion en serie) como arquitectura de bate
 
 - Tensión nominal de bus: **7.4 V** (rango operativo 6.0–8.4 V)
 - Capacidad objetivo baseline actualizada: **~22 Wh nominal** con referencia **18650 de 3.0 Ah** en configuración **2S1P**
-- Ruta de mitigación abierta: **2S2P (~44 Wh)** si el power budget con payload IA y la corriente de descarga lo requieren tras medición real en Gate IA-1
+- Capacidad, formato de celda y configuración en paralelo: **TBD** después de
+  cerrar el presupuesto de energía, corriente, térmica y seguridad de celda.
 - Banco `EPS_Bench1_1S` mantiene 1S; la migración a 2S ocurre en la fase `EPS_Flight_Like`.
 
 ## Alternativas consideradas

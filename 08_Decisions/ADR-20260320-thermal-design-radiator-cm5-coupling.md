@@ -1,7 +1,13 @@
 # ADR-20260320-thermal-design-radiator-cm5-coupling
 
 - **Fecha:** 2026-03-20
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-thermal-power-baselines-reopened.md`
+
+> **Corrección de evidencia (2026-07-27):** el modelo fuente presenta errores
+> de balance radiativo/energético y no deriva sus nodos de una configuración
+> física cerrada. No queda aceptada una cara radiadora, recubrimiento,
+> conductancia, temperatura ni conclusión de “sin heater”.
 
 ---
 

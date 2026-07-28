@@ -1,7 +1,13 @@
 # ADR-20260320-orbit-attitude-solar-layout-baseline
 
 - **Fecha:** 2026-03-20
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-orbit-attitude-analysis-reopened.md`
+
+> **Corrección de evidencia (2026-07-27):** el barrido no impuso la condición
+> heliosincrónica al combinar altitud e inclinación, y el CSV archivado no
+> reproduce la selección de órbita/radiador declarada. La órbita, actitud,
+> layout solar, radiador y márgenes de esta ADR no son baseline vigente.
 
 ---
 

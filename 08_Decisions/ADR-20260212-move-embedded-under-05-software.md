@@ -1,5 +1,8 @@
 # ADR-20260212-move-embedded-under-05-software
 
+- **Fecha:** 2026-02-12
+- **Estado:** Accepted
+
 ## Contexto
 El repositorio organiza contenido por subsistema. El firmware embebido para pruebas de telemetría 433 MHz estaba en `embedded/` en raíz, fuera del dominio `05_Software/`, lo que dificultaba la trazabilidad entre software de vuelo/terreno, documentación y evolución de herramientas de ground segment.
 
@@ -24,6 +27,3 @@ Además, se incorpora `05_Software/GroundTelemetryDashboard/` como solución .NE
 - `docs/TELEMETRY_433_README.md`
 - `00_MVP/MVP v2.0.md`
 - `05_Software/AGENTS.md`
-
-## Estado
-Accepted

@@ -1,8 +1,11 @@
 # Documento Técnico — MVP v2.1 (Consolidado técnico)
 
+**Estado:** Historical Snapshot — superseded por `MVP v2.2.md`
+**Nota:** no normativo; cifras, modos y claims se conservan solo para trazabilidad.
+
 ## DIY Nanosat 1.5U — LoRa Uplink RX-Only + UHF Downlink + Science Pack + GNSS-A
 
-**Estado:** consolidado vigente para ingeniería de sistema (sin cambios técnicos nuevos respecto a v1.4 + anexos).  
+**Estado histórico original:** consolidado para ingeniería de sistema (sin cambios técnicos nuevos respecto a v1.4 + anexos).
 **Alcance:** integración coherente de `MVP v1`, `v1.1`, `v1.3`, `v1.4` y anexos de `Power Budget`, `EPS Sizing` e `ICD/Block Diagram`.
 
 ---

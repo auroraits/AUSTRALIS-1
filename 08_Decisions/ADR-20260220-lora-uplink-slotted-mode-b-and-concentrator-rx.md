@@ -1,7 +1,13 @@
 # ADR-20260220-lora-uplink-slotted-mode-b-and-concentrator-rx
 
 - **Fecha:** 2026-02-20
-- **Estado:** Accepted (preliminar — sujeto a validación en banco/campo)
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-rf-regulatory-command-security-baseline.md`
+
+> **Nota de disposición (2026-07-27):** los parámetros PHY, la canalización,
+> capacidad de slots, receptor concentrador y operación Tierra→espacio en
+> 915 MHz vuelven a estado `TBD`. Este documento se conserva como hipótesis
+> histórica para el plan de ensayos.
 
 ## Contexto
 El objetivo de misión del MVP requiere recibir en órbita paquetes LoRa 915 MHz originados en Buenos Aires usando nodos típicos (RFM95W/SX1276, +20 dBm) y bajar a tierra evidencia reproducible.

@@ -49,6 +49,12 @@ Ante cualquier contradiccion, prevalece el documento de mayor jerarquia:
 | `Superseded` | Reemplazado por version posterior; conservado para trazabilidad. |
 | `Historical Snapshot` | Instantanea historica; no normativa. |
 
+Los estados de verificacion son distintos:
+`Open | Planned | Implemented | Verified | Waived | Blocked by Integrator`.
+Solo `Verified`, respaldado por `ProcedureID`, configuracion y evidencia
+controlada, cierra un requisito. `Baseline` o `Accepted` no equivalen a
+`Verified`.
+
 ---
 
 ## 4) Cabecera minima recomendada para documentos clave
@@ -183,7 +189,15 @@ Parametros TBD (no cerrados aun):
 
 ## 12) Estado TTC UHF y OpenLST
 
-Baseline operativo vigente: **UHF 435 MHz FSK 1200 bps**
+Baseline de seguridad vigente:
+
+- banda/frecuencia coordinada, waveform, bitrate, potencia y hardware: `TBD`;
+- `435 MHz FSK 1200 bps` se conserva como candidato historico de desarrollo;
+- comandos y prompts requieren autenticacion, integridad y anti-replay;
+- SatNOGS permanece receive-only;
+- ninguna radiacion se autoriza por documentacion de arquitectura.
+
+Fuente: `08_Decisions/ADR-20260727-rf-regulatory-command-security-baseline.md`.
 
 OpenLST queda como:
 - Base de desarrollo / candidato derivado para TTC UHF
@@ -210,6 +224,23 @@ Contenido minimo:
 ```
 
 Si una decision ya existe parcialmente, actualizar la ADR existente en vez de duplicarla.
+
+Una ADR que reabre o invalida una decision debe marcar explicitamente las ADRs
+superseded y disponer los claims/evidencias anteriores. No se permite mantener
+dos ADRs `Accepted` que respondan de forma incompatible a la misma pregunta.
+
+### Evidencia y reproducibilidad
+
+- Toda cifra que soporte una decision debe citar artefacto, configuracion,
+  revision/commit, unidades y fila/resultado exacto.
+- Modelos, datasets, firmware y runtimes deben identificarse por version
+  inmutable o digest; un tag mutable no basta para cerrar verificacion.
+- Los resultados de un artefacto no se transfieren por analogia a otro modelo,
+  hardware, orbita o configuracion.
+- Un benchmark de seguridad requiere oraculo externo, split no contaminado,
+  casos adversariales y reglas criticas sin tolerancia.
+- La VCRM en `01_Mission/verification_cross_reference_matrix.csv` es la fuente
+  de estado de verificacion.
 
 ---
 

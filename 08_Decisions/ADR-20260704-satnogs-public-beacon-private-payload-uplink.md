@@ -1,7 +1,13 @@
 # ADR-20260704-satnogs-public-beacon-private-payload-uplink
 
 - **Fecha:** 2026-07-04
-- **Estado:** Accepted
+- **Estado:** Superseded
+- **Superseded por:** `ADR-20260727-rf-regulatory-command-security-baseline.md`
+
+> **Nota de disposición (2026-07-27):** se conserva la separación conceptual
+> beacon público/control terrestre, pero la denominación “privado” no demuestra
+> autenticidad ni confidencialidad. La ADR sucesora exige autenticación y
+> anti-replay y deja cualquier frecuencia/perfil sujeto a coordinación escrita.
 
 ---
 
