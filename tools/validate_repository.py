@@ -312,6 +312,7 @@ def main() -> int:
             f"missing={sorted(set(adr_files) - set(indexed_adrs))}; "
             f"extra={sorted(set(indexed_adrs) - set(adr_files))}"
         )
+    adr_states: dict[str, str] = {}
     for identifier, path in adr_files.items():
         header = "\n".join(
             path.read_text(encoding="utf-8-sig").splitlines()[:15]
@@ -322,14 +323,56 @@ def main() -> int:
         )
         if not state_match:
             errors.append(f"{identifier}: missing canonical Accepted/Superseded state")
-        elif indexed_adrs.get(identifier) != state_match.group(1):
-            errors.append(
-                f"{identifier}: index state {indexed_adrs.get(identifier)!r} "
-                f"!= header {state_match.group(1)!r}"
-            )
+        else:
+            adr_states[identifier] = state_match.group(1)
+            if indexed_adrs.get(identifier) != state_match.group(1):
+                errors.append(
+                    f"{identifier}: index state {indexed_adrs.get(identifier)!r} "
+                    f"!= header {state_match.group(1)!r}"
+                )
     for target in ADR_RE.findall(index_text):
         if target not in adr_files:
             errors.append(f"ADR index references nonexistent target {target}")
+
+    for path in controlled_files(".md"):
+        if path == ROOT / "08_Decisions/INDEX.md":
+            continue
+        text = path.read_text(encoding="utf-8-sig")
+        lines = text.splitlines()
+        header = "\n".join(lines[:20])
+        if (
+            adr_states.get(path.stem) == "Superseded"
+            or re.search(
+                r"(?:Estado|Status).*?(?:Historical|Superseded)",
+                header,
+                re.I,
+            )
+        ):
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            for target in set(ADR_RE.findall(line)):
+                if adr_states.get(target) != "Superseded":
+                    continue
+                context = " ".join(
+                    lines[max(0, line_number - 2) : line_number + 1]
+                )
+                explicitly_supersedes = re.search(
+                    rf"\*\*Supersede(?:d por)?:\*\*[^\n]*{re.escape(target)}",
+                    header,
+                    re.I,
+                )
+                if (
+                    not explicitly_supersedes
+                    and not re.search(
+                        r"supersed|hist[oó]ric|antecedente",
+                        context,
+                        re.I,
+                    )
+                ):
+                    errors.append(
+                        f"{path.relative_to(ROOT)}:{line_number}: active document "
+                        f"references {target} without a historical/superseded label"
+                    )
 
     if errors:
         print("FAIL - repository structural validation")
