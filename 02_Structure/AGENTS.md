@@ -2,7 +2,12 @@
 
 > **Hereda:** todas las reglas del `AGENTS.md` raíz (`/AGENTS.md`). Este archivo solo agrega reglas locales del subsistema.
 >
-> **Referencia mecánica:** CubeSat Design Specification Rev 14.1 (Cal Poly). Volumen nominal 1.5U = 100×100×150 mm. Orbita target: 500–600 km LEO.
+> **Referencia mecánica:** CubeSat Design Specification Rev 14.1 (Cal Poly).
+> La envolvente de referencia 1.5U usa longitud exterior `170.2 ± 0.1 mm`;
+> dimensiones transversales, rieles, tolerancias, *keep-outs* y accesos deben
+> tomarse del dibujo completo de Appendix B y confirmarse contra el ICD del
+> integrador. La aproximación informal `100×100×150 mm` no es válida para
+> diseño, CAD ni análisis.
 
 ## Propósito
 Documenta:
