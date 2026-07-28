@@ -55,8 +55,8 @@ Este banco **no** debe describirse como si la cadena 1S existente alimentara al 
 | Capa | Nombre | Proposito |
 |---|---|---|
 | Bench | `EPS_Bench1_1S` | Validacion funcional COTS 1S. Incluye FPM bench y rail IA bench-only para Gate IA-2. |
-| Flight-Like | `EPS_Flight_Like_2S_MPPT` | PCB custom 2S + MPPT con rail IA integrado TBD. |
-| Flight | `EPS_Flight_2S_MPPT` | Hardware de vuelo calificado. |
+| Flight-Like | `EPS_Flight_Like_2S_MPPT` | Futuro esquema/PCB custom 2S + MPPT; el KiCad actual es un marcador `NON-FABRICABLE`. |
+| Flight | `EPS_Flight_2S_MPPT` | Hardware final TBD, sujeto a calificación. |
 
 ### 2.2 Diagrama de bloques funcional
 
@@ -435,7 +435,8 @@ EPS_Bench1_1S
         |
         v
 EPS_Flight_Like_2S_MPPT
-  - PCB custom 2S + MPPT
+  - Futuro esquema/PCB custom 2S + MPPT
+  - KiCad actual: marcador NON-FABRICABLE
   - Integracion de sistema
   - Rail IA integrado TBD
         |

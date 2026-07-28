@@ -1,230 +1,223 @@
-# EPS Sizing — AUSTRALIS-1 / DIY Nanosat MVP (Paneles + Batería + MPPT)
+# EPS Sizing preliminar — AUSTRALIS-1
 
-**Revisión:** 2026-03-14 (incluye escenario LoRa concentrator SX1303 por especificación)
-**Estado:** Active
-**Trazabilidad:** `00_MVP/MVP v2.2.md` §8, `08_Decisions/ADR-20260218-battery-topology-2s-flight.md`
+**Revisión:** 2026-07-27
+**Estado:** Preliminary / NOT RELEASED
+**Trazabilidad:** `03_Power/Power Budget.md`,
+`02_Structure/STRUCTURE_BASELINE_PRELIMINARY.md`; topología 2S sujeta a la ADR
+vigente y a su revisión correctiva
 
-> Nota histórica: este documento fue originalmente "MVP v1.4 — A2". El número de versión queda como referencia histórica; el contenido es vigente como guía de dimensionamiento.
+## 1. Alcance y estado
 
-## Separación de capas EPS
+Este documento define el método de dimensionamiento para el EPS
+(Electrical Power System) Flight-Like/Flight. No selecciona celda, panel,
+MPPT, regulador, BMS ni PCB.
 
-- Este documento de sizing aplica a las capas **Flight-Like** (`EPS_Flight_Like_2S_MPPT`) y **Flight** (`EPS_Flight_2S_MPPT`).
-- El banco `EPS_Bench1_1S` (1S, sin MPPT real) sirve solo para validación funcional de firmware y power-gating. No es representativo del sizing de vuelo.
-- La arquitectura de vuelo es **2S + MPPT** (bloqueada por ADR).
+El proyecto KiCad en `EPS_PCB/EPS_Bench2S_FlightLike/` es un marcador
+**NON-FABRICABLE**. No implementa ninguna de las funciones enumeradas aquí.
 
-> Nota de modo operativo: este documento referenciaba "SCIENCE MODE" como modo de cálculo. Esa nomenclatura queda supersedada. Los cálculos de energía asociados a "SCI" corresponden a la actividad científica dentro de `MISSION_MODE = NOMINAL`. Las columnas de cálculo se mantienen por compatibilidad numérica.
+El banco `EPS_Bench1_1S` sigue siendo Bench: sirve para firmware,
+power-gating y metrología funcional con alimentación externa del CM5; no
+valida el bus 2S ni el EPS de vuelo.
 
-## 0) Inputs fijos (del Power Budget)
+## 2. Entradas que ya no se consideran válidas
 
-### 0.1 Perfil orbital de cálculo
-- Periodo: **90 min**.
-- Sol / eclipse: **60 / 30 min**.
+- caja 1.5U de 100×100×150 mm;
+- órbita fija 90/60/30 min;
+- consumo total de 0.381/0.451/0.516 Wh/orbita;
+- margen de generación 3.4–3.6×;
+- target `≥1.2 W` o `2–3 W BOL` como diseño cerrado;
+- batería 2S1P de ~22 Wh como selección;
+- 2S2P de ~44 Wh como mitigación demostrada;
+- siete celdas / una pieza en una cara cuadrada como topología realizable;
+- un único MPPT común como solución ya aceptable.
 
-### 0.2 Casos de operación a cubrir
-- Caso TÍPICO (recomendado): SAFE 80 min + DOWNLINK 10 min → **~0.381 Wh/orbita**.
-- Caso SCI (sol) + SAFE (eclipse), LoRa RX single-channel: **~0.451 Wh/orbita**.
-- Caso SCI (sol) + SAFE (eclipse), LoRa RX concentrator SX1303 HAT spec: **~0.516 Wh/orbita**.
+Los valores históricos pueden consultarse en Git, pero no son entradas de
+diseño.
 
-### 0.3 Objetivos de diseño de potencia
-- Potencia disponible en sol objetivo para el escenario sin IA activa: **≥ 1.2 W netos**.
-- Target solar con payload IA activo: **TBD** hasta Gate IA-1.
+## 3. Geometría
 
-## 1) Dimensionamiento de batería (Wh)
+La referencia conceptual 1.5U es:
 
-### 1.1 Requisito mínimo por eclipse
-En eclipse (30 min) no hay generación solar.
+- X/Y nominales: 100 mm;
+- Z: `170.2 ± 0.1 mm`;
+- cara lateral ideal: 0.01702 m²;
+- cara extrema ideal: 0.01000 m².
 
-Si el satélite cae a SAFE en eclipse:
-- P_SAFE_avg ≈ **0.143 W**
-- E_eclipse_SAFE = 0.143 W × 0.5 h = **0.0715 Wh**
+El área útil debe derivarse del CAD e incluir rieles, *keep-outs*, antenas,
+sensores, aperturas, tolerancias, adhesivos y rutas térmicas. No se permite
+usar toda la caja ideal como área solar o radiativa.
 
-SCI solo se ejecuta en sol:
-- P_SCI_avg ≈ **0.379 W**
-- P_SCI_avg con concentrator SX1303 HAT spec ≈ **0.444 W** (99 mA @ 5 V con GNSS ON, duty 15%, OFF real fuera de ventana)
+## 4. Dimensionamiento de batería
 
-Regla bloqueada: en eclipse, por defecto **SAFE**.
+La arquitectura de bus 2S fija dos celdas en serie como mínimo eléctrico; no
+fija paralelo, capacidad, química exacta ni artículo de vuelo.
 
-### 1.2 Requisito por picos — CONF-01 abierto
+### 4.1 Cálculo requerido
 
-> **⚠ CONF-01 abierto:** el pico real de consumo TX UHF no está medido. Ver `architecture.md` §11 y `03_Power/Power Budget.md` §4.
+Para cada caso:
 
-La batería debe sostener:
-- UHF TX pico: **~1.5 W** (estimación preliminar con η≈33%; no medido con hardware real).
-- OBC + márgenes de escritura microSD simultánea.
-- LoRa concentrator RX, si se adopta esa clase: **~0.495 W en RX** (SX1303 HAT spec; no medido en integración propia).
+`E_required = Σ(P_load,i × t_i) / η_path,i`
 
-Target pico de diseño:
-- **~3 W** (objetivo de diseño preliminar, no límite cerrado).
-- **Peor caso plausible:** si el PA real tiene menor eficiencia, el consumo DC puede superar ~3 W. Dimensionar con margen explícito hasta tener medición real.
-- **Con concentrator RX:** exigir rail switchable, OFF real fuera de ventana y no simultaneidad inicial con UHF TX/microSD hasta validar estabilidad de rails.
-- **TX LoRa desde órbita:** prohibido en MVP; no dimensionar operación nominal con TX LoRa del COTS concentrator.
-- **Con payload IA activo:** el objetivo arquitectónico de pico transitorio total sube a **6–7 W** (hipótesis de análisis; no medido).
+La capacidad utilizable debe considerar:
 
-### 1.3 Margen de batería
-- No descargar más de 30–40% por órbita en nominal.
-- Considerar degradación y cold-soak.
+`E_usable_EOL = E_nameplate × f_temperature × f_age × f_rate × DoD_allowed`
 
-### 1.4 Target de capacidad
-- 4 eclipses SAFE consecutivos:
-  - E_4eclipses = 4 × 0.0715 = **0.286 Wh**
-- Con margen ×3:
-  - **Batería target ≥ 0.86 Wh**
+Los factores deben provenir del datasheet/ensayo de la celda exacta, con
+incertidumbre. No se empleará un multiplicador genérico `×3`.
 
-Recomendación de diseño para 1.5U:
-- **~22 Wh nominal** con referencia **2S1P, 18650 de 3.0 Ah**.
-- **2S2P (~44 Wh)** queda abierta como ruta de mitigación si el power budget con payload IA y la corriente de descarga lo requieren tras medición real en Gate IA-1.
+Casos mínimos:
 
-> En práctica: 2× celdas Li-ion en **serie** (2S, topología de vuelo). Ver ADR de topología de batería.
+- eclipse de diseño y recuperación desde SAFE;
+- eclipses consecutivos durante contingencia;
+- downlink en peor estado permitido;
+- detumbling/ADCS;
+- inferencia Gemma 4 e2b en CM5, solo si la política la permite;
+- arranque en frío, inrush y brownout;
+- pérdida/degradación de un string solar;
+- EOL y temperatura hot/cold.
 
-## 2) Dimensionamiento de paneles solares (W)
+### 4.2 Seguridad del pack
 
-### 2.1 Fórmula de potencia neta disponible
-\[ P_{net} = P_{EOL} \times \eta_{EPS} \]
+El diseño deberá incluir y verificar:
 
-Donde:
-- **P_EOL**: potencia de paneles al End Of Life.
-- **η_EPS**: eficiencia neta (MPPT + DC/DC + cableado + pérdidas), rango 0.75–0.85.
+- OVP/UVP/OCP y protección secundaria independiente;
+- fusible y limitación de corriente/latch-up;
+- FETs de desconexión con estado seguro;
+- balanceo y medición individual de celdas;
+- sensores térmicos por ubicación justificada;
+- límites de carga/descarga/supervivencia del datasheet;
+- inhibición autónoma de carga fuera de temperatura y tensión permitidas;
+- estrategia ante sensor inválido;
+- aislamiento de fallas, venting y contención;
+- recuperación segura después de reset/pérdida de energía.
 
-### 2.2 Restricción geométrica (1.5U)
-- Cuerpo: **10×10×15 cm**.
-- Caras disponibles: 4 laterales + 2 bases.
+Un IC de protección aislado no constituye un BMS completo. La selección se
+cerrará mediante FMEA, esquema revisado, BOM y V&V.
 
-### 2.3 Modelo simple de potencia orbital
-\[ E_{gen} = P_{net,sol} \times t_{sol} \]
+## 5. Dimensionamiento solar
 
-Con t_sol = 1 h.
+### 5.1 Condición eléctrica
 
-Para ser energy-positive:
-\[ P_{net,sol} \ge E_{load/orb} / 1h \]
+Para un cargador buck hacia un pack 2S:
 
-- Caso típico: E_load ~0.381 Wh → **P_net,sol ≥ 0.381 W**.
-- Caso SCI+SAFE single-channel: E_load ~0.451 Wh → **P_net,sol ≥ 0.451 W**.
-- Caso SCI+SAFE concentrator SX1303 spec: E_load ~0.516 Wh → **P_net,sol ≥ 0.516 W**.
+`Vmp_string_hot_EOL > Vpack_charge_max + headroom_converter`
 
-Target bloqueado para escenario sin IA activa: **P_net,sol ≥ 1.2 W**.
+Si esto no puede cumplirse en todas las condiciones, debe seleccionarse otra
+longitud de string o una topología buck-boost/boost demostrada.
 
-> Con payload IA activo, el dimensionamiento solar actual **no está cerrado**. El target solar se declara **TBD** hasta medir consumo real del CM5 y definir el duty-cycle orbital del payload IA.
+Dos half-cells IBC crudas de aproximadamente 0.5–0.6 V cada una no pueden
+cargar directamente un pack 2S mediante buck. Una única pieza AnySolar con
+`Vmp≈5–6 V` tampoco alcanza por sí sola para un pack con máximo cercano a
+8.4 V mediante buck. Estos son filtros de arquitectura, no selección de
+producto.
 
-### 2.4 Heurística de paneles
-Si η_EPS = 0.8:
-\[ P_{EOL,sol} \ge 1.2/0.8 = 1.5 W \]
+### 5.2 Topología por cara
 
-Recomendación MVP sin IA activa:
-- Diseñar para **2–3 W BOL** efectivos en sol.
+La topología permanece `TBD`. Debe comparar:
 
-> Mantener abierta la opción de **deployables** o celdas más eficientes si el cierre del power budget con IA lo requiere.
+- MPPT independiente por cara/string;
+- MPPT multi-input con canales realmente independientes;
+- OR-ing/bypass y tolerancia a string abierto/cortocircuitado;
+- strings entre caras, penalizados por iluminación desigual;
+- body-mounted frente a deployables.
 
-## 3) MPPT vs PWM (decisión de arquitectura EPS)
+No se conectarán caras ortogonales en serie sin demostrar el efecto de
+sombreado/mismatch. Un MPPT común no sigue simultáneamente máximos distintos
+de caras ortogonales.
 
-### 3.1 Requisito mínimo
-- Control de carga seguro para Li-ion (CC/CV), protección y medición.
+### 5.3 Ledger BOL/EOL
 
-### 3.2 Recomendación
-- MPPT recomendado para 1.5U con downlink UHF y margen energético.
-- CN3065 de banco se mantiene como cargador lineal de validación (no MPPT de vuelo).
+Por cada candidata se registrará:
 
-## 4) Regulación de potencia y rails
+- revisión de datasheet, lote y dimensiones;
+- curva I-V BOL hot/cold y después de irradiación/EOL;
+- `Voc`, `Vmp`, `Isc`, `Imp` con tolerancias;
+- coverglass, adhesivo, interconnect y diodos;
+- mismatch, sombras, pointing y contaminación;
+- eficiencia/arranque MPPT por condición;
+- pérdida de una cara/string;
+- área y masa derivadas del CAD;
+- evidencia de ensayo de cupón/panel.
 
-### 4.1 Topología recomendada
-- VBAT (Li-ion) → buck a 3V3_OBC always-on.
-- VBAT → buck a 3V3_RF (switchable).
-- VBAT → buck/boost a 5V_AUX (switchable) para GNSS.
-- VBAT → rail AI dedicado power-gated (TBD en detalle de diseño).
-- Si el RX orbital usa un concentrator COTS con rail 5 V, tratarlo como carga switchable del dominio RF/AUX y verificar OFF real; no extrapolar el consumo de sleep COTS como consumo aceptable de vuelo.
+La potencia simulada sin esos factores es un upper bound conceptual.
 
-### 4.2 Reglas de integridad
-- Separar 3V3_RF de 3V3_SCI.
-- Soft-start en rails switchables.
-- Medición de corriente por rail.
+## 6. Rails y distribución
 
-## 5) Sizing por corriente pico
+El esquema futuro debe definir:
 
-### 5.1 Peor caso permitido
-Durante DOWNLINK:
-- UHF TX ON
-- UHF RX ON
-- OBC ON
-- RF rail ON
-- Science OFF
+| Dominio | Estado seguro | Funciones mínimas |
+|---|---|---|
+| OBC always-on | ON después de autorización de despliegue | UVLO, OCP, PGOOD, watchdog |
+| RF | OFF | high-side switch, inrush, FAULT, aislamiento |
+| Science | OFF | high-side switch, OCP, telemetría |
+| IA/CM5 | OFF | switch independiente, hard kill, inrush, current limit |
+| ADCS | según CONOPS | dominio separado o justificación |
+| heaters | OFF | control independiente y límites hardware |
 
-Potencia aproximada:
-- DOWNLINK avg ~1.14 W
-- UHF TX pico: 1.5 W
+Antes de la eyección, todas las funciones powered deben permanecer apagadas
+según el CDS/ICD aplicable. El diseño debe incluir RBF, deployment switch e
+inhibiciones de RF/desplegables; cantidades e interfaces finales se confirman
+con el integrador, pero no pueden omitirse del esquema y la BOM.
 
-### 5.2 Target de capacidad de entrega
-- Dimensionar rail RF y batería para soportar **~3 W** pico como objetivo preliminar de diseño sin IA activa.
-- **CONF-01 abierto:** hasta medir el consumo DC del PA real y el consumo del payload IA, dimensionar con margen conservador. No declarar este sizing como cerrado.
+Cada rail requiere min/nom/max, eficiencia, estabilidad, compensación, layout,
+retorno, caída, inrush, corriente de falla, PGOOD/FAULT, telemetría y
+comportamiento ante reset.
 
-## 6) Energy Balance recomendado
+## 7. Modelo de estados EPS
 
-### 6.1 Caso típico con 1.2 W net en sol
-- Energía generada: 1.2 W × 1 h = **1.2 Wh**
-- Energía consumida: **~0.381 Wh**
-- Margen por órbita: **~+0.819 Wh**
+`EPS_STATE = CRIT | LOW | NOMINAL | HIGH` no está cerrado hasta definir:
 
-### 6.2 Caso SCI+SAFE con 1.2 W net
-- Energía consumida single-channel: **~0.451 Wh**
-- Margen por órbita single-channel: **~+0.749 Wh**
-- Energía consumida concentrator SX1303 spec: **~0.516 Wh**
-- Margen por órbita concentrator SX1303 spec: **~+0.684 Wh**
+- SOC/Vbat/temperatura y sensores de entrada;
+- umbrales con tolerancias;
+- histéresis, dwell/debounce y prioridad de fallas;
+- boot/unknown y sensor inválido;
+- transiciones y acciones locales;
+- carga permitida/prohibida por temperatura;
+- recuperación y logging.
 
-## 7) Reglas de operación energética
-1. Eclipse = SAFE por defecto.
-2. DOWNLINK solo si VBAT y SOC lo permiten.
-3. microSD: preferir en sol; en eclipse solo logs críticos.
-4. Payload IA solo en fase de sol, `MISSION_MODE = NOMINAL`, `EPS_STATE >= NOMINAL`.
-5. LoRa RX concentrator, si se usa, opera solo en ventanas previstas, con OFF real fuera de ventana.
-6. TX LoRa desde órbita permanece prohibido en el MVP.
+El power-gating no puede depender de una recomendación IA. La autoridad
+determinística del OBC/EPS prevalece.
 
-## 8) Checklist de verificación en banco
+## 8. Plan de V&V
 
-### 8.1 Medidas mínimas
-- Corriente real UHF TX (500 mW RF objetivo).
-- Corriente real LoRa RX single-channel y/o concentrator candidato.
-- Corriente real de sleep/off del concentrator candidate y fuga del rail con power-gating.
-- Consumo OBC en sleep/run.
-- Eficiencia DC/DC bajo carga real.
-- Consumo CM5 en idle / activo / inferencia.
+| ID | Nivel | Verificación | Criterio |
+|---|---|---|---|
+| EPS-VV-01 | análisis | power ledger completo | cero carga obligatoria TBD |
+| EPS-VV-02 | esquema | ERC + revisión independiente | cero error/exclusión injustificada |
+| EPS-VV-03 | layout | DRC + revisión térmica/PI | reglas trazadas a fabricante/corriente |
+| EPS-VV-04 | batería | protecciones y charge-inhibit | opera en cada límite y falla segura |
+| EPS-VV-05 | convertidores | matriz V/I/T | eficiencia/estabilidad dentro de criterio |
+| EPS-VV-06 | solar | curvas I-V y MPPT | arranque/seguimiento hot/cold/BOL/EOL |
+| EPS-VV-07 | rails | inrush/OCP/brownout | sin reset de dominios críticos |
+| EPS-VV-08 | integración | peor caso simultáneo | buses estables y fallas contenidas |
+| EPS-VV-09 | ambiente | TVAC/vibración/EMC | funcional pre/durante/post según plan |
+| EPS-VV-10 | campaña | energy balance | margen positivo con incertidumbre EOL |
 
-### 8.2 Prueba de robustez EPS
-- Simular brownouts + resets.
-- Activar TX en el peor punto de VBAT.
-- Verificar no simultaneidad inicial: UHF TX vs LoRa concentrator RX vs microSD write.
-- Verificar estabilidad de supervisor.
-- Verificar power-gating limpio del rail AI.
+## 9. Gates de liberación
 
-## 9) Targets finales
+### Gate de esquema
 
-### Batería
-- Capacidad nominal objetivo de referencia: **~22 Wh**.
-- Configuración base: **2S1P con 18650 de 3.0 Ah**.
-- Ruta de mitigación: **2S2P (~44 Wh)** si el power budget con IA lo exige.
-- Topología de batería de vuelo: **2S** (decisión bloqueada).
+- celda, BMS, cargador, rails e interfaces seleccionados;
+- FMEA y requisitos trazables;
+- ERC y revisión independiente completos.
 
-### Solar
-- P_net en sol objetivo sin IA activa: **≥1.2 W**.
-- P_EOL en sol objetivo sin IA activa: **≥1.5–2.0 W**.
-- Target solar con payload IA activo: **TBD**.
+### Gate de PCB
 
-### EPS
-- MPPT recomendado.
-- Rails medidos + switchables.
-- Pico máximo soportable: **~3 W** sin IA activa; cierre con IA pendiente por `CONF-01` y Gate IA-1.
+- CAD/stack mecánico controlado;
+- BOM/footprints/datasheets y reglas de fabricación;
+- DRC, power integrity y análisis térmico completos.
 
----
+### Gate Flight-Like
 
-**FIN — EPS Sizing A2 (actualizado 2026-03-14)**
+- placa fabricada e inspeccionada;
+- bring-up con fuente limitada y simulador de batería/panel;
+- todos los EPS-VV aplicables ejecutados con raw data;
+- ninguna evidencia Bench 1S usada como sustituto.
 
-## 10) Framework permanente de power-gating y health
-- Diseño EPS preparado para control selectivo `EN_x` por subsistema.
-- Señales mínimas para FaultManager: `PGOOD_x`, `FAULT_x`, `HB_x` y contadores de fault/reset.
-- Requisito de aislamiento: cualquier subsistema no-crítico debe poder apagarse sin comprometer SAFE.
+### Gate Flight
 
-<!-- FEATURE:PHOTO_DEMO START -->
+- configuración congelada;
+- derating/radiación/ambiente/EMC cerrados;
+- aceptación del integrador y V&V de artículo controlado.
 
-## 11) [PHOTO_DEMO] Carga opcional encapsulada
-- [PHOTO_DEMO] no modifica sizing base del MVP 2.2; usa cuota energética best-effort.
-- Presupuesto de potencia por ventana: **TBD** con límite configurable y lockout por fault.
-- Remoción del feature no requiere cambio en topología base EPS 2S.
-
-<!-- FEATURE:PHOTO_DEMO END -->
+Hasta entonces, EPS permanece `Preliminary / NOT RELEASED`.
