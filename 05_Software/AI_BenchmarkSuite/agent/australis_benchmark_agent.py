@@ -299,8 +299,9 @@ class InferenceProxy:
         if not endpoint:
             return self._error("endpoint_missing", started, "Inference endpoint is required.")
 
-        body = self._build_body(runtime, request)
-        url = self._build_url(runtime, endpoint)
+        effective_runtime = self._effective_runtime(runtime, endpoint)
+        body = self._build_body(effective_runtime, request, endpoint)
+        url = self._build_url(effective_runtime, endpoint)
         timeout_s = float(request.get("timeout_s") or 120.0)
         headers = {"Content-Type": "application/json"}
         bearer_value = request.get("api_key")
@@ -333,11 +334,12 @@ class InferenceProxy:
         except Exception:
             parsed = {"raw_text": raw_text}
 
-        normalized = self._normalize(runtime, parsed, latency_ms)
+        normalized = self._normalize(effective_runtime, parsed, latency_ms)
         return {
             "ok": True,
             "timestamp_utc": utc_now(),
             "runtime": runtime,
+            "effective_runtime": effective_runtime,
             "endpoint": url,
             "http_status": status,
             "latency_ms": latency_ms,
@@ -363,7 +365,12 @@ class InferenceProxy:
             return endpoint + "/v1/chat/completions"
         return endpoint
 
-    def _build_body(self, runtime: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    def _effective_runtime(self, runtime: str, endpoint: str) -> str:
+        if runtime == "openai-compatible" and self._is_ollama_openai_endpoint(endpoint):
+            return "ollama"
+        return runtime
+
+    def _build_body(self, runtime: str, request: Dict[str, Any], endpoint: str = "") -> Dict[str, Any]:
         prompt = str(request.get("prompt") or "")
         model = str(request.get("model") or "")
         params = request.get("params") or {}
@@ -419,6 +426,8 @@ class InferenceProxy:
             body["seed"] = seed
         if json_mode:
             body["response_format"] = {"type": "json_object"}
+        if self._is_ollama_openai_endpoint(endpoint):
+            body["think"] = thinking
         return body
 
     def _normalize(self, runtime: str, parsed: Any, latency_ms: float) -> Dict[str, Any]:
@@ -466,7 +475,14 @@ class InferenceProxy:
                 choices = parsed.get("choices") or []
                 if choices:
                     first = choices[0]
-                    text = str((first.get("message") or {}).get("content") or first.get("text") or "")
+                    message = first.get("message") or {}
+                    text = self._content_text(message.get("content") or first.get("text") or "")
+                    reasoning = message.get("reasoning") or message.get("reasoning_content")
+                    if reasoning and not text.strip():
+                        metrics["reasoning_only_response"] = True
+                        metrics["reasoning_chars"] = len(str(reasoning))
+                    if first.get("finish_reason"):
+                        metrics["finish_reason"] = first.get("finish_reason")
                 usage = parsed.get("usage") or {}
                 metrics.update(
                     {
@@ -480,6 +496,24 @@ class InferenceProxy:
             seconds = max(latency_ms / 1000.0, 0.001)
             metrics["tokens_per_s"] = round(float(metrics["generated_tokens"]) / seconds, 3)
         return {"text": text, "metrics": metrics}
+
+    def _is_ollama_openai_endpoint(self, endpoint: str) -> bool:
+        endpoint_lc = endpoint.lower()
+        return ":11434" in endpoint_lc or "ollama" in endpoint_lc
+
+    def _content_text(self, content: Any) -> str:
+        if isinstance(content, list):
+            parts = []
+            for item in content:
+                if isinstance(item, dict):
+                    if item.get("type") == "text" and item.get("text") is not None:
+                        parts.append(str(item.get("text")))
+                    elif item.get("content") is not None:
+                        parts.append(str(item.get("content")))
+                elif item is not None:
+                    parts.append(str(item))
+            return "".join(parts)
+        return str(content or "")
 
     def _error(self, code: str, started: float, message: str, http_status: Optional[int] = None) -> Dict[str, Any]:
         return {

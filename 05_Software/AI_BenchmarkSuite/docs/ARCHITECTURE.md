@@ -180,7 +180,11 @@ Normalized metrics:
 - raw response.
 
 The proxy supports common response shapes from Ollama, llama.cpp completion,
-and OpenAI-compatible chat completions.
+and OpenAI-compatible chat completions. For scored runs against Ollama on
+`:11434`, the proxy uses Ollama native `/api/generate` as `effective_runtime`
+even when the node is registered as `openai-compatible`; this preserves
+`think:false` and prevents reasoning-only responses from being treated as model
+answers.
 
 ## Scoring Model
 

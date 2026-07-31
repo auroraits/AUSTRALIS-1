@@ -119,6 +119,11 @@ Open the console, create a node explicitly, and set its agent endpoint to
 `http://127.0.0.1:8765`. The browser machine and node happen to be the same in
 this mode; the console does not infer that relationship.
 
+Use `runtime: ollama` for scored Ollama runs. If a node is accidentally
+registered as `openai-compatible` while pointing at an Ollama `:11434` endpoint,
+the agent will route the request through Ollama native `/api/generate` and
+record `effective_runtime: ollama`.
+
 ## Minimum Distributed Smoke
 
 1. Start the central dashboard-only host.

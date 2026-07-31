@@ -168,6 +168,11 @@ The node agent proxies:
 - llama.cpp/OpenAI-compatible `/v1/chat/completions`;
 - generic OpenAI-compatible chat completions.
 
+For scored Ollama runs, prefer `runtime: ollama`. If an Ollama endpoint on
+`:11434` is registered as `openai-compatible`, the node agent uses Ollama
+native `/api/generate` as the effective runtime so `think:false` and JSON mode
+are honored. The raw proxy response records `effective_runtime`.
+
 The CM5 operational baseline remains llama.cpp. Ollama is acceptable for
 pre-staging and model preparation, not as the CM5 staging runtime baseline.
 

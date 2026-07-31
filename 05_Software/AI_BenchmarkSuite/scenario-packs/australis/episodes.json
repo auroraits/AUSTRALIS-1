@@ -218,6 +218,11 @@
       "expected_tools": [
         "command.acknowledge"
       ],
+      "expected_tool_alternatives": {
+        "command.acknowledge": [
+          "command.reject"
+        ]
+      },
       "preferred_recommendations": [
         "reject"
       ],
