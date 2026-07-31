@@ -1,20 +1,243 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://australis.local/schemas/run-result.schema.json",
-  "title": "AUSTRALIS AI benchmark run result",
+  "$id": "https://australis.example/schemas/run-result.schema.json",
+  "title": "AUSTRALIS AI benchmark run result v2",
   "type": "object",
-  "required": ["run_id", "episode_id", "node_name", "model", "runtime", "metrics", "scoring"],
+  "required": [
+    "run_id",
+    "episode_id",
+    "node_name",
+    "model",
+    "runtime",
+    "status",
+    "metrics",
+    "scoring",
+    "events"
+  ],
   "properties": {
-    "run_id": {"type": "string"},
-    "episode_id": {"type": "string"},
-    "node_name": {"type": "string"},
-    "model": {"type": "string"},
-    "runtime": {"type": "string"},
-    "metrics": {"type": "object"},
-    "scoring": {"type": "object"},
-    "raw_response": {"type": "object"},
-    "prompt": {"type": "string"},
-    "snapshot": {"type": "object"}
+    "schema_version": {
+      "const": "australis.benchmark.run.v2"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "episode_id": {
+      "type": "string"
+    },
+    "node_id": {
+      "type": "string"
+    },
+    "node_name": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "runtime": {
+      "type": "string"
+    },
+    "status": {
+      "enum": ["queued", "running", "completed", "failed", "timeout", "aborted"]
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "queued_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_utc": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "completed_utc": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "scoring": {
+      "type": "object",
+      "required": [
+        "pass",
+        "score",
+        "hard_fails",
+        "soft_warnings",
+        "rule_explanations"
+      ],
+      "properties": {
+        "pass": {
+          "type": "boolean"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "hard_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hard_fail_details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/scoringDetail"
+          }
+        },
+        "soft_warnings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/scoringDetail"
+          }
+        },
+        "rule_explanations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/scoringDetail"
+          }
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_tools_found": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_tools_missing": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prohibited_tools_detected": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/runEvent"
+      }
+    },
+    "telemetry_summary": {
+      "type": "object"
+    },
+    "telemetry_interval": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "raw_response": {},
+    "raw_text": {
+      "type": "string"
+    },
+    "parsed_output": {
+      "type": ["object", "null"]
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "snapshot": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "scoringDetail": {
+      "type": "object",
+      "required": ["id", "message"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "rule": {
+          "type": ["string", "null"]
+        },
+        "outcome": {
+          "enum": ["pass", "fail", "warn"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "runEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "timestamp_utc",
+        "run_id",
+        "node_name",
+        "episode_id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "queued",
+            "inference_start",
+            "request_sent",
+            "first_byte_or_first_token",
+            "response_received",
+            "generation_complete",
+            "scoring_complete",
+            "timeout",
+            "error",
+            "abort"
+          ]
+        },
+        "timestamp_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "node_name": {
+          "type": "string"
+        },
+        "episode_id": {
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "elapsed_ms": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "details": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

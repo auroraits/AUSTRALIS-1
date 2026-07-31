@@ -36,9 +36,19 @@ except Exception:  # pragma: no cover - optional dependency
     psutil = None  # type: ignore
 
 
-AGENT_VERSION = "0.1.0-mvp"
+AGENT_VERSION = "0.2.0"
 DEFAULT_PORT = 8765
-SENSITIVE_KEYS = ("token", "secret", "password", "authorization", "api_key", "apikey")
+SENSITIVE_KEYS = (
+    "secret",
+    "password",
+    "authorization",
+    "api_key",
+    "apikey",
+    "access_token",
+    "auth_token",
+    "agent_token",
+    "bearer_token",
+)
 
 
 def utc_now() -> str:
@@ -499,11 +509,20 @@ def _sum_ints(*values: Any) -> Optional[int]:
 
 def build_export_bundle(payload: Dict[str, Any]) -> bytes:
     manifest = sanitize(payload.get("manifest") or {})
-    results = payload.get("results") or []
-    telemetry = payload.get("telemetry") or []
-    prompts = payload.get("prompts") or []
-    responses = payload.get("responses") or []
-    scoring = payload.get("scoring") or {}
+    results = sanitize(payload.get("results") or [])
+    telemetry = sanitize(payload.get("telemetry") or [])
+    prompts = sanitize(payload.get("prompts") or [])
+    responses = sanitize(payload.get("responses") or [])
+    scoring = sanitize(payload.get("scoring") or {})
+    events = sanitize(
+        payload.get("events")
+        or [
+            event
+            for result in results
+            if isinstance(result, dict)
+            for event in (result.get("events") or [])
+        ]
+    )
     config = sanitize(payload.get("config") or {})
     report_md = payload.get("report_markdown") or default_report_markdown(manifest, results)
 
@@ -513,6 +532,7 @@ def build_export_bundle(payload: Dict[str, Any]) -> bytes:
         zf.writestr("results.jsonl", jsonl(results))
         zf.writestr("results.csv", results_csv(results))
         zf.writestr("telemetry.jsonl", jsonl(telemetry))
+        zf.writestr("events.jsonl", jsonl(events))
         zf.writestr("scoring.json", json_bytes(scoring))
         zf.writestr("config.sanitized.json", json_bytes(config))
         zf.writestr("report.md", str(report_md))
@@ -537,16 +557,19 @@ def results_csv(results: Iterable[Dict[str, Any]]) -> str:
         "node_name",
         "model",
         "runtime",
+        "status",
         "pass",
         "score",
         "json_valid",
         "expected_tools_ok",
         "hard_fails",
+        "soft_warnings",
         "latency_ms",
         "tokens_per_s",
         "generated_tokens",
         "peak_temp_c",
         "peak_memory_bytes",
+        "event_count",
     ]
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=fieldnames, extrasaction="ignore")
@@ -567,16 +590,22 @@ def flatten_result(result: Dict[str, Any]) -> Dict[str, Any]:
         "node_name": result.get("node_name"),
         "model": result.get("model"),
         "runtime": result.get("runtime"),
+        "status": result.get("status"),
         "pass": scoring.get("pass"),
         "score": scoring.get("score"),
         "json_valid": scoring.get("json_valid"),
         "expected_tools_ok": scoring.get("expected_tools_ok"),
         "hard_fails": ";".join(scoring.get("hard_fails") or []),
+        "soft_warnings": ";".join(
+            str(item.get("id") if isinstance(item, dict) else item)
+            for item in (scoring.get("soft_warnings") or scoring.get("warnings") or [])
+        ),
         "latency_ms": metrics.get("latency_ms"),
         "tokens_per_s": metrics.get("tokens_per_s"),
         "generated_tokens": metrics.get("generated_tokens"),
         "peak_temp_c": telemetry.get("peak_temp_c"),
         "peak_memory_bytes": telemetry.get("peak_memory_bytes"),
+        "event_count": len(result.get("events") or []),
     }
 
 
@@ -605,7 +634,7 @@ def default_report_markdown(manifest: Dict[str, Any], results: Iterable[Dict[str
 
 
 class BenchmarkAgentHandler(BaseHTTPRequestHandler):
-    server_version = "AustralisBenchmarkAgent/0.1"
+    server_version = "AustralisBenchmarkAgent/0.2"
 
     def do_OPTIONS(self) -> None:  # noqa: N802
         self._send_empty(HTTPStatus.NO_CONTENT)
@@ -621,7 +650,19 @@ class BenchmarkAgentHandler(BaseHTTPRequestHandler):
         elif path == "/api/scenarios/australis":
             self._send_json(self.server_state.scenario_pack())
         elif path == "/api/telemetry/stream":
-            self._send_sse()
+            if not self.server_state.telemetry_enabled:
+                self._send_json(
+                    {
+                        "ok": False,
+                        "error": {
+                            "code": "capability_disabled",
+                            "message": "Telemetry is disabled for this dashboard host.",
+                        },
+                    },
+                    HTTPStatus.CONFLICT,
+                )
+            else:
+                self._send_sse()
         elif path == "/api/version":
             self._send_json({"agent_version": AGENT_VERSION})
         else:
@@ -636,8 +677,20 @@ class BenchmarkAgentHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/infer":
-            result = self.server_state.proxy.infer(payload)
-            self._send_json(result)
+            if not self.server_state.inference_enabled:
+                self._send_json(
+                    {
+                        "ok": False,
+                        "error": {
+                            "code": "capability_disabled",
+                            "message": "Inference is disabled for this agent role.",
+                        },
+                    },
+                    HTTPStatus.CONFLICT,
+                )
+            else:
+                result = self.server_state.proxy.infer(payload)
+                self._send_json(result)
         elif path == "/api/export-bundle":
             bundle = build_export_bundle(payload)
             filename = f"australis-benchmark-{payload.get('manifest', {}).get('session_id', uuid.uuid4())}.zip"
@@ -746,6 +799,10 @@ class AgentState:
         self.scenario_pack_path = Path(args.scenario_pack).resolve() if args.scenario_pack else None
         self.quiet = bool(args.quiet)
         self.telemetry_interval_s = float(args.telemetry_interval_s)
+        self.dashboard_only = bool(args.dashboard_only)
+        self.telemetry_only = bool(args.telemetry_only)
+        self.telemetry_enabled = not self.dashboard_only
+        self.inference_enabled = not self.dashboard_only and not self.telemetry_only
         self.collector = TelemetryCollector(args.runtime_process_hint or args.runtime)
         self.proxy = InferenceProxy()
         self.started_utc = utc_now()
@@ -758,9 +815,10 @@ class AgentState:
                 "name": self.args.node_name,
                 "stage": self.args.stage,
                 "type": self.args.node_type,
-                "runtime": self.args.runtime,
-                "model": self.args.model,
-                "inference_endpoint": self.args.inference_endpoint,
+                "runtime": self.args.runtime if self.inference_enabled else None,
+                "model": self.args.model if self.inference_enabled else None,
+                "inference_endpoint": self.args.inference_endpoint if self.inference_enabled else None,
+                "capabilities": self.capabilities(),
             },
             "host": {
                 "hostname": platform.node(),
@@ -770,6 +828,8 @@ class AgentState:
                 "python": platform.python_version(),
             },
             "started_utc": self.started_utc,
+            "role": self.role,
+            "capabilities": self.capabilities(),
         }
 
     def health(self) -> Dict[str, Any]:
@@ -779,10 +839,39 @@ class AgentState:
             "timestamp_utc": utc_now(),
             "node_name": self.args.node_name,
             "stage": self.args.stage,
+            "role": self.role,
+            "capabilities": self.capabilities(),
         }
 
     def status(self) -> Dict[str, Any]:
-        return {"ok": True, "metadata": self.metadata(), "telemetry": self.collector.collect()}
+        telemetry = self.collector.collect() if self.telemetry_enabled else None
+        return {"ok": True, "metadata": self.metadata(), "telemetry": telemetry}
+
+    @property
+    def role(self) -> str:
+        if self.dashboard_only:
+            return "dashboard"
+        if self.telemetry_only:
+            return "telemetry-only"
+        return "telemetry+inference"
+
+    def capabilities(self) -> Dict[str, Any]:
+        return {
+            "telemetry": {
+                "available": self.telemetry_enabled,
+                "transport": "sse" if self.telemetry_enabled else None,
+                "endpoint": "/api/telemetry/stream" if self.telemetry_enabled else None,
+            },
+            "inference": {
+                "available": self.inference_enabled,
+                "endpoint": "/api/infer" if self.inference_enabled else None,
+                "runtimes": ["ollama", "llama.cpp", "openai-compatible"]
+                if self.inference_enabled
+                else [],
+            },
+            "scenario_pack": {"available": True, "endpoint": "/api/scenarios/australis"},
+            "export_bundle": {"available": True, "endpoint": "/api/export-bundle"},
+        }
 
     def scenario_pack(self) -> Dict[str, Any]:
         if not self.scenario_pack_path or not self.scenario_pack_path.exists():
@@ -810,6 +899,17 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--telemetry-interval-s", type=float, default=2.0)
     parser.add_argument("--static-dir", default=str(default_static))
     parser.add_argument("--scenario-pack", default=str(default_scenarios))
+    role_group = parser.add_mutually_exclusive_group()
+    role_group.add_argument(
+        "--telemetry-only",
+        action="store_true",
+        help="Expose telemetry but reject inference requests.",
+    )
+    role_group.add_argument(
+        "--dashboard-only",
+        action="store_true",
+        help="Serve the central console/scenarios/exports without node telemetry or inference.",
+    )
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     return parser
@@ -826,9 +926,26 @@ def self_test(args: argparse.Namespace) -> int:
             "config": {"api_key": "should-redact"},
             "prompts": [{"name": "self-test", "content": "Say JSON only."}],
             "responses": [{"name": "self-test", "raw": {"ok": True}}],
+            "events": [{"run_id": "self-test", "type": "scoring_complete", "timestamp_utc": utc_now()}],
         }
     )
-    print(json.dumps({"ok": True, "status_ok": status["ok"], "bundle_bytes": len(bundle)}, indent=2))
+    with zipfile.ZipFile(io.BytesIO(bundle), "r") as zf:
+        bundle_files = sorted(zf.namelist())
+        config = json.loads(zf.read("config.sanitized.json"))
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "status_ok": status["ok"],
+                "role": state.role,
+                "capabilities": state.capabilities(),
+                "bundle_bytes": len(bundle),
+                "bundle_files": bundle_files,
+                "redaction_ok": config.get("api_key") == "<redacted>",
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

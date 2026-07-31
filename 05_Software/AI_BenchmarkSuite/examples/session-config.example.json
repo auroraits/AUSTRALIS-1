@@ -1,13 +1,19 @@
 {
-  "schema_version": "australis.benchmark.session_config.v1",
+  "schema_version": "australis.benchmark.session_config.v2",
   "episodes": ["E05", "E09", "E12"],
   "repeats": 1,
-  "concurrency": 1,
+  "concurrency": 2,
   "sweep": null,
+  "warning_thresholds": {
+    "latency_ms": null,
+    "minimum_tokens_per_s": null
+  },
   "export": {
     "include_raw_responses": true,
     "include_prompts": true,
-    "include_telemetry": true
+    "include_telemetry": true,
+    "include_run_events": true,
+    "include_scoring_explanations": true
   },
   "notes": "Example only. Do not store secrets in config files."
 }

@@ -1,12 +1,17 @@
 {
-  "schema_version": "australis.benchmark.nodes.v1",
+  "schema_version": "australis.benchmark.nodes.v2",
   "nodes": [
     {
-      "name": "local-pc",
+      "id": "node-prestaging-a",
+      "name": "prestage-node-a",
       "stage": "pre-staging",
       "type": "pc-windows",
+      "agent_endpoint": "http://prestage-node-a.example:8765",
+      "telemetry_capability": true,
+      "telemetry_enabled": true,
+      "inference_capability": true,
+      "inference_enabled": true,
       "runtime": "ollama",
-      "agent_endpoint": "http://127.0.0.1:8765",
       "inference_endpoint": "http://127.0.0.1:11434",
       "model": "gemma4:e2b",
       "params": {
@@ -16,14 +21,22 @@
         "seed": 42,
         "json_mode": true
       },
-      "enabled": true
+      "enabled": true,
+      "notes": "Example telemetry and inference node.",
+      "tags": ["pre-staging"],
+      "last_health": null
     },
     {
-      "name": "cm5-bench-1",
+      "id": "node-staging-a",
+      "name": "staging-node-a",
       "stage": "staging",
       "type": "cm5",
+      "agent_endpoint": "http://staging-node-a.example:8765",
+      "telemetry_capability": true,
+      "telemetry_enabled": true,
+      "inference_capability": true,
+      "inference_enabled": true,
       "runtime": "llama.cpp",
-      "agent_endpoint": "http://cm5-bench.local:8765",
       "inference_endpoint": "http://127.0.0.1:8082",
       "model": "gemma4:e2b-q8_0",
       "params": {
@@ -33,7 +46,29 @@
         "seed": 42,
         "json_mode": true
       },
-      "enabled": false
+      "enabled": false,
+      "notes": "Example only; enable after health and thermal checks.",
+      "tags": ["staging", "cm5"],
+      "last_health": null
+    },
+    {
+      "id": "node-telemetry-a",
+      "name": "telemetry-node-a",
+      "stage": "pre-staging",
+      "type": "pc-linux",
+      "agent_endpoint": "http://telemetry-node-a.example:8765",
+      "telemetry_capability": true,
+      "telemetry_enabled": true,
+      "inference_capability": false,
+      "inference_enabled": false,
+      "runtime": "none",
+      "inference_endpoint": null,
+      "model": null,
+      "params": {},
+      "enabled": true,
+      "notes": "Telemetry-only example; the run queue will not send inference here.",
+      "tags": ["telemetry-only"],
+      "last_health": null
     }
   ]
 }

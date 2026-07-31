@@ -3,139 +3,326 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AUSTRALIS AI Benchmark Suite</title>
+  <title>AUSTRALIS-1 AI Benchmark Operations</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <h1>AUSTRALIS AI Benchmark Suite</h1>
-      <p>Pre-staging and CM5 flight-like agentic regression console</p>
+  <div class="app-shell">
+    <header class="command-bar">
+      <div class="brand-block" aria-label="AUSTRALIS AI Benchmark Operations">
+        <strong>AUSTRALIS-1</strong>
+        <span>AI BENCHMARK OPS</span>
+      </div>
+      <div class="command-status">
+        <span class="status-dot" id="fleetStatusDot"></span>
+        <span id="fleetStatus">No nodes registered</span>
+        <span class="divider"></span>
+        <span id="queueStatus">Queue idle</span>
+      </div>
+      <div class="command-actions">
+        <button id="btnHealthAll" type="button" title="Check all enabled nodes">Health all</button>
+        <button id="btnRun" type="button" class="primary" title="Queue selected benchmark runs">Run queue</button>
+        <button id="btnAbort" type="button" class="danger hidden" title="Abort active and queued runs">Abort</button>
+        <button id="btnExport" type="button" title="Export the session bundle">Export</button>
+      </div>
+    </header>
+
+    <main class="console-shell">
+      <aside class="config-drawer" aria-label="Benchmark configuration">
+        <nav class="config-tabs" aria-label="Configuration sections">
+          <button class="config-tab active" type="button" data-tab="nodes">Nodes</button>
+          <button class="config-tab" type="button" data-tab="inference">Inference</button>
+          <button class="config-tab" type="button" data-tab="episodes">Episodes</button>
+          <button class="config-tab" type="button" data-tab="snapshot">Snapshot</button>
+          <button class="config-tab" type="button" data-tab="prompt">Prompt</button>
+        </nav>
+
+        <section class="tab-panel active" data-panel="nodes">
+          <div class="section-toolbar">
+            <div>
+              <h2>Node Registry</h2>
+              <span id="nodeCount">0 nodes</span>
+            </div>
+            <button id="btnNewNode" type="button">New node</button>
+          </div>
+          <div id="nodesList" class="nodes-list"></div>
+
+          <form id="nodeForm" class="form-stack" novalidate>
+            <div class="form-heading">
+              <h3 id="nodeFormTitle">Add New Node</h3>
+              <span id="nodeFormMode">new</span>
+            </div>
+            <p id="nodeFormError" class="form-error hidden" role="alert"></p>
+
+            <label>Name
+              <input name="name" autocomplete="off" required>
+            </label>
+            <div class="form-grid">
+              <label>Stage
+                <select name="stage">
+                  <option value="pre-staging">pre-staging</option>
+                  <option value="staging">staging</option>
+                </select>
+              </label>
+              <label>Type
+                <select name="type">
+                  <option value="pc-windows">pc-windows</option>
+                  <option value="pc-linux">pc-linux</option>
+                  <option value="cm5">cm5</option>
+                  <option value="other">other</option>
+                </select>
+              </label>
+            </div>
+            <label>Agent endpoint
+              <input name="agent_endpoint" type="url" placeholder="http://node-host.example:8765" required>
+            </label>
+
+            <fieldset>
+              <legend>Telemetry</legend>
+              <label class="check-row">
+                <input name="telemetry_capability" type="checkbox" checked>
+                <span>Agent capability</span>
+              </label>
+              <label class="check-row">
+                <input name="telemetry_enabled" type="checkbox" checked>
+                <span>Collect in dashboard</span>
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <legend>Inference</legend>
+              <label class="check-row">
+                <input name="inference_capability" type="checkbox" checked>
+                <span>Agent capability</span>
+              </label>
+              <label class="check-row">
+                <input name="inference_enabled" type="checkbox" checked>
+                <span>Include in runs</span>
+              </label>
+            </fieldset>
+
+            <div class="form-grid">
+              <label>Runtime
+                <select name="runtime">
+                  <option value="ollama">ollama</option>
+                  <option value="llama.cpp">llama.cpp</option>
+                  <option value="openai-compatible">openai-compatible</option>
+                  <option value="none">none</option>
+                </select>
+              </label>
+              <label>Model
+                <input name="model" autocomplete="off">
+              </label>
+            </div>
+            <label>Inference endpoint from agent
+              <input name="inference_endpoint" type="url" placeholder="http://127.0.0.1:11434">
+            </label>
+            <label>Tags
+              <input name="tags" autocomplete="off" placeholder="lab-a, thermal">
+            </label>
+            <label>Notes
+              <textarea name="notes" rows="3"></textarea>
+            </label>
+            <label class="check-row">
+              <input name="enabled" type="checkbox" checked>
+              <span>Node enabled</span>
+            </label>
+
+            <div class="form-actions">
+              <button id="btnSaveNode" type="submit" class="primary">Add node</button>
+              <button id="btnDuplicateNode" type="button" disabled>Duplicate</button>
+              <button id="btnDeleteNode" type="button" class="danger-quiet" disabled>Delete</button>
+              <button id="btnHealthNode" type="button" disabled>Health</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="tab-panel" data-panel="inference">
+          <div class="section-toolbar">
+            <div>
+              <h2>Inference</h2>
+              <span>Global queue controls</span>
+            </div>
+          </div>
+          <form id="inferenceForm" class="form-stack">
+            <div class="form-grid">
+              <label>Temperature
+                <input name="temperature" type="number" value="0.1" step="0.05">
+              </label>
+              <label>Context
+                <input name="context" type="number" value="4096" step="256" min="1">
+              </label>
+              <label>Output tokens
+                <input name="max_tokens" type="number" value="700" step="50" min="1">
+              </label>
+              <label>Seed
+                <input name="seed" type="number" value="42">
+              </label>
+              <label>Repeats
+                <input name="repeats" type="number" value="1" min="1" max="20">
+              </label>
+              <label>Timeout s
+                <input name="timeout_s" type="number" value="180" min="5">
+              </label>
+              <label>Concurrency
+                <input name="concurrency" type="number" value="1" min="1" max="16">
+              </label>
+              <label>Latency warning ms
+                <input name="latency_warn_ms" type="number" min="1" placeholder="unconfigured">
+              </label>
+              <label>Min tokens/s warning
+                <input name="tokens_per_s_warn" type="number" min="0" step="0.1" placeholder="unconfigured">
+              </label>
+            </div>
+            <label class="check-row">
+              <input name="json_mode" type="checkbox" checked>
+              <span>JSON mode</span>
+            </label>
+            <label class="check-row">
+              <input name="thinking" type="checkbox">
+              <span>Thinking allowed</span>
+            </label>
+          </form>
+          <div class="subsection">
+            <div class="subsection-title">Sweep</div>
+            <div class="segmented-control" id="sweepControls">
+              <button data-sweep="" type="button" class="active">None</button>
+              <button data-sweep="temperature_c" type="button">Temp</button>
+              <button data-sweep="soc_pct" type="button">SoC</button>
+              <button data-sweep="elevation_deg" type="button">Elevation</button>
+              <button data-sweep="power_margin_w" type="button">Power</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" data-panel="episodes">
+          <div class="section-toolbar">
+            <div>
+              <h2>Episodes</h2>
+              <span id="episodeCount">Loading</span>
+            </div>
+            <button id="btnSelectMinimum" type="button">Minimum</button>
+          </div>
+          <div id="episodeList" class="episode-list"></div>
+        </section>
+
+        <section class="tab-panel" data-panel="snapshot">
+          <div class="section-toolbar">
+            <div>
+              <h2>Satellite Snapshot</h2>
+              <span>Deterministic input</span>
+            </div>
+          </div>
+          <label class="preset-control">Preset
+            <select id="presetSelect"></select>
+          </label>
+          <form id="snapshotForm" class="snapshot-form"></form>
+        </section>
+
+        <section class="tab-panel" data-panel="prompt">
+          <div class="section-toolbar">
+            <div>
+              <h2>Prompt Preview</h2>
+              <span id="promptRuntime">No inference node</span>
+            </div>
+          </div>
+          <textarea id="promptPreview" class="code-editor" spellcheck="false" readonly></textarea>
+        </section>
+      </aside>
+
+      <section class="operating-area">
+        <section class="telemetry-workspace" aria-labelledby="telemetryTitle">
+          <div class="workspace-toolbar">
+            <div class="workspace-title">
+              <h2 id="telemetryTitle">Telemetry + Run Timeline</h2>
+              <span id="telemetryStatus" class="status-label">No streams</span>
+            </div>
+            <label class="inline-control">Node
+              <select id="telemetryNodeFilter">
+                <option value="all">All nodes</option>
+              </select>
+            </label>
+          </div>
+          <div id="metricToggles" class="metric-toggles" aria-label="Telemetry metrics"></div>
+          <div id="telemetryLegend" class="telemetry-legend"></div>
+          <div id="chartViewport" class="chart-viewport">
+            <canvas id="telemetryChart"></canvas>
+            <div id="chartTooltip" class="chart-tooltip hidden" role="status"></div>
+          </div>
+          <div id="telemetryCards" class="telemetry-strip"></div>
+        </section>
+
+        <section class="runs-workspace" aria-labelledby="runsTitle">
+          <div class="workspace-toolbar runs-toolbar">
+            <div class="workspace-title">
+              <h2 id="runsTitle">Runs</h2>
+              <span id="runSummary">0 runs</span>
+            </div>
+            <div id="operationNotice" class="operation-notice"></div>
+          </div>
+          <div id="nodeProgressList" class="node-progress-list"></div>
+          <div class="table-wrap">
+            <table id="runsTable">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Node</th>
+                  <th>Episode</th>
+                  <th>Model</th>
+                  <th>Result</th>
+                  <th>Score</th>
+                  <th>Warnings</th>
+                  <th>Latency</th>
+                  <th>Tok/s</th>
+                  <th>Peak temp</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="status-bar">
+      <span>Deterministic OBC authority</span>
+      <span>Benchmark evidence only</span>
+      <span id="sessionId"></span>
+    </footer>
+  </div>
+
+  <div id="drawerBackdrop" class="drawer-backdrop hidden"></div>
+  <aside id="runDrawer" class="run-drawer" aria-hidden="true" aria-labelledby="runDrawerTitle">
+    <div class="drawer-header">
+      <div>
+        <h2 id="runDrawerTitle">Run Detail</h2>
+        <span id="runDrawerSubtitle"></span>
+      </div>
+      <div class="drawer-actions">
+        <button id="btnCopyRun" type="button">Copy</button>
+        <button id="btnExportRun" type="button">Export JSON</button>
+        <button id="btnCloseRun" type="button" title="Close run detail">Close</button>
+      </div>
     </div>
-    <div class="header-actions">
-      <button id="btnHealth" type="button">Health</button>
-      <button id="btnRun" type="button" class="primary">Run</button>
-      <button id="btnExport" type="button">Export bundle</button>
-    </div>
-  </header>
-
-  <main class="workspace">
-    <section class="panel span-4">
-      <div class="panel-title">
-        <h2>Nodes</h2>
-        <button id="btnAddNode" type="button">Add</button>
-      </div>
-      <div id="nodesList" class="nodes-list"></div>
-      <form id="nodeForm" class="grid-form compact">
-        <label>Name<input name="name" value="local-pc"></label>
-        <label>Stage<select name="stage"><option>pre-staging</option><option>staging</option></select></label>
-        <label>Type<select name="type"><option>pc-windows</option><option>pc-linux</option><option>cm5</option><option>other</option></select></label>
-        <label>Runtime<select name="runtime"><option>ollama</option><option>llama.cpp</option><option>openai-compatible</option></select></label>
-        <label>Agent endpoint<input name="agent_endpoint" value="http://127.0.0.1:8765"></label>
-        <label>Inference endpoint<input name="inference_endpoint" value="http://127.0.0.1:11434"></label>
-        <label>Model<input name="model" value="gemma4:e2b"></label>
-        <label class="check"><input name="enabled" type="checkbox" checked> Enabled</label>
-      </form>
-    </section>
-
-    <section class="panel span-4">
-      <div class="panel-title">
-        <h2>Inference</h2>
-      </div>
-      <form id="inferenceForm" class="grid-form">
-        <label>Temperature<input name="temperature" type="number" value="0.1" step="0.05"></label>
-        <label>Context<input name="context" type="number" value="4096" step="256"></label>
-        <label>Output tokens<input name="max_tokens" type="number" value="700" step="50"></label>
-        <label>Seed<input name="seed" type="number" value="42"></label>
-        <label>Repeats<input name="repeats" type="number" value="1" min="1" max="20"></label>
-        <label>Timeout s<input name="timeout_s" type="number" value="180" min="5"></label>
-        <label>Concurrency<input name="concurrency" type="number" value="1" min="1" max="8"></label>
-        <label class="check"><input name="json_mode" type="checkbox" checked> JSON mode</label>
-        <label class="check"><input name="thinking" type="checkbox"> Thinking allowed</label>
-      </form>
-      <div class="sweeps">
-        <span>Sweeps</span>
-        <button data-sweep="temperature_c" type="button">Temp</button>
-        <button data-sweep="soc_pct" type="button">SoC</button>
-        <button data-sweep="elevation_deg" type="button">Elevation</button>
-        <button data-sweep="power_margin_w" type="button">Power margin</button>
-        <button data-sweep="" type="button">None</button>
-      </div>
-    </section>
-
-    <section class="panel span-4">
-      <div class="panel-title">
-        <h2>Telemetry</h2>
-        <span id="telemetryStatus" class="status-pill">idle</span>
-      </div>
-      <canvas id="telemetryChart" width="720" height="220"></canvas>
-      <div id="telemetryCards" class="telemetry-cards"></div>
-    </section>
-
-    <section class="panel span-3">
-      <div class="panel-title">
-        <h2>Episodes</h2>
-        <button id="btnSelectMinimum" type="button">Minimum</button>
-      </div>
-      <div id="episodeList" class="episode-list"></div>
-    </section>
-
-    <section class="panel span-5">
-      <div class="panel-title">
-        <h2>Satellite Snapshot</h2>
-        <select id="presetSelect"></select>
-      </div>
-      <form id="snapshotForm" class="snapshot-grid"></form>
-    </section>
-
-    <section class="panel span-4">
-      <div class="panel-title">
-        <h2>Prompt Preview</h2>
-      </div>
-      <textarea id="promptPreview" spellcheck="false"></textarea>
-    </section>
-
-    <section class="panel span-12">
-      <div class="panel-title">
-        <h2>Runs</h2>
-        <div class="run-summary" id="runSummary">0 runs</div>
-      </div>
-      <div class="table-wrap">
-        <table id="runsTable">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Node</th>
-              <th>Episode</th>
-              <th>Model</th>
-              <th>Pass</th>
-              <th>Score</th>
-              <th>JSON</th>
-              <th>Tools</th>
-              <th>Hard fails</th>
-              <th>Latency</th>
-              <th>Tok/s</th>
-              <th>Temp</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <footer class="app-footer">
-    <span>OBC authority is deterministic. Results are benchmark evidence, not flight readiness.</span>
-    <span id="sessionId"></span>
-  </footer>
+    <div id="runDetail" class="run-detail"></div>
+  </aside>
 
   <template id="nodeTemplate">
-    <article class="node-card">
-      <div>
-        <strong class="node-name"></strong>
+    <article class="node-item">
+      <button type="button" class="node-select">
+        <span class="node-row">
+          <strong class="node-name"></strong>
+          <span class="node-health"></span>
+        </span>
         <span class="node-meta"></span>
-      </div>
-      <button type="button" class="node-toggle"></button>
+        <span class="node-capabilities"></span>
+      </button>
+      <label class="node-enable" title="Enable or disable node">
+        <input class="node-enabled-toggle" type="checkbox">
+        <span>Enabled</span>
+      </label>
+      <button type="button" class="node-health-action" title="Check node health">Health</button>
     </article>
   </template>
 

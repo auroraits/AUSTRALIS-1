@@ -1,19 +1,174 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://australis.local/schemas/node-config.schema.json",
-  "title": "AUSTRALIS AI benchmark node config",
+  "$id": "https://australis.example/schemas/node-config.schema.json",
+  "title": "AUSTRALIS AI benchmark node config v2",
   "type": "object",
-  "required": ["name", "stage", "type", "runtime", "agent_endpoint", "model", "enabled"],
+  "required": [
+    "name",
+    "stage",
+    "type",
+    "agent_endpoint",
+    "telemetry_capability",
+    "telemetry_enabled",
+    "inference_capability",
+    "inference_enabled",
+    "runtime",
+    "model",
+    "enabled"
+  ],
   "properties": {
-    "name": {"type": "string", "minLength": 1},
-    "stage": {"enum": ["pre-staging", "staging"]},
-    "type": {"enum": ["pc-windows", "pc-linux", "cm5", "other"]},
-    "runtime": {"enum": ["ollama", "llama.cpp", "openai-compatible"]},
-    "inference_endpoint": {"type": "string"},
-    "agent_endpoint": {"type": "string"},
-    "model": {"type": "string"},
-    "params": {"type": "object"},
-    "enabled": {"type": "boolean"}
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "enum": ["pre-staging", "staging"]
+    },
+    "type": {
+      "enum": ["pc-windows", "pc-linux", "cm5", "other"]
+    },
+    "agent_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "telemetry_capability": {
+      "type": "boolean",
+      "description": "Whether the remote agent advertises telemetry support."
+    },
+    "telemetry_enabled": {
+      "type": "boolean",
+      "description": "Whether the central dashboard should subscribe to this node."
+    },
+    "inference_capability": {
+      "type": "boolean",
+      "description": "Whether the remote agent advertises inference support."
+    },
+    "inference_enabled": {
+      "type": "boolean",
+      "description": "Whether the central dashboard should include this node in runs."
+    },
+    "runtime": {
+      "enum": ["ollama", "llama.cpp", "openai-compatible", "none", null]
+    },
+    "inference_endpoint": {
+      "type": ["string", "null"]
+    },
+    "model": {
+      "type": ["string", "null"]
+    },
+    "params": {
+      "type": "object"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "last_health": {
+      "type": ["object", "null"],
+      "properties": {
+        "status": {
+          "enum": ["unknown", "checking", "ok", "error"]
+        },
+        "checked_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "latency_ms": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "agent_version": {
+          "type": ["string", "null"]
+        },
+        "role": {
+          "type": ["string", "null"]
+        },
+        "message": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "agent_metadata": {
+      "type": ["object", "null"]
+    }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "inference_capability": {
+            "const": true
+          }
+        },
+        "required": ["inference_capability"]
+      },
+      "then": {
+        "properties": {
+          "runtime": {
+            "enum": ["ollama", "llama.cpp", "openai-compatible"]
+          },
+          "inference_endpoint": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["inference_endpoint"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "telemetry_capability": {
+            "const": false
+          }
+        },
+        "required": ["telemetry_capability"]
+      },
+      "then": {
+        "properties": {
+          "telemetry_enabled": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "inference_capability": {
+            "const": false
+          }
+        },
+        "required": ["inference_capability"]
+      },
+      "then": {
+        "properties": {
+          "inference_enabled": {
+            "const": false
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": true
 }
