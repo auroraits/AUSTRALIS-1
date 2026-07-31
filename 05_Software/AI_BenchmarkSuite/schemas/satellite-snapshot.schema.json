@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://australis.local/schemas/satellite-snapshot.schema.json",
+  "title": "AUSTRALIS AI agent satellite snapshot",
+  "type": "object",
+  "required": ["schema_version", "decision_id", "mission", "eps", "thermal", "rf", "adcs", "nav", "storage", "ai_runtime", "uplink"],
+  "properties": {
+    "schema_version": {"const": "ai_agent_context.v1"},
+    "decision_id": {"type": "string"},
+    "mission": {
+      "type": "object",
+      "required": ["MISSION_MODE", "EPS_STATE", "orbit_phase", "time_to_next_pass_s"],
+      "properties": {
+        "MISSION_MODE": {"enum": ["SAFE", "NOMINAL", "DOWNLINK_WINDOW"]},
+        "EPS_STATE": {"enum": ["CRIT", "LOW", "NOMINAL", "HIGH"]},
+        "orbit_phase": {"enum": ["sun", "eclipse"]},
+        "time_to_next_pass_s": {"type": "number"}
+      },
+      "additionalProperties": true
+    },
+    "eps": {"type": "object"},
+    "thermal": {"type": "object"},
+    "rf": {"type": "object"},
+    "adcs": {"type": "object"},
+    "nav": {"type": "object"},
+    "storage": {"type": "object"},
+    "ai_runtime": {"type": "object"},
+    "uplink": {"type": "object"}
+  },
+  "additionalProperties": true
+}

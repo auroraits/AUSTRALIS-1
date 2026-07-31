@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://australis.local/schemas/node-config.schema.json",
+  "title": "AUSTRALIS AI benchmark node config",
+  "type": "object",
+  "required": ["name", "stage", "type", "runtime", "agent_endpoint", "model", "enabled"],
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "stage": {"enum": ["pre-staging", "staging"]},
+    "type": {"enum": ["pc-windows", "pc-linux", "cm5", "other"]},
+    "runtime": {"enum": ["ollama", "llama.cpp", "openai-compatible"]},
+    "inference_endpoint": {"type": "string"},
+    "agent_endpoint": {"type": "string"},
+    "model": {"type": "string"},
+    "params": {"type": "object"},
+    "enabled": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

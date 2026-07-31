@@ -1,0 +1,39 @@
+{
+  "schema_version": "australis.benchmark.nodes.v1",
+  "nodes": [
+    {
+      "name": "local-pc",
+      "stage": "pre-staging",
+      "type": "pc-windows",
+      "runtime": "ollama",
+      "agent_endpoint": "http://127.0.0.1:8765",
+      "inference_endpoint": "http://127.0.0.1:11434",
+      "model": "gemma4:e2b",
+      "params": {
+        "temperature": 0.1,
+        "context": 4096,
+        "max_tokens": 700,
+        "seed": 42,
+        "json_mode": true
+      },
+      "enabled": true
+    },
+    {
+      "name": "cm5-bench-1",
+      "stage": "staging",
+      "type": "cm5",
+      "runtime": "llama.cpp",
+      "agent_endpoint": "http://cm5-bench.local:8765",
+      "inference_endpoint": "http://127.0.0.1:8082",
+      "model": "gemma4:e2b-q8_0",
+      "params": {
+        "temperature": 0.1,
+        "context": 4096,
+        "max_tokens": 700,
+        "seed": 42,
+        "json_mode": true
+      },
+      "enabled": false
+    }
+  ]
+}

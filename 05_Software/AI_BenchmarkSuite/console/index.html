@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AUSTRALIS AI Benchmark Suite</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>AUSTRALIS AI Benchmark Suite</h1>
+      <p>Pre-staging and CM5 flight-like agentic regression console</p>
+    </div>
+    <div class="header-actions">
+      <button id="btnHealth" type="button">Health</button>
+      <button id="btnRun" type="button" class="primary">Run</button>
+      <button id="btnExport" type="button">Export bundle</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="panel span-4">
+      <div class="panel-title">
+        <h2>Nodes</h2>
+        <button id="btnAddNode" type="button">Add</button>
+      </div>
+      <div id="nodesList" class="nodes-list"></div>
+      <form id="nodeForm" class="grid-form compact">
+        <label>Name<input name="name" value="local-pc"></label>
+        <label>Stage<select name="stage"><option>pre-staging</option><option>staging</option></select></label>
+        <label>Type<select name="type"><option>pc-windows</option><option>pc-linux</option><option>cm5</option><option>other</option></select></label>
+        <label>Runtime<select name="runtime"><option>ollama</option><option>llama.cpp</option><option>openai-compatible</option></select></label>
+        <label>Agent endpoint<input name="agent_endpoint" value="http://127.0.0.1:8765"></label>
+        <label>Inference endpoint<input name="inference_endpoint" value="http://127.0.0.1:11434"></label>
+        <label>Model<input name="model" value="gemma4:e2b"></label>
+        <label class="check"><input name="enabled" type="checkbox" checked> Enabled</label>
+      </form>
+    </section>
+
+    <section class="panel span-4">
+      <div class="panel-title">
+        <h2>Inference</h2>
+      </div>
+      <form id="inferenceForm" class="grid-form">
+        <label>Temperature<input name="temperature" type="number" value="0.1" step="0.05"></label>
+        <label>Context<input name="context" type="number" value="4096" step="256"></label>
+        <label>Output tokens<input name="max_tokens" type="number" value="700" step="50"></label>
+        <label>Seed<input name="seed" type="number" value="42"></label>
+        <label>Repeats<input name="repeats" type="number" value="1" min="1" max="20"></label>
+        <label>Timeout s<input name="timeout_s" type="number" value="180" min="5"></label>
+        <label>Concurrency<input name="concurrency" type="number" value="1" min="1" max="8"></label>
+        <label class="check"><input name="json_mode" type="checkbox" checked> JSON mode</label>
+        <label class="check"><input name="thinking" type="checkbox"> Thinking allowed</label>
+      </form>
+      <div class="sweeps">
+        <span>Sweeps</span>
+        <button data-sweep="temperature_c" type="button">Temp</button>
+        <button data-sweep="soc_pct" type="button">SoC</button>
+        <button data-sweep="elevation_deg" type="button">Elevation</button>
+        <button data-sweep="power_margin_w" type="button">Power margin</button>
+        <button data-sweep="" type="button">None</button>
+      </div>
+    </section>
+
+    <section class="panel span-4">
+      <div class="panel-title">
+        <h2>Telemetry</h2>
+        <span id="telemetryStatus" class="status-pill">idle</span>
+      </div>
+      <canvas id="telemetryChart" width="720" height="220"></canvas>
+      <div id="telemetryCards" class="telemetry-cards"></div>
+    </section>
+
+    <section class="panel span-3">
+      <div class="panel-title">
+        <h2>Episodes</h2>
+        <button id="btnSelectMinimum" type="button">Minimum</button>
+      </div>
+      <div id="episodeList" class="episode-list"></div>
+    </section>
+
+    <section class="panel span-5">
+      <div class="panel-title">
+        <h2>Satellite Snapshot</h2>
+        <select id="presetSelect"></select>
+      </div>
+      <form id="snapshotForm" class="snapshot-grid"></form>
+    </section>
+
+    <section class="panel span-4">
+      <div class="panel-title">
+        <h2>Prompt Preview</h2>
+      </div>
+      <textarea id="promptPreview" spellcheck="false"></textarea>
+    </section>
+
+    <section class="panel span-12">
+      <div class="panel-title">
+        <h2>Runs</h2>
+        <div class="run-summary" id="runSummary">0 runs</div>
+      </div>
+      <div class="table-wrap">
+        <table id="runsTable">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Node</th>
+              <th>Episode</th>
+              <th>Model</th>
+              <th>Pass</th>
+              <th>Score</th>
+              <th>JSON</th>
+              <th>Tools</th>
+              <th>Hard fails</th>
+              <th>Latency</th>
+              <th>Tok/s</th>
+              <th>Temp</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>OBC authority is deterministic. Results are benchmark evidence, not flight readiness.</span>
+    <span id="sessionId"></span>
+  </footer>
+
+  <template id="nodeTemplate">
+    <article class="node-card">
+      <div>
+        <strong class="node-name"></strong>
+        <span class="node-meta"></span>
+      </div>
+      <button type="button" class="node-toggle"></button>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

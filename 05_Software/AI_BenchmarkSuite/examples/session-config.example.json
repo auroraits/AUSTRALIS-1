@@ -1,0 +1,13 @@
+{
+  "schema_version": "australis.benchmark.session_config.v1",
+  "episodes": ["E05", "E09", "E12"],
+  "repeats": 1,
+  "concurrency": 1,
+  "sweep": null,
+  "export": {
+    "include_raw_responses": true,
+    "include_prompts": true,
+    "include_telemetry": true
+  },
+  "notes": "Example only. Do not store secrets in config files."
+}

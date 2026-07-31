@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://australis.local/schemas/run-result.schema.json",
+  "title": "AUSTRALIS AI benchmark run result",
+  "type": "object",
+  "required": ["run_id", "episode_id", "node_name", "model", "runtime", "metrics", "scoring"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "episode_id": {"type": "string"},
+    "node_name": {"type": "string"},
+    "model": {"type": "string"},
+    "runtime": {"type": "string"},
+    "metrics": {"type": "object"},
+    "scoring": {"type": "object"},
+    "raw_response": {"type": "object"},
+    "prompt": {"type": "string"},
+    "snapshot": {"type": "object"}
+  },
+  "additionalProperties": true
+}

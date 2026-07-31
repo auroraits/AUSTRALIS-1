@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://australis.local/schemas/agent-output.schema.json",
+  "title": "AUSTRALIS AI agent output",
+  "type": "object",
+  "required": ["decision_id", "risk_level", "recommendation", "tools", "supervisor_expectation", "behavior_log"],
+  "properties": {
+    "decision_id": {"type": "string"},
+    "summary": {"type": "string"},
+    "risk_level": {"enum": ["low", "medium", "high", "critical"]},
+    "recommendation": {"enum": ["accept", "defer", "reject", "shutdown_ai", "request_ground_review"]},
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tool"],
+        "properties": {
+          "tool": {"type": "string"},
+          "arguments": {"type": "object"},
+          "reason": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "supervisor_expectation": {"enum": ["accepted", "clipped", "rejected"]},
+    "behavior_log": {
+      "type": "object",
+      "required": ["event_type", "model_version", "prompt_version", "confidence", "requires_downlink"],
+      "properties": {
+        "event_type": {"type": "string"},
+        "model_version": {"type": "string"},
+        "prompt_version": {"type": "string"},
+        "confidence": {"type": "number"},
+        "requires_downlink": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
