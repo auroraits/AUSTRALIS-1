@@ -1360,6 +1360,11 @@ function createQueuedRun(node, episode, snapshot, params, repeat, sweepValue) {
     sweep: state.selectedSweep ? {field: state.selectedSweep, value: sweepValue} : null,
     proxy_ok: null,
     proxy_error: null,
+    proxy_runtime: null,
+    effective_runtime: null,
+    proxy_endpoint: null,
+    proxy_http_status: null,
+    request_body_sanitized: null,
     metrics: {},
     parsed_output: null,
     parse_error: null,
@@ -1480,6 +1485,11 @@ async function runOne(task) {
 
   run.proxy_ok = Boolean(proxyPayload?.ok);
   run.proxy_error = run.proxy_error || proxyPayload?.error || null;
+  run.proxy_runtime = proxyPayload?.runtime || null;
+  run.effective_runtime = proxyPayload?.effective_runtime || proxyPayload?.runtime || null;
+  run.proxy_endpoint = proxyPayload?.endpoint || null;
+  run.proxy_http_status = proxyPayload?.http_status ?? null;
+  run.request_body_sanitized = proxyPayload?.request_body_sanitized ?? null;
   run.metrics = {...(proxyPayload?.metrics || {})};
   if (run.metrics.latency_ms === undefined && proxyPayload?.latency_ms !== undefined) {
     run.metrics.latency_ms = proxyPayload.latency_ms;
@@ -1735,6 +1745,7 @@ function renderRunDetail(run) {
         ${summaryField("Node", run.node_name)}
         ${summaryField("Model", run.model || "Unavailable")}
         ${summaryField("Runtime", run.runtime || "Unavailable")}
+        ${summaryField("Effective runtime", run.effective_runtime || "Unavailable")}
         ${summaryField("Duration", fmtMetric(run.duration_ms, " ms"))}
         ${summaryField("Telemetry samples", run.telemetry_summary?.sample_count ?? 0)}
       </div>
@@ -1798,6 +1809,11 @@ function renderRunDetail(run) {
     ${codeSection("Agent Proxy Response", formatJson({
       ok: run.proxy_ok,
       error: run.proxy_error,
+      runtime: run.proxy_runtime,
+      effective_runtime: run.effective_runtime,
+      endpoint: run.proxy_endpoint,
+      http_status: run.proxy_http_status,
+      request_body_sanitized: run.request_body_sanitized,
       metrics: run.metrics,
       raw: run.raw_response
     }))}
@@ -2185,10 +2201,25 @@ function emptyScoring() {
 function telemetryForInterval(nodeId, startUtc, endUtc) {
   const start = timestampMs(startUtc);
   const end = timestampMs(endUtc);
-  return (state.telemetryByNode.get(nodeId) || []).filter(sample => {
+  return telemetryHistoryForNode(nodeId).filter(sample => {
     const timestamp = timestampMs(sample.timestamp_utc);
     return timestamp >= start && timestamp <= end;
   }).map(clone);
+}
+
+function telemetryHistoryForNode(nodeId) {
+  const samples = [];
+  const seen = new Set();
+  const addSample = sample => {
+    if (!sample || sample.node_id !== nodeId) return;
+    const key = `${sample.timestamp_utc || ""}|${sample.node_id || ""}|${sample.host || ""}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    samples.push(sample);
+  };
+  for (const sample of state.telemetryByNode.get(nodeId) || []) addSample(sample);
+  for (const sample of state.telemetry || []) addSample(sample);
+  return samples.sort((a, b) => timestampMs(a.timestamp_utc) - timestampMs(b.timestamp_utc));
 }
 
 function summarizeTelemetry(samples) {
@@ -2354,6 +2385,10 @@ function updatePromptPreview() {
 }
 
 async function exportBundle() {
+  if (state.batch?.running) {
+    setOperationNotice("Wait for the active benchmark run to finish before exporting.", "warn");
+    return;
+  }
   const manifest = {
     session_id: state.sessionId,
     generated_utc: new Date().toISOString(),
@@ -2362,17 +2397,30 @@ async function exportBundle() {
     architecture: "central-dashboard-with-remote-node-agents",
     note: "Benchmark evidence only. No flight-ready claim."
   };
+  const exportResults = refreshResultsForExport();
+  state.results = exportResults;
+  renderRuns();
+  renderNodeProgress();
   const payload = sanitizeForExport({
     manifest,
-    results: state.results,
+    results: exportResults,
     events: state.events,
     telemetry: state.telemetry,
-    prompts: state.results.map(result => ({
+    prompts: exportResults.map(result => ({
       name: `${result.run_id}-${result.episode_id}.txt`,
       content: result.prompt
     })),
-    responses: state.results.map(result => ({
+    responses: exportResults.map(result => ({
       name: `${result.run_id}-${result.episode_id}.json`,
+      proxy: {
+        ok: result.proxy_ok,
+        error: result.proxy_error,
+        runtime: result.proxy_runtime,
+        effective_runtime: result.effective_runtime,
+        endpoint: result.proxy_endpoint,
+        http_status: result.proxy_http_status,
+        request_body_sanitized: result.request_body_sanitized
+      },
       raw: result.raw_response,
       text: result.raw_text
     })),
@@ -2387,7 +2435,7 @@ async function exportBundle() {
       selected_episodes: selectedEpisodes().map(episode => episode.id),
       sweep: state.selectedSweep || null
     },
-    report_markdown: buildReportMarkdown(manifest)
+    report_markdown: buildReportMarkdown(manifest, exportResults)
   });
 
   const endpoints = [];
@@ -2421,10 +2469,63 @@ async function exportBundle() {
   }
 }
 
-function buildReportMarkdown(manifest) {
-  const total = state.results.length;
-  const pass = state.results.filter(result => result.status === "completed" && result.scoring.pass).length;
-  const rows = state.results.map(result => {
+function refreshResultsForExport() {
+  return state.results.map(result => refreshRunEvidence(result));
+}
+
+function refreshRunEvidence(result) {
+  const run = clone(result);
+  if (run.started_utc && run.completed_utc) {
+    run.telemetry_interval = telemetryForInterval(run.node_id, run.started_utc, run.completed_utc);
+    run.telemetry_summary = summarizeTelemetry(run.telemetry_interval);
+  }
+  if (isTerminalRun(run) && run.raw_text !== undefined) {
+    const parsed = parseAgentJson(run.raw_text || "");
+    run.parsed_output = parsed.value;
+    run.parse_error = parsed.error;
+    const episode = getEpisode(run.episode_id);
+    const node = nodeForRun(run);
+    if (episode && node) {
+      run.scoring = scoreOutput(
+        parsed.value,
+        parsed.valid,
+        run.snapshot,
+        episode,
+        run.metrics || {},
+        run.telemetry_summary || emptyTelemetrySummary(),
+        node,
+        run.inference_params || {},
+        run.proxy_ok,
+        run.proxy_error
+      );
+    }
+  }
+  return run;
+}
+
+function isTerminalRun(run) {
+  return !["queued", "running"].includes(run.status);
+}
+
+function nodeForRun(run) {
+  return state.nodes.find(node => node.id === run.node_id) || {
+    id: run.node_id,
+    name: run.node_name,
+    stage: run.node_stage,
+    type: run.node_type,
+    telemetry_capability: true,
+    telemetry_enabled: true,
+    inference_capability: true,
+    inference_enabled: true,
+    runtime: run.runtime,
+    model: run.model
+  };
+}
+
+function buildReportMarkdown(manifest, results = state.results) {
+  const total = results.length;
+  const pass = results.filter(result => result.status === "completed" && result.scoring.pass).length;
+  const rows = results.map(result => {
     const warnings = (result.scoring.soft_warnings || []).map(item => item.id).join("; ");
     return `| ${markdownCell(result.episode_id)} | ${markdownCell(result.node_name)} | ${markdownCell(result.model)} | ${markdownCell(result.status)} | ${result.scoring.pass ? "Pass" : "Fail"} | ${result.scoring.score} | ${markdownCell(result.scoring.hard_fails.join("; "))} | ${markdownCell(warnings)} |`;
   }).join("\n");

@@ -32,7 +32,8 @@ report.md
 Each result can include:
 
 - queue and terminal status;
-- node, model, and runtime;
+- node, model, configured runtime, effective runtime, proxy endpoint, and HTTP
+  status;
 - prompt and satellite snapshot;
 - normalized and raw response;
 - parsed JSON and parse error;
@@ -41,6 +42,12 @@ Each result can include:
 - rule explanations;
 - run lifecycle events;
 - telemetry samples and summary for the run interval.
+
+Before packaging a browser session, the console refreshes each completed run
+from the accumulated SSE telemetry buffer and recalculates its telemetry
+summary and scoring. This prevents short runs from keeping stale
+`critical_telemetry_unavailable` warnings when telemetry samples arrived just
+after generation completed but before export.
 
 `events.jsonl` is the session-level event stream. The same events remain nested
 under their run in `results.jsonl`.

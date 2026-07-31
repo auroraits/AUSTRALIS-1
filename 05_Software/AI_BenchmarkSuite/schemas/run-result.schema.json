@@ -40,6 +40,21 @@
     "runtime": {
       "type": "string"
     },
+    "effective_runtime": {
+      "type": ["string", "null"]
+    },
+    "proxy_runtime": {
+      "type": ["string", "null"]
+    },
+    "proxy_endpoint": {
+      "type": ["string", "null"]
+    },
+    "proxy_http_status": {
+      "type": ["number", "null"]
+    },
+    "request_body_sanitized": {
+      "type": ["object", "null"]
+    },
     "status": {
       "enum": ["queued", "running", "completed", "failed", "timeout", "aborted"]
     },
