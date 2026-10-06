@@ -26,4 +26,5 @@
 
 - [ ] Repository validators and applicable builds/tests pass.
 - [ ] The diff received independent human review.
-- [ ] The merge commit SHA will identify the authoritative destination revision.
+- [ ] The resulting `main` commit SHA will identify the authoritative destination
+      revision.

@@ -7,7 +7,8 @@
 ## Contexto
 
 AUSTRALIS conserva dos historias de trabajo. `auroraits/AUSTRALIS-1` contiene
-la configuración pública reconciliada y validada por CI, mientras que
+la configuración pública reconciliada y controles automatizados de repositorio,
+mientras que
 `auroraits/DIY-Nanosat` conserva historia privada y fue archivado. Algunos
 runbooks y memorias todavía denominaban canónico al repositorio histórico, y el
 checkout local de ese repositorio contiene trabajo divergente no consolidado.
