@@ -2,8 +2,8 @@
 
 Status: **Active — required for every public tag or exported release**
 
-The clean public mirror already exists. This process governs later public tags,
-archives and mirrors. It does not declare any other private repository
+The public technical repository already exists. This process governs later
+public tags and archives. It does not declare any other private repository
 authoritative and it must not be read as evidence of technical or flight
 readiness.
 
@@ -31,13 +31,15 @@ carry private repository history.
 
 ## Export rule
 
-When importing material from a non-public workspace, use an approved tree export
-or `git archive` from an exact commit. Never fork, mirror or import private
-history. Validate the resulting public tree independently.
+When importing selected material from a non-public or historical workspace,
+start from current `AUSTRALIS-1/main` and use a scoped branch and reviewed pull
+request. Record the source path and commit when available. Never fork, mirror,
+merge, rebase or import private history, and never replace the current tree with
+a legacy tree. Validate the resulting public tree independently.
 
 ## Release checks
 
-Run these checks in the clean mirror before publication:
+Run these checks in the public technical repository before publication:
 
 ```powershell
 git ls-files -ci --exclude-standard

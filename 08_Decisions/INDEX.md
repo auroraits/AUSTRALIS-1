@@ -1,6 +1,6 @@
 # ADR index — AUSTRALIS-1
 
-**Revisión:** 2026-07-27
+**Revisión:** 2026-10-05
 **Estado:** Active index
 
 Este índice permite distinguir decisiones vigentes de registros históricos.
@@ -44,5 +44,6 @@ El encabezado formal dentro de cada ADR sigue siendo la fuente autoritativa; el
 | `ADR-20260727-telemetry-bench-433-v4` | Accepted | — |
 | `ADR-20260727-thermal-power-baselines-reopened` | Accepted | — |
 | `ADR-20260727-verification-and-review-governance` | Accepted | — |
+| `ADR-20261005-repository-authority-and-historical-migration` | Accepted | — |
 
-Totales de esta revisión: 19 `Accepted`, 16 `Superseded`, 35 ADR.
+Totales de esta revisión: 20 `Accepted`, 16 `Superseded`, 36 ADR.

@@ -29,8 +29,8 @@ licensing:
 - no public grant of trademarks, endorsement rights, flight-ready implementation
   rights, manufacturing rights or patent rights beyond the minimum rights in the
   selected public license;
-- clean public mirror only, so the public record starts from an intentional
-  release boundary.
+- authoritative public repository with clean published history, so the public
+  record starts from an intentional release boundary.
 
 The current interim scheme is:
 

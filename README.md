@@ -7,6 +7,18 @@ necesariamente las correcciones de esta rama.
 
 Sitio oficial: <https://australis.aurora.ar/>
 
+## Autoridad de configuración
+
+La única baseline técnica vigente se mantiene en
+[`auroraits/AUSTRALIS-1`](https://github.com/auroraits/AUSTRALIS-1), rama
+`main`. Cada uso de la baseline debe fijar el commit SHA correspondiente.
+
+El repositorio privado `auroraits/DIY-Nanosat` está archivado y se conserva
+solamente como historia. Sus ramas, clones y cambios locales no son normativos.
+Cualquier material útil se incorpora únicamente mediante un pull request
+acotado y revisado hacia `AUSTRALIS-1/main`; no se sincronizan árboles ni
+historias. Ver `REPOSITORY_GOVERNANCE.md`.
+
 ## Propósito
 
 AUSTRALIS-1 es un proyecto CubeSat 1.5U experimental cuyo objetivo científico

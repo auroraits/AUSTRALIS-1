@@ -30,9 +30,9 @@ public-release material existed in the current tree or in history:
 - a Fritzing BOM export containing a local absolute path;
 - an older shopping/prototype PDF and Obsidian workspace files in history.
 
-Decision: publish a clean public mirror/export from the sanitized tree. Do not
-rewrite the private canonical repository as the first choice, and do not simply
-flip the private repo visibility to public.
+Decision at the time: publish a clean public export from the sanitized tree. Do
+not rewrite the then-private source repository as the first choice, and do not
+simply flip the private repo visibility to public.
 
 ## Secrets and personal data
 

@@ -1,6 +1,6 @@
 # AUSTRALIS-1 / DIY Nanosat - AGENTS.md Raiz (Politica Documental Global)
 
-**Revision:** 2026-03-14
+**Revision:** 2026-10-05
 
 Este archivo es la autoridad raiz de gobierno documental del proyecto. Todos los `AGENTS.md` de subsistema deben ser coherentes con estas reglas y solo pueden agregar restricciones locales, nunca contradecirlas.
 
@@ -8,7 +8,7 @@ Este archivo es la autoridad raiz de gobierno documental del proyecto. Todos los
 
 ## 1) Objetivo del repositorio
 
-Este repositorio es la **fuente de verdad** de documentacion tecnica del proyecto DIY Nanosat y de la mision **AUSTRALIS-1**.
+Este repositorio (`auroraits/AUSTRALIS-1`) en la rama `main` es la **unica fuente de verdad vigente** de documentacion tecnica del proyecto DIY Nanosat y de la mision **AUSTRALIS-1**. `auroraits/DIY-Nanosat`, sus clones, ramas y cambios locales son historia no normativa. Todo rescate de material historico debe entrar por un pull request acotado y revisado; no se sincronizan arboles ni historias. La politica completa se define en `REPOSITORY_GOVERNANCE.md`.
 
 La identidad vigente de mision es:
 **AUSTRALIS-1 - Experimental Autonomic Flight AI-Assisted CubeSat**
@@ -246,6 +246,9 @@ dos ADRs `Accepted` que respondan de forma incompatible a la misma pregunta.
 
 ## 14) Flujo de trabajo con Git
 
+- No hacer commits directos en `main`.
+- Trabajar en una rama separada y proponer todo cambio mediante pull request hacia `main`.
+- Un cambio no forma parte de la baseline vigente hasta quedar revisado y mergeado en `main`.
 - Commits pequenos y descriptivos.
 - Formato de mensaje: `<subsistema>: <intencion>`
   - Ej: `EPS: formaliza separacion bench/flight-like/flight`
