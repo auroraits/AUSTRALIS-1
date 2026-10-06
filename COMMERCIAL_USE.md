@@ -37,11 +37,13 @@ publication.
 
 ## Current enforcement posture
 
-The project uses an authoritative public repository with clean published history
-plus dual commercial licensing. The public repository is for non-commercial use
-only. Commercial users must get a separate written license that defines the
-permitted field, manufacturing rights, flight/launch permissions, support
-expectations, attribution, fees, patent scope, termination and governing law.
+The intended enforcement model is an authoritative public repository with clean
+published history plus a separate commercial licensing path. That path remains
+pending designation of the authorized entity/contact and counsel review. The
+public repository is for non-commercial use only. Any future commercial user
+would need a separate written license defining the permitted field,
+manufacturing rights, flight/launch permissions, support expectations,
+attribution, fees, patent scope, termination and governing law.
 
 Before accepting external contributions, the project also needs an inbound
 contributor license workflow so accepted contributions can be used and
