@@ -29,8 +29,8 @@ licensing:
 - no public grant of trademarks, endorsement rights, flight-ready implementation
   rights, manufacturing rights or patent rights beyond the minimum rights in the
   selected public license;
-- clean public mirror only, so the public record starts from an intentional
-  release boundary.
+- authoritative public repository with clean published history, so the public
+  record starts from an intentional release boundary.
 
 The current interim scheme is:
 
@@ -97,7 +97,7 @@ all commercial exploitation indefinitely.
 
 Reference: https://fsl.software/
 
-## Enforcement gaps to close before publication
+## Remaining enforcement gaps
 
 1. Copyright protects code, text, diagrams, datasets and original expressive
    files; it does not protect bare ideas, facts, discoveries or functional
@@ -115,7 +115,8 @@ Reference: https://fsl.software/
 
 ## Required controls
 
-- Publish from a clean mirror, not private history.
+- Maintain the authoritative public repository without importing private Git
+  history.
 - Add a contribution policy before accepting external pull requests.
 - Require contributors to certify original work and grant the project owner the
   right to use, sublicense and commercially license contributions.
@@ -125,7 +126,8 @@ Reference: https://fsl.software/
 - Add commercial-contact instructions to README and repository description.
 - Preserve third-party notices and avoid vendoring third-party PDFs, CAD,
   datasheets, papers, model artifacts or generated binaries.
-- Decide patent/trademark filings before public mirror release.
+- Decide patent/trademark filings before publishing new material that could
+  prejudice those rights.
 
 ## Commercial license checklist
 
@@ -147,8 +149,8 @@ A separate commercial agreement should cover:
 
 For the next release gate, keep the current standardized public terms as an
 interim publication layer, but treat them as incomplete for high-value commercial
-enforcement. Before flipping any public mirror to public visibility, legal
-counsel should decide whether to:
+enforcement. Before expanding the public scope or publishing new potentially
+protectable material, legal counsel should decide whether to:
 
 1. keep the current PolyForm NC + CC BY-NC-SA split with stronger notices and a
    separate commercial license template; or

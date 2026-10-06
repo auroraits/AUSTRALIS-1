@@ -54,8 +54,9 @@ license. See `COMMERCIAL_USE.md`.
 
 The public terms are an interim standardized publication layer. For stronger
 commercial enforcement, see `LEGAL_ENFORCEMENT_REVIEW.md`; a custom commercial
-license or custom non-commercial research license may be required before public
-release of a clean mirror.
+license or custom non-commercial research license may be required before a
+future tagged release, broader public disclosure or publication of potentially
+protectable material.
 
 ## Third-party notices
 
